@@ -14,7 +14,6 @@ const choker = electron.remote.require('chokidar');
 const os = window.require('os');
 
 class Admin extends Component {
-
   constructor(props) {
     super(props)
 

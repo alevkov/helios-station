@@ -24,7 +24,6 @@ let photosList = []
 let oPhotosList = observable(photosList);
 
 const Home = observer(class Home extends Component {
-
   constructor(props) {
     super(props)
     this.state = {
