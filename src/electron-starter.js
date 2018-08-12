@@ -19,7 +19,14 @@ function createWindow() {
         });
     
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 800, height: 600});
+    mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        "node-integration": "iframe", // and this line
+        "webPreferences":{
+          "webSecurity":false
+        }
+    });
     mainWindow.loadURL(startUrl);
 
     // Open the DevTools.
