@@ -16,13 +16,14 @@ import { observer } from 'mobx-react';
 let SourceSelectedSub = null;
 let PhotoAddedSub = null;
 
-// v important directories
+// directories
 let sourceFolderDir = null;
 
 // observables
 let photosList = []
 let oPhotosList = observable(photosList);
 
+// declare as observer to observe the state of data structs declared above
 const Home = observer(class Home extends Component {
   constructor(props) {
     super(props)
@@ -35,8 +36,6 @@ const Home = observer(class Home extends Component {
   }
 
   componentDidMount() {
-    console.log("Did mount");
-    this._mounted = true;
     if (SourceSelectedSub === null) { 
       SourceSelectedSub = emitter.addListener(EVENT_SOURCE_FOLDER_SELECTED,
        this.onSourceSelectedHandler);
@@ -47,11 +46,10 @@ const Home = observer(class Home extends Component {
   }
 
   componentWillMount() {
-    this._mounted = true;
+
   }
 
   componentWillUnmount() {
-    this._mounted = false;
     //SourceSelectedSub.remove();
   }
 
@@ -60,7 +58,7 @@ const Home = observer(class Home extends Component {
     console.log(sourceFolderDir);
   }
 
-  onPhotoAdded(...args) {
+  onPhotoAdded(...args) { 
     let image = {
       src: 'file://' + args[0],
       actual: 'file://' + args[0],
@@ -68,6 +66,7 @@ const Home = observer(class Home extends Component {
       height: 2
     }
     console.log("added");
+    // add photo to observable array
     oPhotosList.push(image);
   }
 

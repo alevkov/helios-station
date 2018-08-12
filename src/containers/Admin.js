@@ -8,6 +8,7 @@ import { emitter,
   EVENT_SOURCE_FOLDER_SELECTED
 } from '../common';
 
+// electron packages
 const electron = window.require('electron');
 const {dialog} = window.require('electron').remote;
 const choker = electron.remote.require('chokidar');
@@ -17,27 +18,30 @@ class Admin extends Component {
   constructor(props) {
     super(props)
 
-    this.sourceFolderHandler = this.sourceFolderHandler.bind(this);
-    this.sortFolderHandler = this.sortFolderHandler.bind(this);
-    this.gifFolderHandler = this.gifFolderHandler.bind(this);
+    this.onSourceFolderClick = this.onSourceFolderClick.bind(this);
+    this.onSortFolderClick = this.onSortFolderClick.bind(this);
+    this.onGifFolderClick = this.onGifFolderClick.bind(this);
   }
 
-  sourceFolderHandler() {
+  onSourceFolderClick() {
     dialog.showOpenDialog({
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
           emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, dir);
           let watchGlob = null;
+          // set the watch dir according to OS
           if (os.platform() === 'darwin') {
             watchGlob = dir + '/**/*.jpg';
           } else {
             watchGlob = dir + '\\**\\*.jpg'
           }
+          // watch the dir
           const watcher = choker.watch(watchGlob, {
             ignored: /(^|[\/\\])\../,
             persistent: true
           });
+          // when a file is added, send event to Home
           watcher.on('add', path => {
             emitter.emit(EVENT_PHOTO_ADDED, path); // 10 is logged
           });
@@ -45,7 +49,7 @@ class Admin extends Component {
     });
   }
 
-  sortFolderHandler() {
+  onSortFolderClick() {
     dialog.showOpenDialog({
         properties: ['openDirectory']
     }, (dir) => {
@@ -55,7 +59,7 @@ class Admin extends Component {
     });
   }
 
-  gifFolderHandler() {
+  onGifFolderClick() {
     dialog.showOpenDialog({
         properties: ['openDirectory']
     }, (dir) => {
@@ -70,17 +74,17 @@ class Admin extends Component {
       <div className="Admin">
         <form className="Admin-form">
           <div className="Admin-button">
-            <Button onClick={this.sourceFolderHandler}>
+            <Button onClick={this.onSourceFolderClick}>
               Source Path
             </Button>
           </div>
           <div className="Admin-button">
-            <Button onClick={this.sortFolderHandler}>
+            <Button onClick={this.onSortFolderClick}>
               Sorting Path
             </Button>
           </div>
           <div className="Admin-button">
-            <Button onClick={this.gifFolderHandler}>
+            <Button onClick={this.onGifFolderClick}>
               Gif Path
             </Button>
           </div>
