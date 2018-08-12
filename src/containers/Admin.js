@@ -21,6 +21,7 @@ class Admin extends Component {
     this.onSourceFolderClick = this.onSourceFolderClick.bind(this);
     this.onSortFolderClick = this.onSortFolderClick.bind(this);
     this.onGifFolderClick = this.onGifFolderClick.bind(this);
+    this.onPhotoAddedHandler = this.onPhotoAddedHandler.bind(this);
   }
 
   onSourceFolderClick() {
@@ -42,9 +43,7 @@ class Admin extends Component {
             persistent: true
           });
           // when a file is added, send event to Home
-          watcher.on('add', path => {
-            emitter.emit(EVENT_PHOTO_ADDED, path); // 10 is logged
-          });
+          watcher.on('add', this.onPhotoAddedHandler);
         }
     });
   }
@@ -67,6 +66,10 @@ class Admin extends Component {
           console.log(dir);
         }
     });
+  }
+
+  onPhotoAddedHandler(path) {
+    emitter.emit(EVENT_PHOTO_ADDED, path);
   }
 
   render() {
