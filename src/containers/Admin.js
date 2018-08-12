@@ -14,9 +14,19 @@ const {dialog} = window.require('electron').remote;
 const choker = electron.remote.require('chokidar');
 const os = window.require('os');
 
+let _sourceDir = null;
+let _sortDir = null;
+let _gifDir = null;
+
 class Admin extends Component {
   constructor(props) {
     super(props)
+
+    this.state = {
+      sourceDir: _sourceDir,
+      sortDir: _sortDir,
+      gifDir: _gifDir
+    }
 
     this.onSourceFolderClick = this.onSourceFolderClick.bind(this);
     this.onSortFolderClick = this.onSortFolderClick.bind(this);
@@ -44,6 +54,10 @@ class Admin extends Component {
           });
           // when a file is added, send event to Home
           watcher.on('add', this.onPhotoAddedHandler);
+          _sourceDir = dir;
+          this.setState({
+            sourceDir: _sourceDir
+          });
         }
     });
   }
@@ -54,6 +68,10 @@ class Admin extends Component {
     }, (dir) => {
         if (dir !== undefined) {
           console.log(dir);
+          _sortDir = dir;
+          this.setState({
+            sortDir: _sortDir
+          });
         }
     });
   }
@@ -63,7 +81,10 @@ class Admin extends Component {
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
-          console.log(dir);
+          _gifDir = dir;
+          this.setState({
+            gifDir: _gifDir
+          });
         }
     });
   }
@@ -78,19 +99,22 @@ class Admin extends Component {
         <form className="Admin-form">
           <div className="Admin-button">
             <Button onClick={this.onSourceFolderClick}>
-              Source Path
+              Source Path ⇝
             </Button>
           </div>
+          { this.state.sourceDir !== null ? <h4>{this.state.sourceDir}</h4> : null }
           <div className="Admin-button">
             <Button onClick={this.onSortFolderClick}>
-              Sorting Path
+              Sorting Path ⇝
             </Button>
           </div>
+          { this.state.sortDir !== null ? <h4>{this.state.sortDir}</h4> : null }
           <div className="Admin-button">
             <Button onClick={this.onGifFolderClick}>
-              Gif Path
+              Gif Path ⇝
             </Button>
           </div>
+          { this.state.gifDir !== null ? <h4>{this.state.gifDir}</h4> : null }
           <FormControlLabel
             control={
               <Checkbox

@@ -36,7 +36,6 @@ export default class SelectDock extends React.Component {
         size={0.1}
         position='top' 
         dimMode='none'
-        fluid='false'
         dockStyle={dockStyles}
         isVisible={this.props.showDock}>
           <ul style={sharingListStyles}>
