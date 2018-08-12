@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Gallery from '../components/neptunian/Gallery';
 import SelectedImage from '../components/neptunian/SelectedImage';
+import SharingDock from '../components/SelectDock';
 import Lightbox from 'react-images';
 import logo from '../logo.svg';
 import '../styles/Home.css';
@@ -20,19 +21,22 @@ let PhotoAddedSub = null;
 let sourceFolderDir = null;
 
 // observables
-let photosList = []
-let oPhotosList = observable(photosList);
+let photosList = [];
+let o_photosList = observable(photosList);
 
 // declare as observer to observe the state of data structs declared above
 const Home = observer(class Home extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      photos: oPhotosList
+      photos: o_photosList,
+      selectedPhotosList: new Set()
     }
 
     this.onPhotoAdded = this.onPhotoAdded.bind(this);
     this.onSourceSelectedHandler = this.onSourceSelectedHandler.bind(this);
+    this.selectPhoto = this.selectPhoto.bind(this);
+    this.toggleSmsModal = this.toggleSmsModal.bind(this);
   }
 
   componentDidMount() {
@@ -67,15 +71,35 @@ const Home = observer(class Home extends Component {
     }
     console.log("added");
     // add photo to observable array
-    oPhotosList.push(image);
+    o_photosList.push(image);
+  }
+
+  selectPhoto(event, obj) {
+    console.log(obj.index);
+    o_photosList[obj.index].selected = !o_photosList[obj.index].selected;
+    if (o_photosList[obj.index].selected === true) {
+      this.state.selectedPhotosList.add(obj.index);
+    } else {
+      this.state.selectedPhotosList.delete(obj.index);
+    }
+    this.forceUpdate();
+  }
+
+
+  toggleSmsModal() {
+
   }
 
   render() {
     return (
       <div className="Home">
+        <SharingDock 
+          showDock={this.state.selectedPhotosList.size !==0 } 
+          toggleSms={this.toggleSmsModal} />
         { this.state.photos.length === 0 ? <NothingToShow /> : null }
         <Gallery 
-          photos={oPhotosList}
+          photos={o_photosList}
+          onClick={this.selectPhoto}
           ImageComponent={SelectedImage} />
       </div>
     );

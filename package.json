@@ -11,10 +11,13 @@
   "dependencies": {
     "@material-ui/core": "^1.4.3",
     "fbemitter": "^2.1.1",
+    "material-ui": "^0.20.2",
+    "material-ui-community-icons": "^0.15.0",
     "mdbreact": "^4.6.1",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.5",
     "react": "^16.4.2",
+    "react-dock": "^0.2.4",
     "react-dom": "^16.4.2",
     "react-images": "^0.5.19",
     "react-router-dom": "^4.3.1"
