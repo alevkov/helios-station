@@ -12,6 +12,7 @@ import { emitter,
 const electron = window.require('electron');
 const {dialog} = window.require('electron').remote;
 const choker = electron.remote.require('chokidar');
+const fs = electron.remote.require('fs');
 const os = window.require('os');
 
 let _sourceDir = null;
@@ -55,6 +56,7 @@ class Admin extends Component {
           // when a file is added, send event to Home
           watcher.on('add', this.onPhotoAddedHandler);
           _sourceDir = dir;
+          // set state
           this.setState({
             sourceDir: _sourceDir
           });
