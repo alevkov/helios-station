@@ -7,6 +7,7 @@ import { emitter,
   EVENT_PHOTO_ADDED,
   EVENT_SOURCE_FOLDER_SELECTED
 } from '../common';
+import SortingEngine from '../extras/SortingEngine';
 
 // electron packages
 const electron = window.require('electron');
@@ -15,18 +16,19 @@ const choker = electron.remote.require('chokidar');
 const fs = electron.remote.require('fs');
 const os = window.require('os');
 
-let _sourceDir = null;
-let _sortDir = null;
-let _gifDir = null;
-
 class Admin extends Component {
+
+  static _sourceDir = null;
+  static _sortDir = null;
+  static _gifDir = null;
+
   constructor(props) {
     super(props)
 
     this.state = {
-      sourceDir: _sourceDir,
-      sortDir: _sortDir,
-      gifDir: _gifDir
+      sourceDir: Admin._sourceDir,
+      sortDir: Admin._sortDir,
+      gifDir: Admin._gifDir
     }
 
     this.onSourceFolderClick = this.onSourceFolderClick.bind(this);
@@ -40,6 +42,7 @@ class Admin extends Component {
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
+          // emit source folder event
           emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, dir);
           let watchGlob = null;
           // set the watch dir according to OS
@@ -48,17 +51,17 @@ class Admin extends Component {
           } else {
             watchGlob = dir + '\\**\\*.jpg'
           }
-          // watch the dir
+          // watch the source dir
           const watcher = choker.watch(watchGlob, {
             ignored: /(^|[\/\\])\../,
             persistent: true
           });
           // when a file is added, send event to Home
           watcher.on('add', this.onPhotoAddedHandler);
-          _sourceDir = dir;
+          Admin._sourceDir = dir;
           // set state
           this.setState({
-            sourceDir: _sourceDir
+            sourceDir: Admin._sourceDir
           });
         }
     });
@@ -70,9 +73,10 @@ class Admin extends Component {
     }, (dir) => {
         if (dir !== undefined) {
           console.log(dir);
-          _sortDir = dir;
+          Admin._sortDir = dir;
+          const sorter = new SortingEngine(Admin._sortDir);
           this.setState({
-            sortDir: _sortDir
+            sortDir: Admin._sortDir
           });
         }
     });
@@ -83,9 +87,9 @@ class Admin extends Component {
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
-          _gifDir = dir;
+          Admin._gifDir = dir;
           this.setState({
-            gifDir: _gifDir
+            gifDir: Admin._gifDir
           });
         }
     });

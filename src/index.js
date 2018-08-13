@@ -10,7 +10,7 @@ ReactDOM.render(
   <MuiThemeProvider>
     <Router>
       <App />
-    </Router>,
+    </Router>
   </MuiThemeProvider>, document.getElementById('root')
 );
 registerServiceWorker();
