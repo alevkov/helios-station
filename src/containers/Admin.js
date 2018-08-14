@@ -3,38 +3,37 @@ import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import '../styles/Admin.css';
-import { emitter,
-  EVENT_PHOTO_ADDED,
-  EVENT_SOURCE_FOLDER_SELECTED
-} from '../common';
 import SortingEngine from '../extras/SortingEngine';
 
-// electron packages
-const electron = window.require('electron');
-const {dialog} = window.require('electron').remote;
-const choker = electron.remote.require('chokidar');
-const fs = electron.remote.require('fs');
-const os = window.require('os');
+// electron packages 
+const electron = window.require('electron'); 
+const {dialog} = window.require('electron').remote; 
 
 class Admin extends Component {
 
-  static _sourceDir = null;
-  static _sortDir = null;
-  static _gifDir = null;
+  // hash map of reactive directories
+  static _dirMap = {
+    source: null,
+    sort: null,
+    gif: null
+  }
+
+  // sorting engine instance
+  static _sortingEngine = null;
 
   constructor(props) {
     super(props)
 
     this.state = {
-      sourceDir: Admin._sourceDir,
-      sortDir: Admin._sortDir,
-      gifDir: Admin._gifDir
+      sourceDir: Admin._dirMap.source,
+      sortDir: Admin._dirMap.sort,
+      gifDir: Admin._dirMap.gif
     }
 
     this.onSourceFolderClick = this.onSourceFolderClick.bind(this);
     this.onSortFolderClick = this.onSortFolderClick.bind(this);
     this.onGifFolderClick = this.onGifFolderClick.bind(this);
-    this.onPhotoAddedHandler = this.onPhotoAddedHandler.bind(this);
+    this.onDirSelectedHandler = this.onDirSelectedHandler.bind(this);
   }
 
   onSourceFolderClick() {
@@ -42,26 +41,9 @@ class Admin extends Component {
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
-          // emit source folder event
-          emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, dir);
-          let watchGlob = null;
-          // set the watch dir according to OS
-          if (os.platform() === 'darwin') {
-            watchGlob = dir + '/**/*.jpg';
-          } else {
-            watchGlob = dir + '\\**\\*.jpg'
-          }
-          // watch the source dir
-          const watcher = choker.watch(watchGlob, {
-            ignored: /(^|[\/\\])\../,
-            persistent: true
-          });
-          // when a file is added, send event to Home
-          watcher.on('add', this.onPhotoAddedHandler);
-          Admin._sourceDir = dir;
-          // set state
+          this.onDirSelectedHandler('source', dir);
           this.setState({
-            sourceDir: Admin._sourceDir
+            sourceDir: Admin._dirMap.source
           });
         }
     });
@@ -72,11 +54,9 @@ class Admin extends Component {
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
-          console.log(dir);
-          Admin._sortDir = dir;
-          const sorter = new SortingEngine(Admin._sortDir);
+          this.onDirSelectedHandler('sort', dir);
           this.setState({
-            sortDir: Admin._sortDir
+            sortDir: Admin._dirMap.sort
           });
         }
     });
@@ -87,16 +67,42 @@ class Admin extends Component {
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
-          Admin._gifDir = dir;
+          this.onDirSelectedHandler('gif', dir);
           this.setState({
-            gifDir: Admin._gifDir
+            gifDir: Admin._dirMap.gif
           });
         }
     });
   }
 
-  onPhotoAddedHandler(path) {
-    emitter.emit(EVENT_PHOTO_ADDED, path);
+  onDirSelectedHandler(type, dir) {
+    // fill dir map
+    switch (type) {
+      case 'source': {
+        Admin._dirMap.source = dir;
+        break;
+      }
+      case 'sort': {
+        Admin._dirMap.sort = dir;
+        break;
+      }
+      case 'gif': {
+        Admin._dirMap.gif = dir;
+        break;
+      }
+      default: {
+        throw new Error('Invalid folder type!');
+        break;
+      }
+    }
+    if (Admin._dirMap.source !== null &&
+        Admin._dirMap.sort !== null &&
+        Admin._dirMap.gif !== null) {
+      console.log('are we there yet?');
+      // initialize sorting engine
+      Admin._sortingEngine =
+        new SortingEngine(Admin._dirMap.source, Admin._dirMap.sort);
+    }
   }
 
   render() {
