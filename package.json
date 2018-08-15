@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "@material-ui/core": "^1.4.3",
+    "base64image-to-file": "^1.2.0",
+    "electron-settings": "^3.2.0",
     "fbemitter": "^2.1.1",
+    "gifshot": "^0.4.5",
     "material-ui": "^0.20.2",
     "material-ui-community-icons": "^0.15.0",
     "mdbreact": "^4.6.1",
+    "mkdirp": "^0.5.1",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.5",
     "move-file": "^1.0.0",
@@ -21,7 +25,8 @@
     "react-dock": "^0.2.4",
     "react-dom": "^16.4.2",
     "react-images": "^0.5.19",
-    "react-router-dom": "^4.3.1"
+    "react-router-dom": "^4.3.1",
+    "xfs": "^0.2.4"
   },
   "main": "src/electron-starter.js",
   "scripts": {

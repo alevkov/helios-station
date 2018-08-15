@@ -15,7 +15,7 @@ class Admin extends Component {
   static _dirMap = {
     source: null,
     sort: null,
-    gif: null
+    media: null
   }
 
   // sorting engine instance
@@ -27,12 +27,12 @@ class Admin extends Component {
     this.state = {
       sourceDir: Admin._dirMap.source,
       sortDir: Admin._dirMap.sort,
-      gifDir: Admin._dirMap.gif
+      mediaDir: Admin._dirMap.media
     }
 
     this.onSourceFolderClick = this.onSourceFolderClick.bind(this);
     this.onSortFolderClick = this.onSortFolderClick.bind(this);
-    this.onGifFolderClick = this.onGifFolderClick.bind(this);
+    this.onMediaFolderClick = this.onMediaFolderClick.bind(this);
     this.onDirSelectedHandler = this.onDirSelectedHandler.bind(this);
   }
 
@@ -62,14 +62,14 @@ class Admin extends Component {
     });
   }
 
-  onGifFolderClick() {
+  onMediaFolderClick() {
     dialog.showOpenDialog({
         properties: ['openDirectory']
     }, (dir) => {
         if (dir !== undefined) {
-          this.onDirSelectedHandler('gif', dir);
+          this.onDirSelectedHandler('media', dir);
           this.setState({
-            gifDir: Admin._dirMap.gif
+            mediaDir: Admin._dirMap.media
           });
         }
     });
@@ -86,8 +86,8 @@ class Admin extends Component {
         Admin._dirMap.sort = dir;
         break;
       }
-      case 'gif': {
-        Admin._dirMap.gif = dir;
+      case 'media': {
+        Admin._dirMap.media = dir;
         break;
       }
       default: {
@@ -97,7 +97,7 @@ class Admin extends Component {
     }
     if (Admin._dirMap.source !== null &&
         Admin._dirMap.sort !== null &&
-        Admin._dirMap.gif !== null) {
+        Admin._dirMap.media !== null) {
       console.log('are we there yet?');
       // initialize sorting engine
       Admin._sortingEngine =
@@ -122,17 +122,17 @@ class Admin extends Component {
           </div>
           { this.state.sortDir !== null ? <h4>{this.state.sortDir}</h4> : null }
           <div className="Admin-button">
-            <Button onClick={this.onGifFolderClick}>
-              Gif Path ⇝
+            <Button onClick={this.onMediaFolderClick}>
+              Media Path ⇝
             </Button>
           </div>
-          { this.state.gifDir !== null ? <h4>{this.state.gifDir}</h4> : null }
+          { this.state.mediaDir !== null ? <h4>{this.state.mediaDir}</h4> : null }
           <FormControlLabel
             control={
               <Checkbox
                 value="checkedA"/>
             }
-            label="CREATE .GIF"/>
+            label="Generate Media"/>
         </form>
       </div>
     );

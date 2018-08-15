@@ -3,8 +3,10 @@ import { emitter,
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED
 } from '../common';
+import MediaEngine from './MediaEngine';
 
-const electron = window.require('electron'); 
+const electron = window.require('electron');
+const settings = electron.remote.require('electron-settings');
 const choker = electron.remote.require('chokidar');
 const moveFile = electron.remote.require('move-file');
 const fs = electron.remote.require('fs');
@@ -18,6 +20,12 @@ export default class SortingEngine {
   static _dirWatchSet = new Set() // [string: bool]
 
   constructor(source, sort) {
+    //TODO: delete this shit
+    // let gifSettings = {
+    //   frames: 4
+    // };
+    //settings.set('gif', gifSettings);
+
     // set up class methods
     this.routePhoto = this.routePhoto.bind(this);
     this.onSourcePhotoAddedHandler = this.onSourcePhotoAddedHandler.bind(this);
@@ -61,23 +69,23 @@ export default class SortingEngine {
       }
       // e.g. _sortDir/000/
       case 'index': {
+        const filename = dir.replace(/^.*[\\\/]/, '');
+        const index = filename.split('_')[0];
         //TODO: handle when index folder already exists
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir);
-          const filename = dir.replace(/^.*[\\\/]/, '');
-          const index = filename.split('_')[0];
-          SortingEngine._sortDirMap.set(index, new Set());
         }
         if (SortingEngine._dirWatchSet.has(dir) === false) {
+          SortingEngine._sortDirMap.set(index, new Set());
           const indexPathWatcher = choker.watch(watchGlob, {
             ignored: /(^|[\/\\])\../,
             persistent: true
           });
           indexPathWatcher.on('add', path => {
-            this.onSortedPhotoAddedHandler(path);
+            this.onSortedPhotoAddedHandler(index, path);
           });
           indexPathWatcher.on('unlink', path => {
-            this.onSortedPhotoRemovedHandler(path);
+            this.onSortedPhotoRemovedHandler(index, path);
           });  
           SortingEngine._dirWatchSet.add(dir);    
         }
@@ -98,9 +106,10 @@ export default class SortingEngine {
     // start watching index path
     this.initWatchDir('index', indexPath);
     // move photo to index path
-    moveFile(path, 
-      indexPath + (os.platform() === 'darwin' ? '/' : '\\') +
-      filename)
+    const destination = indexPath + 
+      (os.platform() === 'darwin' ? '/' : '\\') +
+      filename
+    moveFile(path, destination)
     .then(() => {
       console.log(filename + ' moved.');
     });
@@ -110,11 +119,28 @@ export default class SortingEngine {
     
   }
 
-  onSortedPhotoAddedHandler(path) {
+  onSortedPhotoAddedHandler(index, path) {
     emitter.emit(EVENT_PHOTO_ADDED, path);
+    SortingEngine._sortDirMap.get(index).add(path);
+    let frames = settings.get('gif.frames');
+    console.log("Frame count: " + frames);
+    if (SortingEngine._sortDirMap.get(index).size == frames) {
+      console.log('enough');
+      let frames = Array.from(SortingEngine._sortDirMap.get(index));
+      /*TODO: use settings for this shit*/
+      var media = '/Users/sphota/Desktop/test_c';
+      var type = 'gif';
+      /**/
+      const mediaEngine = new MediaEngine(
+        frames,
+        media, 
+        type
+      );
+      mediaEngine.generate();
+    }
   }
 
-  onSortedPhotoRemovedHandler(path) {
+  onSortedPhotoRemovedHandler(index, path) {
     emitter.emit(EVENT_PHOTO_REMOVED, path);
   }
 
