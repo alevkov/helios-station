@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Gallery from '../components/neptunian/Gallery';
 import SelectedImage from '../components/neptunian/SelectedImage';
 import SharingDock from '../components/home/SelectDock';
+import CloudInterface from '../extras/CloudInterface';
 import Lightbox from 'react-images';
 import logo from '../logo.svg';
 import '../styles/Home.css';
@@ -12,6 +13,9 @@ import {
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
+
+const electron = window.require('electron');
+const settings = electron.remote.require('electron-settings');
 
 // declare as observer to observe the state of data structs declared above
 const Home = observer(class Home extends Component {
@@ -43,11 +47,12 @@ const Home = observer(class Home extends Component {
   onPhotoAddedHandler = (...args) => { 
     let image = {
       src: 'file://' + args[0],
-      actual: 'file://' + args[0],
+      actual: args[0],
+      eventcode: settings.get('event.name'),
       width: 3,
       height: 2
     }
-    console.log("added");
+    console.log('added');
     // add photo to observable array
     Home.o_photosList.push(image);
   }
@@ -75,26 +80,28 @@ const Home = observer(class Home extends Component {
   getSelectedPhotosList = () => {
     let selectedPhotosPaths = [];
     this.state.selectedPhotosList.forEach(i => {
-      selectedPhotosPaths.push(Home.o_photosList[i].src)
+      selectedPhotosPaths.push(Home.o_photosList[i].actual)
     });
     return selectedPhotosPaths;
   }
 
-  toggleSmsModal = () => {
-
+  toggleModal = name => () => {
+    console.log(name);
   }
 
   onLoveItClick = () => {
-
+    const cloud = new CloudInterface();
+    const selected = this.getSelectedPhotosList();
+    cloud.upload(selected);
   }
 
   render() {
     return (
-      <div className="Home">
+      <div className='Home'>
         <SharingDock 
           showDock={this.state.selectedPhotosList.size !==0 } 
-          toggleSms={this.toggleSmsModal}
-          loveIt={this.onLoveItClick} />
+          toggleModal={this.toggleModal}
+          onLoveItClick={this.onLoveItClick} />
         { this.state.photos.length === 0 ? <NothingToShow /> : null }
         <Gallery 
           photos={Home.o_photosList}
@@ -106,7 +113,7 @@ const Home = observer(class Home extends Component {
 })
 
 const NothingToShow = () => (
-  <div className="NotFound">
+  <div className='NotFound'>
     <h3>No photos to display.</h3>
   </div>
 )

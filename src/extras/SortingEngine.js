@@ -60,7 +60,6 @@ export default class SortingEngine {
       case 'index': {
         const filename = dir.replace(/^.*[\\\/]/, '');
         const index = filename.split('_')[0];
-        //TODO: handle when index folder already exists
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir);
         }

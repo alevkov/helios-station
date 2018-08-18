@@ -46,22 +46,22 @@ export default class SelectDock extends React.Component {
               </IconButton>
             </li>
             <li style={sharingButtonStyles}>
-              <IconButton onClick={this.props.toggleSms}>
+              <IconButton onClick={this.props.toggleModal('sms')}>
                 <SmsBox style={dockIconStyles} />
               </IconButton>
             </li>
             <li style={sharingButtonStyles}>
-              <IconButton>
+              <IconButton onClick={this.props.toggleModal('email')}>
                 <EmailBox style={dockIconStyles} />
               </IconButton>
             </li>
             <li style={sharingButtonStyles}>
-              <IconButton>
+              <IconButton onClick={this.props.toggleModal('facebook')}>
                 <FacebookBox style={dockIconStyles} />
               </IconButton>
             </li>
             <li style={sharingButtonStyles}>
-              <IconButton>
+              <IconButton onClick={this.props.toggleModal('twitter')}>
                 <TwitterBox style={dockIconStyles} />
               </IconButton>
             </li>

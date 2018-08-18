@@ -8,7 +8,6 @@ const os = window.require('os');
 export default class MediaEngine  {
   constructor(frames) {
     this.frames = frames;
-    this.type = type;
   }
 
   sortedFrames = ascending => {
@@ -91,7 +90,7 @@ export default class MediaEngine  {
         }, (obj) => {
           if (!obj.error) {
             console.log(obj);
-            const data = obj.image.replace(/^data:image\/\w+;base64,/, "");
+            const data = obj.image.replace(/^data:image\/\w+;base64,/, '');
             const buf = new Buffer(data, 'base64');
             fs.writeFile(settings.get('dir.media') + 
               (os.platform() === 'darwin' ? '/' : '\\') + 

@@ -30,19 +30,19 @@ class App extends Component {
 
   render() {
     const sideList = (
-      <div className="menuList">
+      <div className='menuList'>
         <List>{menuItems}</List>
       </div>
     );
     return (
-      <div className="App-container">
+      <div className='App-container'>
         <Button
           style={{ fontSize: '25px'}}
           onClick={this.onDrawerClickHandler(true)}>&#9776;</Button>
         <Drawer open={this.state.menuOpen} onClose={this.onDrawerClickHandler(false)}>
           <div
             tabIndex={0}
-            role="button"
+            role='button'
             onClick={this.onDrawerClickHandler(false)}
             onKeyDown={this.onDrawerClickHandler(false)}>
             {sideList}
