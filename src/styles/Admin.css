@@ -2,3 +2,48 @@
   margin: 5%;
   text-align: center;
 }
+
+.Admin-general-form-1 {
+  margin: 1%;
+}
+
+.Admin-general-form-1 > div  {
+  margin: 1%;
+}
+
+.Admin-general-form-1 > button {
+  margin: 1%;
+}
+
+.Admin-general-form-2 {
+  margin: 2%;
+}
+
+.Admin-general-form-2 > button {
+  margin: 2%;
+}
+
+
+.Admin-media-form-1 {
+  margin: 1%;
+}
+
+.Admin-media-form-1 > div {
+  margin: 1%;
+}
+
+.Admin-media-form-2 {
+  margin: 2%;
+}
+
+.Admin-media-form-2 > div {
+  margin: 1%;
+}
+
+.Admin-media-form-3 {
+  margin: 5%;
+}
+
+.Admin-media-form-3 > button {
+  margin: 1%;
+}

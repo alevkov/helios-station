@@ -1,12 +1,13 @@
 import gifshot from 'gifshot';
 
 const electron = window.require('electron');
+const settings = electron.remote.require('electron-settings');
 const fs = electron.remote.require('fs');
+const os = window.require('os');
 
 export default class MediaEngine  {
-  constructor(frames, media, type) {
+  constructor(type, frames) {
     this.frames = frames;
-    this.media = media;
     this.type = type;
   }
 
@@ -16,39 +17,43 @@ export default class MediaEngine  {
       const aIndex = aFile.split('_')[1].split('.')[0];
       const bFile = b.replace(/^.*[\\\/]/, '');
       const bIndex = bFile.split('_')[1].split('.')[0];
-      return ascending ? (aIndex > bIndex ? 1 : -1) : (aIndex < bIndex ? 1 : -1);
+      return ascending ? 
+        (aIndex > bIndex ? 1 : -1) : 
+        (aIndex < bIndex ? 1 : -1);
     });
   }
 
   generate = () => {
     switch (this.type) {
       case 'gif': {
-        console.log('inside gif');
-        /*TODO: use settings*/
-        var boooooomerange = true;
-        var loop = true;
-        var reverse = false;
-        var numFrames = 4;
-        /**/
-        const sorted = reverse ? this.sortedFrames(false) : this.sortedFrames(true);
+        const boomerang = Boolean(settings.get('media.boomerang'));
+        const numFrames = Number.parseInt(settings.get('media.frames'));
+        const width = Number.parseInt(settings.get('media.width'));
+        const height = Number.parseInt(settings.get('media.height'));
+        const duration = 1.0 / Number.parseInt(settings.get('media.fps')); 
+        // sort frames
+        const sorted = this.sortedFrames(true);
         const sortedDescending = this.sortedFrames(false);
+        // remove first element
         sortedDescending.shift();
-        const orderedFrames = boooooomerange ? 
+        // if boomerang, append descending array
+        const orderedFrames = boomerang ? 
           sorted.concat(sortedDescending) : sorted;
         let finalFrames = [];
+        // append file URL
         for (var i = 0; i < orderedFrames.length; i++) {
           finalFrames.push('file://' + orderedFrames[i]);
         }
         gifshot.createGIF({
           'images': finalFrames,
-          'numFrames': boooooomerange ? (2 * numFrames - 1) : numFrames,
+          'numFrames': boomerang ? (2 * numFrames - 1) : numFrames,
           'keepCameraOn': false,
-          'gifWidth': 800,
-          'gifHeight': 450,
+          'gifWidth': width,
+          'gifHeight': height,
           'filter': '',
-          'interval': 0.3,
-          'frameDuration': 1,
-          'text': 'sample',
+          /*'interval': interval,*/
+          'frameDuration': duration,
+          'text': '',
           'fontWeight': 'normal',
           // The font size of the text that covers the animated GIF
           'fontSize': '16px',
@@ -88,7 +93,9 @@ export default class MediaEngine  {
             console.log(obj);
             const data = obj.image.replace(/^data:image\/\w+;base64,/, "");
             const buf = new Buffer(data, 'base64');
-            fs.writeFile(this.media + '/' + 'image.gif', buf);
+            fs.writeFile(settings.get('dir.media') + 
+              (os.platform() === 'darwin' ? '/' : '\\') + 
+              'image.gif', buf);
           } else {
             console.log(obj);
           }

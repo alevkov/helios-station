@@ -25,14 +25,6 @@ export default class SortingEngine {
     //   frames: 4
     // };
     //settings.set('gif', gifSettings);
-
-    // set up class methods
-    this.routePhoto = this.routePhoto.bind(this);
-    this.onSourcePhotoAddedHandler = this.onSourcePhotoAddedHandler.bind(this);
-    this.initWatchDir = this.initWatchDir.bind(this);
-    this.onSourcePhotoRemovedHandler = this.onSourcePhotoRemovedHandler.bind(this);
-    this.onSortedPhotoAddedHandler = this.onSortedPhotoAddedHandler.bind(this);
-    this.onSortedPhotoRemovedHandler = this.onSortedPhotoRemovedHandler.bind(this);
     // init dir strings
     SortingEngine._sourceDir = source;
     SortingEngine._sortDir = sort;
@@ -41,7 +33,7 @@ export default class SortingEngine {
     this.initWatchDir('source', SortingEngine._sourceDir);
   }
 
-  initWatchDir(type, dir) {
+  initWatchDir = (type, dir) => {
     // initialize dir string to watch
     let watchGlob = null;
     // set the watch dir according to OS
@@ -62,9 +54,6 @@ export default class SortingEngine {
         sourceWatcher.on('add', path => {
           this.onSourcePhotoAddedHandler(path);
         });
-        sourceWatcher.on('unlink', path => {
-          this.onSourcePhotoRemovedHandler(path);
-        })
         break;
       }
       // e.g. _sortDir/000/
@@ -97,7 +86,7 @@ export default class SortingEngine {
     }
   }
 
-  onSourcePhotoAddedHandler(path) {
+  onSourcePhotoAddedHandler = path => {
     const filename = path.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0];
     const indexPath = SortingEngine._sortDir +
@@ -115,36 +104,21 @@ export default class SortingEngine {
     });
   }
 
-  onSourcePhotoRemovedHandler(path) {
-    
-  }
-
-  onSortedPhotoAddedHandler(index, path) {
+  onSortedPhotoAddedHandler = (index, path) => {
     emitter.emit(EVENT_PHOTO_ADDED, path);
     SortingEngine._sortDirMap.get(index).add(path);
-    let frames = settings.get('gif.frames');
-    console.log("Frame count: " + frames);
-    if (SortingEngine._sortDirMap.get(index).size == frames) {
-      console.log('enough');
+    const maxNum = Number.parseInt(settings.get('gif.frames'));
+    if (SortingEngine._sortDirMap.get(index).size == maxNum) {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
-      /*TODO: use settings for this shit*/
-      var media = '/Users/sphota/Desktop/test_c';
-      var type = 'gif';
-      /**/
       const mediaEngine = new MediaEngine(
-        frames,
-        media, 
-        type
+        'gif',
+        frames
       );
       mediaEngine.generate();
     }
   }
 
-  onSortedPhotoRemovedHandler(index, path) {
+  onSortedPhotoRemovedHandler = (index, path) => {
     emitter.emit(EVENT_PHOTO_REMOVED, path);
-  }
-
-  routePhoto(path) {
-
   }
 }

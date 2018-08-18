@@ -1,32 +1,28 @@
 import React, { Component } from 'react';
 import Gallery from '../components/neptunian/Gallery';
 import SelectedImage from '../components/neptunian/SelectedImage';
-import SharingDock from '../components/SelectDock';
+import SharingDock from '../components/home/SelectDock';
 import Lightbox from 'react-images';
 import logo from '../logo.svg';
 import '../styles/Home.css';
 import { 
   emitter,
   EVENT_PHOTO_ADDED,
+  EVENT_PHOTO_REMOVED,
   EVENT_SOURCE_FOLDER_SELECTED
 } from '../common';
-import { observable, reaction, toJS, autorun } from 'mobx';
+import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 
-let photosList = [];
+const _ = require('lodash');
 
 // declare as observer to observe the state of data structs declared above
 const Home = observer(class Home extends Component {
-
   // sub sandwhiches
-  static _SourceSelectedSub = null;
   static _PhotoAddedSub = null;
-
-  // directories
-  static _sourceFolderDir = null;
-
+  static _PhotoRemovedSub = null;
   // observables
-  static o_photosList = observable(photosList);
+  static o_photosList = observable([]);
 
   constructor(props) {
     super(props)
@@ -34,37 +30,20 @@ const Home = observer(class Home extends Component {
       photos: Home.o_photosList,
       selectedPhotosList: new Set()
     }
-
-    this.onPhotoAddedHandler = this.onPhotoAddedHandler.bind(this);
-    this.onSourceSelectedHandler = this.onSourceSelectedHandler.bind(this);
-    this.selectPhoto = this.selectPhoto.bind(this);
-    this.toggleSmsModal = this.toggleSmsModal.bind(this);
   }
 
   componentDidMount() {
-    if (Home._SourceSelectedSub === null) { 
-      Home._SourceSelectedSub = emitter.addListener(EVENT_SOURCE_FOLDER_SELECTED,
-      this.onSourceSelectedHandler);
-    }
     if (Home._PhotoAddedSub === null) {
-      Home._PhotoAddedSub = emitter.addListener(EVENT_PHOTO_ADDED, this.onPhotoAddedHandler);
+      Home._PhotoAddedSub = emitter.addListener(EVENT_PHOTO_ADDED,
+       this.onPhotoAddedHandler);
+    }
+    if (Home._PhotoRemovedSub === null) {
+      Home._PhotoRemovedSub = emitter.addListener(EVENT_PHOTO_REMOVED,
+       this.onPhotoRemovedHandler);
     }
   }
 
-  componentWillMount() {
-
-  }
-
-  componentWillUnmount() {
-    //_SourceSelectedSub.remove();
-  }
-
-  onSourceSelectedHandler(...args)  {
-    Home._sourceFolderDir = args[0];
-    console.log(Home._sourceFolderDir);
-  }
-
-  onPhotoAddedHandler(...args) { 
+  onPhotoAddedHandler = (...args) => { 
     let image = {
       src: 'file://' + args[0],
       actual: 'file://' + args[0],
@@ -76,7 +55,15 @@ const Home = observer(class Home extends Component {
     Home.o_photosList.push(image);
   }
 
-  selectPhoto(event, obj) {
+  onPhotoRemovedHandler = (...args) => {
+    // remove path from observable array
+    const idx = Home.o_photosList.findIndex((item, index, array) => {
+      return item.src === 'file://' + args[0];
+    });
+    Home.o_photosList.remove(Home.o_photosList[idx]);
+  }
+
+  selectPhoto = (event, obj) => {
     console.log(obj.index);
     Home.o_photosList[obj.index].selected = !Home.o_photosList[obj.index].selected;
     if (Home.o_photosList[obj.index].selected === true) {
@@ -87,8 +74,7 @@ const Home = observer(class Home extends Component {
     this.forceUpdate();
   }
 
-
-  toggleSmsModal() {
+  toggleSmsModal = () => {
     //
   }
 

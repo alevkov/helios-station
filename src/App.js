@@ -3,7 +3,7 @@ import Drawer from '@material-ui/core/Drawer';
 import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import { menuItems } from './components/menuData';
+import { menuItems } from './components/root/menuData';
 import Routes from './Routes';
 import logo from './logo.svg';
 import './App.css';
@@ -22,7 +22,7 @@ class App extends Component {
     menuOpen: false
   };
 
-  toggleDrawer = (open) => () => {
+  onDrawerClickHandler = (open) => () => {
     this.setState({
       menuOpen: open,
     });
@@ -38,13 +38,13 @@ class App extends Component {
       <div className="App-container">
         <Button
           style={{ fontSize: '25px'}}
-          onClick={this.toggleDrawer(true)}>&#9776;</Button>
-        <Drawer open={this.state.menuOpen} onClose={this.toggleDrawer(false)}>
+          onClick={this.onDrawerClickHandler(true)}>&#9776;</Button>
+        <Drawer open={this.state.menuOpen} onClose={this.onDrawerClickHandler(false)}>
           <div
             tabIndex={0}
             role="button"
-            onClick={this.toggleDrawer(false)}
-            onKeyDown={this.toggleDrawer(false)}>
+            onClick={this.onDrawerClickHandler(false)}
+            onKeyDown={this.onDrawerClickHandler(false)}>
             {sideList}
           </div>
         </Drawer>
