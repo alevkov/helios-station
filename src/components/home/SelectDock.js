@@ -3,6 +3,7 @@ import Dock from 'react-dock';
 import IconButton from '@material-ui/core/IconButton';
 // assets
 import SmsBox from 'material-ui-community-icons/icons/message-text';
+import HeartBox from 'material-ui-community-icons/icons/heart-box'
 import EmailBox from 'material-ui-community-icons/icons/email';
 import FacebookBox from 'material-ui-community-icons/icons/facebook-box';
 import TwitterBox from 'material-ui-community-icons/icons/twitter-box';
@@ -30,7 +31,7 @@ export default class SelectDock extends React.Component {
       width: 30,
       height: 30
     }
-    
+
     return (
       <Dock
         size={0.1}
@@ -39,6 +40,11 @@ export default class SelectDock extends React.Component {
         dockStyle={dockStyles}
         isVisible={this.props.showDock}>
           <ul style={sharingListStyles}>
+            <li style={sharingButtonStyles}>
+              <IconButton onClick={this.props.onLoveItClick}>
+                <HeartBox style={dockIconStyles} />
+              </IconButton>
+            </li>
             <li style={sharingButtonStyles}>
               <IconButton onClick={this.props.toggleSms}>
                 <SmsBox style={dockIconStyles} />

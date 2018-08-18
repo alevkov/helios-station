@@ -110,11 +110,8 @@ export default class SortingEngine {
     const maxNum = Number.parseInt(settings.get('gif.frames'));
     if (SortingEngine._sortDirMap.get(index).size == maxNum) {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
-      const mediaEngine = new MediaEngine(
-        'gif',
-        frames
-      );
-      mediaEngine.generate();
+      const mediaEngine = new MediaEngine(frames);
+      mediaEngine.generate('gif');
     }
   }
 

@@ -8,13 +8,10 @@ import '../styles/Home.css';
 import { 
   emitter,
   EVENT_PHOTO_ADDED,
-  EVENT_PHOTO_REMOVED,
-  EVENT_SOURCE_FOLDER_SELECTED
+  EVENT_PHOTO_REMOVED
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-
-const _ = require('lodash');
 
 // declare as observer to observe the state of data structs declared above
 const Home = observer(class Home extends Component {
@@ -57,8 +54,9 @@ const Home = observer(class Home extends Component {
 
   onPhotoRemovedHandler = (...args) => {
     // remove path from observable array
+    const removedPath = args[0];
     const idx = Home.o_photosList.findIndex((item, index, array) => {
-      return item.src === 'file://' + args[0];
+      return item.src === 'file://' + removedPath;
     });
     Home.o_photosList.remove(Home.o_photosList[idx]);
   }
@@ -74,8 +72,20 @@ const Home = observer(class Home extends Component {
     this.forceUpdate();
   }
 
+  getSelectedPhotosList = () => {
+    let selectedPhotosPaths = [];
+    this.state.selectedPhotosList.forEach(i => {
+      selectedPhotosPaths.push(Home.o_photosList[i].src)
+    });
+    return selectedPhotosPaths;
+  }
+
   toggleSmsModal = () => {
-    //
+
+  }
+
+  onLoveItClick = () => {
+
   }
 
   render() {
@@ -83,7 +93,8 @@ const Home = observer(class Home extends Component {
       <div className="Home">
         <SharingDock 
           showDock={this.state.selectedPhotosList.size !==0 } 
-          toggleSms={this.toggleSmsModal} />
+          toggleSms={this.toggleSmsModal}
+          loveIt={this.onLoveItClick} />
         { this.state.photos.length === 0 ? <NothingToShow /> : null }
         <Gallery 
           photos={Home.o_photosList}
