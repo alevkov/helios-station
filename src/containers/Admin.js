@@ -272,16 +272,6 @@ class Admin extends Component {
             <MenuItem onClick={this.onMediaTypeClose}>.mp4</MenuItem>
           </Menu>
         </div>
-        <div className='Admin-media-form-4'>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={settings.get('media.generate')}
-                onChange={this.onCheckBoxChangedHandler('media.generate')}
-                value='checkedGenerate'/>
-            }
-            label='Generate Media'/>
-        </div>
       </div>
     );
     return (
