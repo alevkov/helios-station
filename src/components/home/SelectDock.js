@@ -34,7 +34,7 @@ export default class SelectDock extends React.Component {
     return (
       <Dock
         size={0.1}
-        position='top' 
+        position='bottom' 
         dimMode='none'
         dockStyle={dockStyles}
         isVisible={this.props.showDock}>
