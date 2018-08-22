@@ -22,9 +22,9 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 900,
-        "node-integration": "iframe", // and this line
-        "webPreferences": {
-          "webSecurity": false
+        'node-integration': 'iframe', // and this line
+        'webPreferences': {
+          'webSecurity': false
         }
     });
     mainWindow.loadURL(startUrl);

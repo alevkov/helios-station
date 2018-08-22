@@ -6,12 +6,11 @@ const fs = electron.remote.require('fs');
 const os = window.require('os');
 
 export default class MediaEngine  {
-  constructor(type, frames) {
+  constructor(frames) {
     this.frames = frames;
-    this.type = type;
   }
 
-  sortedFrames = (ascending) => {
+  sortedFrames = ascending => {
     return this.frames.concat().sort((a, b) => {
       const aFile = a.replace(/^.*[\\\/]/, '');
       const aIndex = aFile.split('_')[1].split('.')[0];
@@ -23,8 +22,8 @@ export default class MediaEngine  {
     });
   }
 
-  generate = () => {
-    switch (this.type) {
+  generate = type => {
+    switch (type) {
       case 'gif': {
         const boomerang = Boolean(settings.get('media.boomerang'));
         const numFrames = Number.parseInt(settings.get('media.frames'));
@@ -91,7 +90,7 @@ export default class MediaEngine  {
         }, (obj) => {
           if (!obj.error) {
             console.log(obj);
-            const data = obj.image.replace(/^data:image\/\w+;base64,/, "");
+            const data = obj.image.replace(/^data:image\/\w+;base64,/, '');
             const buf = new Buffer(data, 'base64');
             fs.writeFile(settings.get('dir.media') + 
               (os.platform() === 'darwin' ? '/' : '\\') + 

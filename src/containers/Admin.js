@@ -5,6 +5,7 @@ import { SegmentedControl } from 'segmented-control'
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
 import Menu from '@material-ui/core/Menu';
+import Select from 'react-select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
@@ -96,6 +97,19 @@ class Admin extends Component {
     this.setState({ mediaTypeAnchor: null });
   }
 
+  onLogoImageclick = () => {
+    dialog.showOpenDialog({
+        properties: ['openFile']
+    }, (dir) => {
+        if (dir !== undefined) {
+          this.onDirSelectedHandler('logo', dir);
+          this.setState({
+            sortDir: settings.get('dir.logo')
+          });
+        }
+    });
+  }
+
   // Abstract 
   onDirSelectedHandler = (type, dir) => {
     settings.set('dir.' + type, dir);
@@ -123,66 +137,53 @@ class Admin extends Component {
     }
   }
 
-  onLogoImageclick = () => {
-    dialog.showOpenDialog({
-        properties: ['openFile']
-    }, (dir) => {
-        if (dir !== undefined) {
-          this.onDirSelectedHandler('logo', dir);
-          this.setState({
-            sortDir: settings.get('dir.logo')
-          });
-        }
-    });
-  }
-
   render() {
     const generalSegment = () => (
-      <div className="Admin-general-form">
-        <div className="Admin-general-form-1">
+      <div className='Admin-general-form'>
+        <div className='Admin-general-form-1'>
           <TextField
-            id="event"
-            label="Event Name"
+            id='event'
+            label='Event Name'
             onChange={this.onTextChangedHandler('event.name')}
             defaultValue={settings.get('event.name')}
-            margin="normal"/>
+            margin='normal'/>
           <TextField
-            id="session"
-            label="Session"
+            id='session'
+            label='Session'
             onChange={this.onTextChangedHandler('event.session')}
             defaultValue={settings.get('event.session')}
-            type="number"
-            margin="normal"/>
+            type='number'
+            margin='normal'/>
           <Button
             aria-owns={this.state.stationNameAnchor ? 'station-name-menu' : null}
-            aria-haspopup="true"
-            color="secondary"
-            variant="contained"
+            aria-haspopup='true'
+            color='secondary'
+            variant='contained'
             onClick={this.onStationNameClick}>
             Station
           </Button>
           <Menu
-            id="station-name-menu"
+            id='station-name-menu'
             anchorEl={this.state.stationNameAnchor}
             open={Boolean(this.state.stationNameAnchor)}
             onClose={this.onStationNameClose}>
             <MenuItem onClick={this.onStationNameClose}>Station 1</MenuItem>
           </Menu>
         </div>
-        <div className="Admin-general-form-2">
+        <div className='Admin-general-form-2'>
           <Button onClick={this.onSourceFolderClick}
-            color="primary"
-            variant="contained">
+            color='primary'
+            variant='contained'>
             Source Path
           </Button>
           <Button onClick={this.onSortFolderClick}
-            color="primary"
-            variant="contained">
+            color='primary'
+            variant='contained'>
             Sorting Path
           </Button>
           <Button onClick={this.onMediaFolderClick}
-            color="primary"
-            variant="contained">
+            color='primary'
+            variant='contained'>
             Media Path
           </Button>
         </div>
@@ -193,78 +194,78 @@ class Admin extends Component {
         <FormControlLabel
           control={
             <Checkbox
-              value="checkedA"/>
+              value='checkedA'/>
           }
-          label="Generate Media"/> */}
+          label='Generate Media'/> */}
       </div>
     );
     const mediaSegment = () => (
-      <div className="Admin-media-form">
-        <div className="Admin-media-form-1">
+      <div className='Admin-media-form'>
+        <div className='Admin-media-form-1'>
           <TextField
-            id="width"
-            label="Width"
+            id='width'
+            label='Width'
             onChange={this.onTextChangedHandler('media.width')}
             defaultValue={settings.get('media.width')}
-            type="number"
-            margin="normal"/>
+            type='number'
+            margin='normal'/>
           <TextField
-            id="height"
-            label="Height"
+            id='height'
+            label='Height'
             onChange={this.onTextChangedHandler('media.height')}
             defaultValue={settings.get('media.height')}
-            type="number"
-            margin="normal"/>
+            type='number'
+            margin='normal'/>
         </div>
-        <div className="Admin-media-form-2">
+        <div className='Admin-media-form-2'>
           <TextField
-            id="frames"
-            label="# of Frames"
+            id='frames'
+            label='# of Frames'
             onChange={this.onTextChangedHandler('media.frames')}
             defaultValue={settings.get('media.frames')}
-            type="number"
-            margin="normal"/>
+            type='number'
+            margin='normal'/>
           <TextField
-            id="fps"
-            label="FPS"
+            id='fps'
+            label='FPS'
             onChange={this.onTextChangedHandler('media.fps')}
             defaultValue={settings.get('media.fps')}
-            type="number"
-            margin="normal"/>
+            type='number'
+            margin='normal'/>
           <FormControlLabel
             control={
               <Checkbox
                 checked={settings.get('media.loop')}
                 onChange={this.onCheckBoxChangedHandler('media.loop')}
-                value="checkedLoop"/>
+                value='checkedLoop'/>
             }
-            label="Loop"/>
+            label='Loop'/>
           <FormControlLabel
             control={
               <Checkbox
                 checked={settings.get('media.boomerang')}
                 onChange={this.onCheckBoxChangedHandler('media.boomerang')}
-                value="checkedBoomerang"/>
+                value='checkedBoomerang'/>
             }
-            label="Boomerang"/>
+            label='Boomerang'/>
         </div>
-        <div className="Admin-media-form-3">
+        <div className='Admin-media-form-3'>
           <Button onClick={this.onLogoImageclick}
-            color="primary"
+            color='primary'
             onClick={this.onLogoImageclick}
-            variant="contained">
+            variant='contained'>
             Logo Image
           </Button>
           <Button
             aria-owns={this.state.mediaTypeAnchor ? 'media-type-menu' : null}
-            aria-haspopup="true"
-            color="secondary"
-            variant="contained"
+            aria-haspopup='true'
+            color='secondary'
+            variant='contained'
             onClick={this.onMediaTypeClick}>
             FORMAT
           </Button>
           <Menu
-            id="media-type-menu"
+            id='media-type-menu'
             anchorEl={this.state.mediaTypeAnchor}
             open={Boolean(this.state.mediaTypeAnchor)}
             onClose={this.onMediaTypeClose}>
@@ -272,32 +273,68 @@ class Admin extends Component {
             <MenuItem onClick={this.onMediaTypeClose}>.mp4</MenuItem>
           </Menu>
         </div>
-        <div className="Admin-media-form-4">
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={settings.get('media.generate')}
-                onChange={this.onCheckBoxChangedHandler('media.generate')}
-                value="checkedGenerate"/>
-            }
-            label="Generate Media"/>
+      </div>
+    );
+    const frameSelectOptions = () => {
+      const options = [];
+      const frames = Number.parseInt(settings.get('media.frames'));
+      for (let i = 0; i < frames; i++) {
+        const option = {value: i, label: `Frame ${i}`};
+        options.push(option);
+      }
+      return options;
+    }
+    const photoSegment = () => (
+      <div className='Admin-photo-form'>
+        <div className='Admin-photo-form-1'>
+          <TextField
+            id='crop-up'
+            label='Crop-Up'
+            onChange={this.onTextChangedHandler('photo.crop-up')}
+            defaultValue={settings.get('photo.crop-up')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='crop-down'
+            label='Crop-Down'
+            onChange={this.onTextChangedHandler('photo.crop-down')}
+            defaultValue={settings.get('photo.crop-down')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='crop-left'
+            label='Crop-Left'
+            onChange={this.onTextChangedHandler('photo.crop-left')}
+            defaultValue={settings.get('photo.crop-left')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='crop-right'
+            label='Crop-Right'
+            onChange={this.onTextChangedHandler('photo.crop-right')}
+            defaultValue={settings.get('photo.crop-right')}
+            type='number'
+            margin='normal'/>
+        </div>
+        <div className='Admin-photo-form-2'>
+          <Select options={frameSelectOptions()} />
         </div>
       </div>
     );
     return (
-      <div className="Admin">
+      <div className='Admin'>
         <SegmentedControl
-          name="oneDisabled"
+          name='oneDisabled'
           options={[
-            { label: "General", value: "general", default: true },
-            { label: "Media", value: "media" },
-            { label: "Photo", value: "photo" }
+            { label: 'General', value: 'general', default: true },
+            { label: 'Media', value: 'media' },
+            { label: 'Photo', value: 'photo' }
           ]}
           setValue={segValue => this.onSegmentedChangedHandler(segValue)}
           style={{ width: 400, color: '#303F9F' }}/>
         { this.state.selectedSegment === 'general' ? generalSegment() : null }
         { this.state.selectedSegment === 'media' ? mediaSegment() : null }
-        { /* this.state.selectedSegment === 'photo' ? photoSegment() : null */ }
+        { this.state.selectedSegment === 'photo' ? photoSegment() : null }
       </div>
     );
   }
