@@ -54,7 +54,7 @@ class Gallery extends React.Component {
     const { ImageComponent = Photo } = this.props;
     // subtract 1 pixel because the browser may round up a pixel
     const width = this.state.containerWidth - 1;
-    const { photos, columns, margin, onClick } = this.props;
+    const { photos, columns, margin, onClick, onExpand, onEffects } = this.props;
     const thumbs = computeSizes({ width, columns, margin, photos });
     return (
       <div className="react-photo-gallery--gallery">
@@ -68,6 +68,8 @@ class Gallery extends React.Component {
                 index={index}
                 photo={photo}
                 onClick={onClick ? this.handleClick : null}
+                onExpand={onExpand ? onExpand : null}
+                onEffects={onEffects ? onEffects : null}
               />
             );
           })}
@@ -81,6 +83,7 @@ class Gallery extends React.Component {
 Gallery.propTypes = {
   photos: PropTypes.arrayOf(photoPropType).isRequired,
   onClick: PropTypes.func,
+  onExpand: PropTypes.func,
   columns: PropTypes.number,
   margin: PropTypes.number,
   ImageComponent: PropTypes.func,

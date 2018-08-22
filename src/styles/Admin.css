@@ -23,7 +23,6 @@
   margin: 2%;
 }
 
-
 .Admin-media-form-1 {
   margin: 1%;
 }
@@ -45,5 +44,13 @@
 }
 
 .Admin-media-form-3 > button {
+  margin: 1%;
+}
+
+.Admin-photo-form-1 {
+  margin: 2%;
+}
+
+.Admin-photo-form-1 > div {
   margin: 1%;
 }

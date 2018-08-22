@@ -96,6 +96,19 @@ class Admin extends Component {
     this.setState({ mediaTypeAnchor: null });
   }
 
+  onLogoImageclick = () => {
+    dialog.showOpenDialog({
+        properties: ['openFile']
+    }, (dir) => {
+        if (dir !== undefined) {
+          this.onDirSelectedHandler('logo', dir);
+          this.setState({
+            sortDir: settings.get('dir.logo')
+          });
+        }
+    });
+  }
+
   // Abstract 
   onDirSelectedHandler = (type, dir) => {
     settings.set('dir.' + type, dir);
@@ -121,19 +134,6 @@ class Admin extends Component {
         new SortingEngine(settings.get('dir.source'), settings.get('dir.sort'));
       }
     }
-  }
-
-  onLogoImageclick = () => {
-    dialog.showOpenDialog({
-        properties: ['openFile']
-    }, (dir) => {
-        if (dir !== undefined) {
-          this.onDirSelectedHandler('logo', dir);
-          this.setState({
-            sortDir: settings.get('dir.logo')
-          });
-        }
-    });
   }
 
   render() {
@@ -274,6 +274,40 @@ class Admin extends Component {
         </div>
       </div>
     );
+    const photoSegment = () => (
+      <div className='Admin-photo-form'>
+        <div className='Admin-photo-form-1'>
+          <TextField
+            id='crop-up'
+            label='Crop-Up'
+            onChange={this.onTextChangedHandler('photo.crop-up')}
+            defaultValue={settings.get('photo.crop-up')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='crop-down'
+            label='Crop-Down'
+            onChange={this.onTextChangedHandler('photo.crop-down')}
+            defaultValue={settings.get('photo.crop-down')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='crop-left'
+            label='Crop-Left'
+            onChange={this.onTextChangedHandler('photo.crop-left')}
+            defaultValue={settings.get('photo.crop-left')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='crop-right'
+            label='Crop-Right'
+            onChange={this.onTextChangedHandler('photo.crop-right')}
+            defaultValue={settings.get('photo.crop-right')}
+            type='number'
+            margin='normal'/>
+        </div>
+      </div>
+    );
     return (
       <div className='Admin'>
         <SegmentedControl
@@ -287,7 +321,7 @@ class Admin extends Component {
           style={{ width: 400, color: '#303F9F' }}/>
         { this.state.selectedSegment === 'general' ? generalSegment() : null }
         { this.state.selectedSegment === 'media' ? mediaSegment() : null }
-        { /* this.state.selectedSegment === 'photo' ? photoSegment() : null */ }
+        { this.state.selectedSegment === 'photo' ? photoSegment() : null }
       </div>
     );
   }
