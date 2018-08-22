@@ -54,3 +54,9 @@
 .Admin-photo-form-1 > div {
   margin: 1%;
 }
+
+.Admin-photo-form-2 {
+  width: 50%;
+  margin-left:25%;
+  margin-top: 5%;
+}

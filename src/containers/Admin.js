@@ -5,6 +5,7 @@ import { SegmentedControl } from 'segmented-control'
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
 import Menu from '@material-ui/core/Menu';
+import Select from 'react-select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
@@ -274,6 +275,15 @@ class Admin extends Component {
         </div>
       </div>
     );
+    const frameSelectOptions = () => {
+      const options = [];
+      const frames = Number.parseInt(settings.get('media.frames'));
+      for (let i = 0; i < frames; i++) {
+        const option = {value: i, label: `Frame ${i}`};
+        options.push(option);
+      }
+      return options;
+    }
     const photoSegment = () => (
       <div className='Admin-photo-form'>
         <div className='Admin-photo-form-1'>
@@ -305,6 +315,9 @@ class Admin extends Component {
             defaultValue={settings.get('photo.crop-right')}
             type='number'
             margin='normal'/>
+        </div>
+        <div className='Admin-photo-form-2'>
+          <Select options={frameSelectOptions()} />
         </div>
       </div>
     );
