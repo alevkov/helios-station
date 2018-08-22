@@ -106,7 +106,7 @@ export default class SortingEngine {
   onSortedPhotoAddedHandler = (index, path) => {
     emitter.emit(EVENT_PHOTO_ADDED, path);
     SortingEngine._sortDirMap.get(index).add(path);
-    const maxNum = Number.parseInt(settings.get('gif.frames'));
+    const maxNum = Number.parseInt(settings.get('media.frames'));
     if (SortingEngine._sortDirMap.get(index).size == maxNum) {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       const mediaEngine = new MediaEngine(frames);
