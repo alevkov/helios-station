@@ -103,11 +103,11 @@ export default class SortingEngine {
     // TODO: Appy effects before moving
     const cloud = new CloudInterface();
     const proc = new ImageProcessor();
-    let focalParams = proc.effectParamsFromSettings(
+    const focalParams = proc.effectParamsFromSettings(
       'focal', Number.parseInt(index), Number.parseInt(camera));
-    let scaleParams = proc.effectParamsFromSettings(
+    const scaleParams = proc.effectParamsFromSettings(
       'scale', Number.parseInt(index), Number.parseInt(camera));
-    let cropParams = proc.effectParamsFromSettings(
+    const cropParams = proc.effectParamsFromSettings(
       'crop');
     cloud.uploadOne(path)
       .then(location => {
