@@ -44,12 +44,13 @@ export const Home = observer(class Home extends Component {
     }));
   }
   static frameByIndexAndCamera = (index, camera) => {
-    Home.o_photosList.forEach(i => {
-      if (Home.o_photosList[i].idx === index && 
+    console.log('index: ' + index, 'camera: ' + camera)
+    for (let i = 0; i < Home.o_photosList.length; i++) {
+      if (Home.o_photosList[i].index === index && 
         Home.o_photosList[i].camera === camera) {
         return Home.o_photosList[i];
       }
-    });
+    }
   }
 
   constructor(props) {
@@ -94,7 +95,6 @@ export const Home = observer(class Home extends Component {
     // add photo to observable array
     Home.o_photosList.push(image);
     Home.sortFrames(true);
-    emitter.emit(EVENT_FRAME_ADDED, Home.o_photosList[camera-1]);
     // upload to server
     const cloud = new CloudInterface();
     cloud.upload([image.actual]);

@@ -15,8 +15,7 @@ import '../styles/Admin.css';
 import { observe } from 'mobx';
 import { observer } from 'mobx-react';
 import { 
-  emitter,
-  EVENT_FRAME_ADDED
+  emitter
 } from '../common';
 
 // electron packages 
@@ -27,7 +26,6 @@ const settings = electron.remote.require('electron-settings');
 export const Admin = observer(class Admin extends Component {
   // sorting engine instance
   static _sortingEngine = null;
-  static _FrameAddedSub = null;
 
   constructor(props) {
     super(props);
@@ -40,14 +38,6 @@ export const Admin = observer(class Admin extends Component {
       selectedIndex: {value: 0, label: 'Session 0'}
     };
     this.initSortingEngine();
-    if (Admin._FrameAddedSub=== null) {
-      Home._FrameAddedSub = emitter.addListener(EVENT_FRAME_ADDED,
-       this.onFrameAdded);
-    }
-  }
-
-  onFrameAdded = frame => {
-    console.log(frame);
   }
 
   // Segmented Control
@@ -188,6 +178,7 @@ export const Admin = observer(class Admin extends Component {
   }
 
   render() {
+    const frameByIdxAndCam = Home.frameByIndexAndCamera(this.state.selectedIndex.value, this.state.selectedFrame.value);
     const fp_x = settings.get('photo.fp_x_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const fp_y = settings.get('photo.fp_y_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const fp_z = settings.get('photo.fp_z_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
@@ -322,11 +313,11 @@ export const Admin = observer(class Admin extends Component {
     const photoSegment = () => (
       <div className='Admin-photo-form'>
         <div className='Admin-photo-form-1'>
-          {Home.o_photosList.length !== 0 ?
+          {frameByIdxAndCam !== undefined ?
           (<div style={{width: '800', height: '450'}} key={0}>
             <img 
               style={{maxWidth: '100%', maxHeight: '100%'}} 
-              src={Home.o_photosList[this.state.selectedFrame.value-1].src} />
+              src={frameByIdxAndCam.src} />
           </div>) : null}
         </div>
         <div className='Admin-photo-croptions'>
