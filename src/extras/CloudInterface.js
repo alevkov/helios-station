@@ -41,6 +41,30 @@ export default class CloudInterface {
     }
   }
 
+  uploadOne = filepath => {
+    return new Promise((resolve, reject) => {
+      const params = {
+        Bucket: CloudInterface._bucket,
+        Key: settings.get('event.name'),
+        Body: ''
+      };
+      const path = String(filepath);
+      fs.readFile(path, (err, data) => {
+        const filename = path.replace(/^.*[\\\/]/, '');
+        params.Body = data;
+        params.Key = params.Key + '/' + filename;
+        this.s3.upload(params, (err, data) => {
+          if (err) {
+            reject(err);
+          } if (data) {
+            console.log('Upload Success', data.Location);
+            resolve(data.Location);
+          }
+        });
+      });
+    }); 
+  }
+
   update = (buffer, name) => {
     const params = {
       Bucket: CloudInterface._bucket,

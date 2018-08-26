@@ -95,9 +95,6 @@ export const Home = observer(class Home extends Component {
     // add photo to observable array
     Home.o_photosList.push(image);
     Home.sortFrames(true);
-    // upload to server
-    const cloud = new CloudInterface();
-    cloud.upload([image.actual]);
   }
 
   onPhotoRemoved = (...args) => {
@@ -159,7 +156,7 @@ export const Home = observer(class Home extends Component {
   onCarouselNav = pos => {
     console.log(pos);
   }
-
+  /*
   onSelectChanged = name => option => {
     switch (name) {
       case 'photo.effect': {
@@ -195,18 +192,19 @@ export const Home = observer(class Home extends Component {
         break;
       }
     }
-  }
+  }*/
 
   onTextChanged = name => event => {
     settings.set(name, event.target.value);
   }
 
   render() {
+    /*
     const effectsList = [
       {value: 'original', label: 'No Effect'},
       {value: 'sepia', label: 'Sepia'},
       {value: 'grayscale', label: 'Grayscale'},
-    ];
+    ];*/
     const carouselContent = Home.o_photosList
      .map((item, i) => <div key={i}><img src={item.src} /></div>);
     const ImageCarousel = () => (
@@ -223,7 +221,7 @@ export const Home = observer(class Home extends Component {
     );
     return (
       <div className='Home'> 
-      {/*** Select Effects ***/} 
+      {/*** Select Effects 
         <div className='Home-top-bar'>
         { this.state.photos.length > 0 ? 
           <Select
@@ -231,7 +229,7 @@ export const Home = observer(class Home extends Component {
             options={effectsList} 
             placeholder='Effects..'
             onChange={this.onSelectChanged('photo.effect')}/> : null }
-        </div>
+        </div> ***/} 
       {/*** Close Button ***/}
         { this.state.showPhotoCarousel === true ? 
         (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>

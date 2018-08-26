@@ -182,7 +182,7 @@ export const Admin = observer(class Admin extends Component {
     const fp_x = settings.get('photo.fp_x_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const fp_y = settings.get('photo.fp_y_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const fp_z = settings.get('photo.fp_z_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
-    const scale = settings.get('scale_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
+    const scale = settings.get('photo.scale_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const crop_x = settings.get('photo.crop-x');
     const crop_y = settings.get('photo.crop-y');
     const crop_w = settings.get('photo.crop-w');
@@ -280,8 +280,7 @@ export const Admin = observer(class Admin extends Component {
           <FormControlLabel
             control={
               <Checkbox
-                checked={settings.get('media.loop')}
-                onChange={this.onCheckboxChanged('media.loop')}
+                checked={/*settings.get('media.loop')*/true}
                 value='checkedLoop'/>
             }
             label='Loop'/>
@@ -386,11 +385,11 @@ export const Admin = observer(class Admin extends Component {
             margin='normal'/>
           <TextField
             id='fp-z'
-            label='Focal Point Zoom'
+            label='Focal Point Zoom (%)'
             onChange={this.onTextChanged('photo.fp_z_' + 
               this.state.selectedIndex.value + '_' + 
               this.state.selectedFrame.value)}
-            value={fp_z === undefined ? 0 : fp_z}
+            value={fp_z === undefined ? 100 : fp_z}
             type='number'
             type='number'
             margin='normal'/>
@@ -402,7 +401,7 @@ export const Admin = observer(class Admin extends Component {
             onChange={this.onTextChanged('photo.scale_' + 
             this.state.selectedIndex.value + '_' + 
             this.state.selectedFrame.value)}
-            value={scale === undefined ? 0 : scale}
+            value={scale === undefined ? 100 : scale}
             type='number'
             margin='normal'/>
         </div>

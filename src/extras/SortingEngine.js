@@ -4,6 +4,8 @@ import { emitter,
   EVENT_PHOTO_REMOVED
 } from '../common';
 import MediaEngine from './MediaEngine';
+import ImageProcessor from './ImageProcessor';
+import CloudInterface from './CloudInterface';
 
 const electron = window.require('electron');
 const settings = electron.remote.require('electron-settings');
@@ -88,6 +90,7 @@ export default class SortingEngine {
   onSourcePhotoAddedHandler = path => {
     const filename = path.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0];
+    const camera = filename.split('_')[1].split('.')[0];
     const indexPath = SortingEngine._sortDir +
       (os.platform() === 'darwin' ? '/' : '\\') +
       index;
@@ -98,10 +101,33 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: Appy effects before moving
-    moveFile(path, destination)
-    .then(() => {
-      console.log(filename + ' moved.');
-    });
+    const cloud = new CloudInterface();
+    const proc = new ImageProcessor();
+    let focalParams = proc.effectParamsFromSettings(
+      'focal', Number.parseInt(index), Number.parseInt(camera));
+    let scaleParams = proc.effectParamsFromSettings(
+      'scale', Number.parseInt(index), Number.parseInt(camera));
+    let cropParams = proc.effectParamsFromSettings(
+      'crop');
+    cloud.uploadOne(path)
+      .then(location => {
+        console.log('applying focal to ' + path);
+        proc.doImgixEffect(focalParams, path)
+          .then(image => {
+            console.log('applying scale to ' + path);
+            const scaled = proc.doEffect(scaleParams, image);
+            console.log('applying crop to ' + path);
+            const cropped = proc.doEffect(cropParams, scaled);
+            proc.writeImage(image, path)
+              .then(() => {
+                console.log('wrote new image to ' + path);
+                moveFile(path, destination)
+                .then(() => {
+                  console.log(filename + ' moved to ' + destination);
+                });
+              });
+          });
+        });
   }
 
   // effects must be already applied at this point

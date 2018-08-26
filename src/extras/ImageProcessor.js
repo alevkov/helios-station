@@ -16,62 +16,22 @@ export default class ImageProcessor {
     return items;
   }
 
-  applyImgixEffect = async (params, toImages) => {
-    let newItems = [];
-    for (let i = 0; i < toImages.length; i++) {
-      const url = this.getImgUrl(toImages[i]);
-      const urlParams = this.imgixEffectParams(params);
-      const effected = await Jimp.read(url + urlParams);
-      const filepath = this.getFilePath(toImages[i]);
-      const filename = filepath.replace(/^.*[\\\/]/, '');
-      const index = filename.split('_')[0];
-      const destPath = settings.get('dir.sort') + 
-        '/' + index + '/' + 'proc' + '/'+ filename;
-      await effected.writeAsync(destPath);
-      const newItem = toImages[i];
-      newItem.src = 'file://' + destPath + '?t=' + new Date().getTime();
-      newItem.modified = destPath;
-      newItems.push(newItem);
-    }
-    return newItems;
+  doImgixEffect = async (params, path) => {
+    const url = this.getImgUrl(path);
+    const urlParams = this.imgixEffectParams(params);
+    return Jimp.read(url + urlParams);
   }
 
-  applyEffect = async (params, toImages) => {
-    let newItems = [];
-    for (let i = 0; i < toImages.length; i++) {
-      const filepath = this.getFilePath(toImages[i]);
-      // read img with JIMP
-      const image = await Jimp.read(filepath);
-      // apply effect
-      const effected = this.imageWithEffect(image, params);
-      // get filename
-      const filename = filepath.replace(/^.*[\\\/]/, '');
-      // get camera name
-      const index = filename.split('_')[0];
-      // get destination path
-      const destPath = settings.get('dir.sort') + 
-        '/' + index + '/' + 'proc' + '/'+ filename;
-      // write to destination
-      await effected.writeAsync(destPath);
-      // modify image structure to point src to modified file
-      const newItem = toImages[i];
-      // add date to force img reload
-      newItem.src = 'file://' + destPath + '?t=' + new Date().getTime();
-      newItem.modified = destPath;
-      newItems.push(newItem);
-    }
-    return newItems;
+  doEffect = (params, image) => {
+    return this.imageWithEffect(image, params);
   }
 
-  getFilePath = (imageObj) => {
-    const filepath = imageObj.modified === null ?
-      imageObj.actual : imageObj.modified;
-    return filepath;
+  writeImage = async (image, destination) => {
+    await image.writeAsync(destination);
   }
 
-  getImgUrl = (imageObj) => {
-    const filepath = this.getFilePath(imageObj);
-    const filename = filepath.replace(/^.*[\\\/]/, '');
+  getImgUrl = (path) => {
+    const filename = path.replace(/^.*[\\\/]/, '');
     const url = 'https://helios-microsite.imgix.net/' +
       settings.get('event.name') + '/' + filename;
     return url;
@@ -124,45 +84,49 @@ export default class ImageProcessor {
   }
 
   effectParamsFromSettings = (effect, index=null, camera=null) => {
+    let params = {
+      type: effect,
+      values: null
+    };
     switch (effect) {
       case 'crop': {
-        return {
-          type: effect,
-          values: {
-            x: Number.parseInt(settings.get('photo.crop-x')),
-            y: Number.parseInt(settings.get('photo.crop-y')),
-            w: Number.parseInt(settings.get('photo.crop-w')),
-            h: Number.parseInt(settings.get('photo.crop-h'))
-          }
-        };
+        params.values = {
+          x: Number.parseInt(settings.get('photo.crop-x')),
+          y: Number.parseInt(settings.get('photo.crop-y')),
+          w: Number.parseInt(settings.get('photo.crop-w')),
+          h: Number.parseInt(settings.get('photo.crop-h'))
+        }
+        console.log('got params for crop:');
+        console.log(params);
+        return params;
       }
       case 'focal': {
-        return {
-          type: 'focal',
-          values: {
-            fp_x: Number.parseFloat(settings.get(
-              'photo.fp_x_' + index + '_' + camera)
-            ),
-            fp_y: Number.parseFloat(settings.get(
-              'photo.fp_y_' + index + '_' + camera)
-            ),
-            fp_z: Number.parseFloat(settings.get(
-              'photo.fp_z_' + index + '_' + camera)
-            )
-          }
+        params.values = {
+          fp_x: Number.parseFloat(settings.get(
+            'photo.fp_x_' + index + '_' + camera)
+          ),
+          fp_y: Number.parseFloat(settings.get(
+            'photo.fp_y_' + index + '_' + camera)
+          ),
+          fp_z: Number.parseFloat(settings.get(
+            'photo.fp_z_' + index + '_' + camera) / 100
+          )
         }
+        console.log('got params for focal:');
+        console.log(params);
+        return params;
       }
       case 'scale': {
-        return {
-          type: 'scale',
-          values: {
-            scale: Number.parseFloat(
-                Number.parseFloat(
-                  settings.get('photo.scale_' + index + '_' + camera)
-                ) / 100
-              )
-          }
+        params.values = {
+          scale: Number.parseFloat(
+            Number.parseFloat(
+              settings.get('photo.scale_' + index + '_' + camera)
+            ) / 100
+          )
         }
+        console.log('got params for scale:');
+        console.log(params);
+        return params;
       }
       default: {
         break;
