@@ -97,12 +97,14 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
+    // TODO: Appy effects before moving
     moveFile(path, destination)
     .then(() => {
       console.log(filename + ' moved.');
     });
   }
 
+  // effects must be already applied at this point
   onSortedPhotoAddedHandler = (index, path) => {
     emitter.emit(EVENT_PHOTO_ADDED, path);
     SortingEngine._sortDirMap.get(index).add(path);

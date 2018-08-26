@@ -31,6 +31,7 @@ export const Home = observer(class Home extends Component {
   static _PhotoRemovedSub = null;
   // observables
   static o_photosList = observable.array([], { deep: true });
+  static _indexList = new Set();
   static sortFrames = ascending => {
     Home.o_photosList.replace(Home.o_photosList.slice().sort((a, b) => {
       const aFile = a.actual.replace(/^.*[\\\/]/, '');
@@ -76,23 +77,24 @@ export const Home = observer(class Home extends Component {
   onPhotoAdded = (...args) => {
     const path = args[0];
     const filename = path.replace(/^.*[\\\/]/, '');
-    const idx = filename.split('_')[1].split('.')[0];
-    const camera = filename.split('_')[0];
+    const camera = Number.parseInt(filename.split('_')[1].split('.')[0]);
+    const idx = Number.parseInt(filename.split('_')[0]);
     const image = {
       src: 'file://' + path,
       actual: path,
       name: filename,
-      frame: idx,
-      camera: Number.parseInt(camera),
+      index: idx,
+      camera: camera,
       modified: null,
       eventcode: settings.get('event.name'),
       width: 3,
       height: 2
     }
+    Home._indexList.add(idx);
     // add photo to observable array
     Home.o_photosList.push(image);
     Home.sortFrames(true);
-    emitter.emit(EVENT_FRAME_ADDED, Home.o_photosList[idx-1]);
+    emitter.emit(EVENT_FRAME_ADDED, Home.o_photosList[camera-1]);
     // upload to server
     const cloud = new CloudInterface();
     cloud.upload([image.actual]);

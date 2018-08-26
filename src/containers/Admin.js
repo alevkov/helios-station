@@ -36,7 +36,8 @@ export const Admin = observer(class Admin extends Component {
       sortDir: settings.get('dir.sort'),
       mediaDir: settings.get('dir.media'),
       selectedSegment: 'general',
-      selectedFrame: {value: 1, label: 'Frame 1'}
+      selectedFrame: {value: 1, label: 'Frame 1'},
+      selectedIndex: {value: 0, label: 'Session 0'}
     };
     this.initSortingEngine();
     if (Admin._FrameAddedSub=== null) {
@@ -109,65 +110,6 @@ export const Admin = observer(class Admin extends Component {
     });
   }
 
-  onApplyEffectsClick = effect => () => {
-    const frameIdx = this.state.selectedFrame.value - 1;
-    const proc = new ImageProcessor();
-    switch (effect) {
-      case 'scale': {
-        const paramsScale = {
-          type: 'scale',
-          values: {
-            scale: Number.parseFloat(settings.get('photo.scale_' + this.state.selectedFrame.value))
-          }
-        }
-        proc.applyEffect(paramsScale, [Home.o_photosList[frameIdx]])
-          .then((newImages) => {
-            Home.o_photosList[frameIdx] = newImages[0];
-          });
-        break;
-      }
-      case 'focal': {
-        const paramsFocal ={
-          type: 'focal',
-          values: {
-            fp_x: Number.parseFloat(settings.get('photo.fp_x_' + this.state.selectedFrame.value)),
-            fp_y: Number.parseFloat(settings.get('photo.fp_y_' + this.state.selectedFrame.value)),
-            fp_z: Number.parseFloat(settings.get('photo.fp_z_' + this.state.selectedFrame.value))
-          }
-        }
-        proc.applyImgixEffect(paramsFocal, [Home.o_photosList[frameIdx]])
-          .then((newImages) => {
-            Home.o_photosList[frameIdx] = newImages[0];
-          })
-        break;
-      }
-      case 'crop': {
-        if (settings.get('photo.crop-x') === undefined ||
-            settings.get('photo.crop-y') === undefined ||
-            settings.get('photo.crop-w') === undefined || 
-            settings.get('photo.crop-h') === undefined) { return; }
-        const paramsCrop = {
-          type: 'crop',
-          values: {
-            x: Number.parseInt(settings.get('photo.crop-x')),
-            y: Number.parseInt(settings.get('photo.crop-y')),
-            w: Number.parseInt(settings.get('photo.crop-w')),
-            h: Number.parseInt(settings.get('photo.crop-h'))
-          }
-        };
-        proc.applyEffect(paramsCrop, Home.o_photosList)
-          .then((newImages) => {
-            Home.o_photosList.replace(newImages);
-            Home.sortFrames(true);
-          });
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-  }
-
   // Abstract 
   onDirSelected = (type, dir) => {
     settings.set('dir.' + type, dir);
@@ -200,6 +142,13 @@ export const Admin = observer(class Admin extends Component {
         });
         break;
       }
+      case 'photo.index': {
+        console.log(option.value);
+        this.setState({
+          selectedIndex: option
+        });
+        break;
+      }
       default: {
         break;
       }
@@ -219,16 +168,35 @@ export const Admin = observer(class Admin extends Component {
   }
 
   frameSelectOptions = () => {
-      const options = [];
-      const frames = Number.parseInt(settings.get('media.frames'));
-      for (let i = 0; i < frames; i++) {
-        const option = {value: i+1, label: `Frame ${i+1}`};
-        options.push(option);
-      }
-      return options;
+    const options = [];
+    const frames = Number.parseInt(settings.get('media.frames'));
+    for (let i = 0; i < frames; i++) {
+      const option = {value: i+1, label: `Frame ${i+1}`};
+      options.push(option);
     }
+    return options;
+  }
+
+  indexSelectOptions = () => {
+    const options = [];
+    const indeces = Number.parseInt(settings.get('event.session'));
+    for (let i = 0; i < indeces; i++) {
+      const option = {value: i, label: `Session ${i}`};
+      options.push(option);
+    }
+    return options;
+  }
 
   render() {
+    const fp_x = settings.get('photo.fp_x_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
+    const fp_y = settings.get('photo.fp_y_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
+    const fp_z = settings.get('photo.fp_z_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
+    const scale = settings.get('scale_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
+    const crop_x = settings.get('photo.crop-x');
+    const crop_y = settings.get('photo.crop-y');
+    const crop_w = settings.get('photo.crop-w');
+    const crop_h = settings.get('photo.crop-h');
+
     const stationSelectOptions = [
       {value: 1, label: 'Station 1'}
     ];
@@ -366,36 +334,30 @@ export const Admin = observer(class Admin extends Component {
             id='crop-x'
             label='Crop-X'
             onChange={this.onTextChanged('photo.crop-x')}
-            defaultValue={settings.get('photo.crop-x')}
+            value={crop_x === undefined ? 0 : crop_x}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-down'
             label='Crop-Y'
             onChange={this.onTextChanged('photo.crop-y')}
-            defaultValue={settings.get('photo.crop-y')}
+            value={crop_y === undefined ? 0 : crop_y}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-left'
             label='Crop-W'
             onChange={this.onTextChanged('photo.crop-w')}
-            defaultValue={settings.get('photo.crop-w')}
+            value={crop_w === undefined ? 0 : crop_w}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-right'
             label='Crop-H'
             onChange={this.onTextChanged('photo.crop-h')}
-            defaultValue={settings.get('photo.crop-h')}
+            value={crop_h === undefined ? 0 : crop_h}
             type='number'
             margin='normal'/>
-          <Button
-            color='primary'
-            onClick={this.onApplyEffectsClick('crop')}
-            variant='contained'>
-            Apply
-          </Button>
         </div>
         <div className='Admin-photo-form-2'>
           <Select 
@@ -404,47 +366,54 @@ export const Admin = observer(class Admin extends Component {
             placeholder='Frame...'
             onChange={this.onSelectChanged('photo.frame')}/>
         </div>
+        <div className='Admin-photo-index-select'>
+          <Select 
+            options={this.indexSelectOptions()}
+            value={this.state.selectedIndex}
+            placeholder='Index...'
+            onChange={this.onSelectChanged('photo.index')}/>
+        </div>
         <div className='Admin-photo-form-focal'>
           <TextField
             id='fp-x'
             label='Focal Point X'
-            onChange={this.onTextChanged('photo.fp_x_' + this.state.selectedFrame.value)}
-            value={settings.get('photo.fp_x_' + this.state.selectedFrame.value)}
+            onChange={this.onTextChanged('photo.fp_x_' +
+              this.state.selectedIndex.value + '_' +
+              this.state.selectedFrame.value)}
+            value={fp_x === undefined ? 0 : fp_x}
+            type='number'
             margin='normal'/>
           <TextField
             id='fp-y'
             label='Focal Point Y'
-            onChange={this.onTextChanged('photo.fp_y_' + this.state.selectedFrame.value)}
-            value={settings.get('photo.fp_y_' + this.state.selectedFrame.value)}
+            onChange={this.onTextChanged('photo.fp_y_' +
+              this.state.selectedIndex.value + '_' + 
+              this.state.selectedFrame.value)}
+            value={fp_y === undefined ? 0 : fp_y}
+            type='number'
             type='number'
             margin='normal'/>
           <TextField
             id='fp-z'
             label='Focal Point Zoom'
-            onChange={this.onTextChanged('photo.fp_z_' + this.state.selectedFrame.value)}
-            value={settings.get('photo.fp_z_' + this.state.selectedFrame.value)}
+            onChange={this.onTextChanged('photo.fp_z_' + 
+              this.state.selectedIndex.value + '_' + 
+              this.state.selectedFrame.value)}
+            value={fp_z === undefined ? 0 : fp_z}
+            type='number'
             type='number'
             margin='normal'/>
-          <Button
-            color='primary'
-            onClick={this.onApplyEffectsClick('focal')}
-            variant='contained'>
-            Apply
-          </Button>
         </div>
         <div className='Admin-photo-form-scale'>
           <TextField
             id='scale'
             label='Scale (%)'
-            onChange={this.onTextChanged('photo.scale_' + this.state.selectedFrame.value)}
-            value={settings.get('photo.scale_' + this.state.selectedFrame.value)}
+            onChange={this.onTextChanged('photo.scale_' + 
+            this.state.selectedIndex.value + '_' + 
+            this.state.selectedFrame.value)}
+            value={scale === undefined ? 0 : scale}
+            type='number'
             margin='normal'/>
-          <Button
-            color='primary'
-            onClick={this.onApplyEffectsClick('crop')}
-            variant='contained'>
-            Apply
-          </Button>
         </div>
         <div className='Admin-photo-logo-image'>
           <Button

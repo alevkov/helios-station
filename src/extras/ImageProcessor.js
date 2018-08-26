@@ -2,7 +2,6 @@ const Jimp = window.require('jimp');
 const electron = window.require('electron'); 
 const settings = electron.remote.require('electron-settings');
 
-
 export default class ImageProcessor {
   constructor() {
 
@@ -117,6 +116,53 @@ export default class ImageProcessor {
         console.log(urlParams);
         return urlParams;
         break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+
+  effectParamsFromSettings = (effect, index=null, camera=null) => {
+    switch (effect) {
+      case 'crop': {
+        return {
+          type: effect,
+          values: {
+            x: Number.parseInt(settings.get('photo.crop-x')),
+            y: Number.parseInt(settings.get('photo.crop-y')),
+            w: Number.parseInt(settings.get('photo.crop-w')),
+            h: Number.parseInt(settings.get('photo.crop-h'))
+          }
+        };
+      }
+      case 'focal': {
+        return {
+          type: 'focal',
+          values: {
+            fp_x: Number.parseFloat(settings.get(
+              'photo.fp_x_' + index + '_' + camera)
+            ),
+            fp_y: Number.parseFloat(settings.get(
+              'photo.fp_y_' + index + '_' + camera)
+            ),
+            fp_z: Number.parseFloat(settings.get(
+              'photo.fp_z_' + index + '_' + camera)
+            )
+          }
+        }
+      }
+      case 'scale': {
+        return {
+          type: 'scale',
+          values: {
+            scale: Number.parseFloat(
+                Number.parseFloat(
+                  settings.get('photo.scale_' + index + '_' + camera)
+                ) / 100
+              )
+          }
+        }
       }
       default: {
         break;
