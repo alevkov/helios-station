@@ -63,7 +63,7 @@ const SelectedImage = ({ index, onClick, photo, margin, onExpand, onEffects }) =
 
       <Checkmark selected={photo.selected ? true : false} />
       <Preview selected={photo.selected ? true : false} onExpand={onExpand} index={index}/>
-      <Effects selected={photo.selected ? true : false} onEffects={onEffects} index={index}/>
+      {/*<Effects selected={photo.selected ? true : false} onEffects={onEffects} index={index}/>*/}
       <img style={photo.selected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle }} {...photo} onClick={(e) => onClick(e, { index, photo })} />
 
       <style>

@@ -27,7 +27,7 @@ export default class CloudInterface {
       };
       const path = String(filepaths[i]);
       fs.readFile(path, (err, data) => {
-        const filename = path.replace(/^.*[\\\/]/, '')
+        const filename = path.replace(/^.*[\\\/]/, '');
         params.Body = data;
         params.Key = params.Key + '/' + filename;
         this.s3.upload(params, (err, data) => {
@@ -37,8 +37,24 @@ export default class CloudInterface {
             console.log('Upload Success', data.Location);
           }
         });
-      })
-
+      });
     }
+  }
+
+  update = (buffer, name) => {
+    const params = {
+      Bucket: CloudInterface._bucket,
+      Key: settings.get('event.name'),
+      Body: ''
+    };
+    params.Body = buffer;
+    params.Key = params.Key + '/' + name;
+    this.s3.upload(params, (err, data) => {
+      if (err) {
+        console.log('Error', err);
+      } if (data) {
+        console.log('Upload Success', data.Location);
+      }
+    });
   }
 }

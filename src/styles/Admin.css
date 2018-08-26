@@ -23,6 +23,13 @@
   margin: 2%;
 }
 
+.Admin-general-station-select {
+  width: 20%;
+  margin-left: 40%;
+  margin-top: 5%;
+  margin-bottom: 5%;
+}
+
 .Admin-media-form-1 {
   margin: 1%;
 }
@@ -47,6 +54,12 @@
   margin: 1%;
 }
 
+.Admin-media-format-select {
+  width: 20%;
+  margin-left:40%;
+  margin-top: 5%;
+}
+
 .Admin-photo-form-1 {
   margin: 2%;
 }
@@ -59,4 +72,24 @@
   width: 50%;
   margin-left:25%;
   margin-top: 5%;
+}
+
+.Admin-photo-form-focal {
+  margin: 3%;
+}
+
+.Admin-photo-form-focal > div {
+  margin: 1%;
+}
+
+.Admin-photo-form-scale {
+  margin: 3%;
+}
+
+.Admin-photo-form-scale > div {
+  margin: 3%;
+}
+
+.Admin-photo-croptions > div {
+  margin: 1%;
 }
