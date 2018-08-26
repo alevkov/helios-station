@@ -202,7 +202,7 @@ export const Admin = observer(class Admin extends Component {
             margin='normal'/>
           <TextField
             id='session'
-            label='Session'
+            label='# of Sessions'
             onChange={this.onTextChanged('event.session')}
             value={settings.get('event.session')}
             type='number'
