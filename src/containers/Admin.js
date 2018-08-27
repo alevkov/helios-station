@@ -37,7 +37,13 @@ export const Admin = observer(class Admin extends Component {
       selectedFrame: {value: 1, label: 'Frame 1'},
       selectedIndex: {value: 0, label: 'Session 0'}
     };
-    this.initSortingEngine();
+    this.initSortingEngineIfDirsSelected();
+    console.log('Admin: constructor');
+    console.log('Admin: sorting engine inited: ' + Admin._sortingEngine !== null);
+  }
+
+  componentDidMount() {
+    console.log('Admin: did mount');
   }
 
   // Segmented Control
@@ -103,6 +109,7 @@ export const Admin = observer(class Admin extends Component {
   // Abstract 
   onDirSelected = (type, dir) => {
     settings.set('dir.' + type, dir);
+    this.initSortingEngineIfDirsSelected();
   }
 
   onTextChanged = name => event => {
@@ -145,7 +152,7 @@ export const Admin = observer(class Admin extends Component {
     }
   }
 
-  initSortingEngine = () => {
+  initSortingEngineIfDirsSelected = () => {
     if (settings.get('dir.source') !== undefined &&
         settings.get('dir.sort') !== undefined &&
         settings.get('dir.media') !== undefined) {
