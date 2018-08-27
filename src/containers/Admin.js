@@ -394,6 +394,7 @@ export const Admin = observer(class Admin extends Component {
             type='number'
             margin='normal'/>
         </div>
+        {/**** UNUSED
         <div className='Admin-photo-form-scale'>
           <TextField
             id='scale'
@@ -404,7 +405,7 @@ export const Admin = observer(class Admin extends Component {
             value={scale === undefined ? 100 : scale}
             type='number'
             margin='normal'/>
-        </div>
+        </div> */}
         <div className='Admin-photo-logo-image'>
           <Button
             color='primary'

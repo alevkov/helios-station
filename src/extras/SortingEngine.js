@@ -115,9 +115,9 @@ export default class SortingEngine {
         proc.doImgixEffect(focalParams, path)
           .then(image => {
             console.log('applying scale to ' + path);
-            const scaled = proc.doEffect(scaleParams, image);
+            //const scaled = proc.doEffect(scaleParams, image);
             console.log('applying crop to ' + path);
-            const cropped = proc.doEffect(cropParams, scaled);
+            const cropped = proc.doEffect(cropParams, image);
             proc.writeImage(image, path)
               .then(() => {
                 console.log('wrote new image to ' + path);
