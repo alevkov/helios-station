@@ -6,7 +6,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
 import Menu from '@material-ui/core/Menu';
 import Select from 'react-select';
-import { Home } from './Home';
+//import { Home } from './Home';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
@@ -159,7 +159,10 @@ export const Admin = observer(class Admin extends Component {
       // initialize sorting engine
       if (Admin._sortingEngine == null) {
               Admin._sortingEngine =
-        new SortingEngine(settings.get('dir.source'), settings.get('dir.sort'));
+        new SortingEngine(
+          settings.get('dir.source'), 
+          settings.get('dir.sort'),
+          settings.get('dir.media'));
       }
     }
   }
@@ -185,7 +188,7 @@ export const Admin = observer(class Admin extends Component {
   }
 
   render() {
-    const frameByIdxAndCam = Home.frameByIndexAndCamera(this.state.selectedIndex.value, this.state.selectedFrame.value);
+    //const frameByIdxAndCam = Home.frameByIndexAndCamera(this.state.selectedIndex.value, this.state.selectedFrame.value);
     const fp_x = settings.get('photo.fp_x_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const fp_y = settings.get('photo.fp_y_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
     const fp_z = settings.get('photo.fp_z_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
@@ -318,6 +321,7 @@ export const Admin = observer(class Admin extends Component {
     );
     const photoSegment = () => (
       <div className='Admin-photo-form'>
+        {/*
         <div className='Admin-photo-form-1'>
           {frameByIdxAndCam !== undefined ?
           (<div style={{width: '800', height: '450'}} key={0}>
@@ -325,7 +329,7 @@ export const Admin = observer(class Admin extends Component {
               style={{maxWidth: '100%', maxHeight: '100%'}} 
               src={frameByIdxAndCam.src} />
           </div>) : null}
-        </div>
+        </div>*/}
         <div className='Admin-photo-croptions'>
           <TextField
             id='crop-x'

@@ -18,21 +18,18 @@ export default class SortingEngine {
   // dirs
   static _sourceDir = null;
   static _sortDir = null;
+  static _mediaDir = null;
   static _sortDirMap = new Map(); // [string: Set<string>]
   static _dirWatchSet = new Set() // [string: bool]
 
-  constructor(source, sort) {
-    //TODO: delete this shit
-    // let gifSettings = {
-    //   frames: 4
-    // };
-    //settings.set('gif', gifSettings);
-    // init dir strings
+  constructor(source, sort, media) {
     SortingEngine._sourceDir = source;
     SortingEngine._sortDir = sort;
+    SortingEngine._mediaDir = media;
     // emit source folder event for subscribing components
     emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, SortingEngine._sourceDir);
     this.initWatchDir('source', SortingEngine._sourceDir);
+    this.initWatchDir('media', SortingEngine._mediaDir);
   }
 
   initWatchDir = (type, dir) => {
@@ -54,7 +51,7 @@ export default class SortingEngine {
         });
         // when a file is added, send event to subs
         sourceWatcher.on('add', path => {
-          this.onSourcePhotoAddedHandler(path);
+          this.onSourcePhotoAdded(path);
         });
         break;
       }
@@ -72,7 +69,7 @@ export default class SortingEngine {
             persistent: true
           });
           indexPathWatcher.on('add', path => {
-            this.onSortedPhotoAddedHandler(index, path);
+            this.onSortedPhotoAdded(index, path);
           });
           indexPathWatcher.on('unlink', path => {
             this.onSortedPhotoRemovedHandler(index, path);
@@ -81,13 +78,30 @@ export default class SortingEngine {
         }
         break;
       }
+      case 'media': {
+        let mediaGlob = null;
+        // set the watch dir according to OS
+        if (os.platform() === 'darwin') {
+          watchGlob = dir + '/*.gif';
+        } else {
+          watchGlob = dir + '\\*.gif'
+        }
+        const mediaWatcher = choker.watch(mediaGlob, {
+          ignored: /(^|[\/\\])\../,
+          persistent: true
+        });
+        mediaWatcher.on('add', path => {
+          this.onMediaAdded(path);
+        });
+        break;
+      }
       default: {
         break;
       }
     }
   }
 
-  onSourcePhotoAddedHandler = path => {
+  onSourcePhotoAdded = path => {
     const filename = path.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0];
     const camera = filename.split('_')[1].split('.')[0];
@@ -100,7 +114,7 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
-    // TODO: Appy effects before moving
+    // Appy effects before moving
     const cloud = new CloudInterface();
     const proc = new ImageProcessor();
     const focalParams = proc.effectParamsFromSettings(
@@ -131,8 +145,7 @@ export default class SortingEngine {
   }
 
   // effects must be already applied at this point
-  onSortedPhotoAddedHandler = (index, path) => {
-    emitter.emit(EVENT_PHOTO_ADDED, path);
+  onSortedPhotoAdded = (index, path) => {
     SortingEngine._sortDirMap.get(index).add(path);
     const maxNum = Number.parseInt(settings.get('media.frames'));
     if (SortingEngine._sortDirMap.get(index).size == maxNum) {
@@ -140,6 +153,10 @@ export default class SortingEngine {
       const mediaEngine = new MediaEngine(frames);
       mediaEngine.generate('gif');
     }
+  }
+
+  onMediaAdded = path => {
+    emitter.emit(EVENT_PHOTO_ADDED, path);
   }
 
   onSortedPhotoRemovedHandler = (index, path) => {
