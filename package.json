@@ -12,6 +12,7 @@
     "@material-ui/core": "^1.4.3",
     "aws-sdk": "^2.296.0",
     "base64image-to-file": "^1.2.0",
+    "chokidar": "^2.0.4",
     "core-js": "^2.5.7",
     "electron-settings": "^3.2.0",
     "fbemitter": "^2.1.1",
