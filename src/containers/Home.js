@@ -6,10 +6,6 @@ import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
 import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
-import TextField from '@material-ui/core/TextField';
-import ImageProcessor from '../extras/ImageProcessor';
-import Lightbox from 'react-images';
-import logo from '../logo.svg';
 import '../styles/Home.css';
 import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
@@ -32,26 +28,6 @@ export const Home = observer(class Home extends Component {
   // observables
   static o_photosList = observable.array([], { deep: true });
   static _indexList = new Set();
-  static sortFrames = ascending => {
-    Home.o_photosList.replace(Home.o_photosList.slice().sort((a, b) => {
-      const aFile = a.actual.replace(/^.*[\\\/]/, '');
-      const aIndex = aFile.split('_')[1].split('.')[0];
-      const bFile = b.actual.replace(/^.*[\\\/]/, '');
-      const bIndex = bFile.split('_')[1].split('.')[0];
-      return ascending ? 
-        (aIndex > bIndex ? 1 : -1) : 
-        (aIndex < bIndex ? 1 : -1);
-    }));
-  }
-  static frameByIndexAndCamera = (index, camera) => {
-    console.log('index: ' + index, 'camera: ' + camera)
-    for (let i = 0; i < Home.o_photosList.length; i++) {
-      if (Home.o_photosList[i].index === index && 
-        Home.o_photosList[i].camera === camera) {
-        return Home.o_photosList[i];
-      }
-    }
-  }
 
   constructor(props) {
     super(props)
@@ -78,23 +54,18 @@ export const Home = observer(class Home extends Component {
   onPhotoAdded = (...args) => {
     const path = args[0];
     const filename = path.replace(/^.*[\\\/]/, '');
-    const camera = Number.parseInt(filename.split('_')[1].split('.')[0]);
     const idx = Number.parseInt(filename.split('_')[0]);
     const image = {
       src: 'file://' + path,
       actual: path,
       name: filename,
-      index: idx,
-      camera: camera,
-      modified: null,
+      index: idx, // shot number
       eventcode: settings.get('event.name'),
       width: 3,
       height: 2
     }
     Home._indexList.add(idx);
-    // add photo to observable array
     Home.o_photosList.push(image);
-    Home.sortFrames(true);
   }
 
   onPhotoRemoved = (...args) => {
@@ -104,7 +75,6 @@ export const Home = observer(class Home extends Component {
       return item.src === 'file://' + removedPath;
     });
     Home.o_photosList.remove(Home.o_photosList[idx]);
-    Home.sortFrames(true);
   }
 
   onSelectPhoto = (event, obj) => {
@@ -136,8 +106,7 @@ export const Home = observer(class Home extends Component {
   getSelectedPhotosList = () => {
     let selectedPhotosPaths = [];
     this.state.selectedPhotosList.forEach(i => {
-      const path = Home.o_photosList[i].modified === null ?
-        Home.o_photosList[i].actual : Home.o_photosList[i].modified;
+      const path = Home.o_photosList[i].actual;
       selectedPhotosPaths.push(path);
     });
     return selectedPhotosPaths;
@@ -150,7 +119,7 @@ export const Home = observer(class Home extends Component {
   onLoveItClick = () => {
     const cloud = new CloudInterface();
     const selected = this.getSelectedPhotosList();
-    cloud.upload(selected);
+    cloud.upload(selected, 'loveit');
   }
 
   onCarouselNav = pos => {

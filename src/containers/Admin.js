@@ -1,22 +1,14 @@
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
-import ButtonToolbar from 'react-bootstrap';
 import { SegmentedControl } from 'segmented-control'
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
-import Menu from '@material-ui/core/Menu';
 import Select from 'react-select';
 //import { Home } from './Home';
-import MenuItem from '@material-ui/core/MenuItem';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
-import ImageProcessor from '../extras/ImageProcessor';
 import '../styles/Admin.css';
-import { observe } from 'mobx';
 import { observer } from 'mobx-react';
-import { 
-  emitter
-} from '../common';
 
 // electron packages 
 const electron = window.require('electron'); 

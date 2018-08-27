@@ -18,18 +18,19 @@ export default class CloudInterface {
     });
   }
 
-  upload = filepaths => {
-    for (var i = 0; i < filepaths.length; i++) {
+  upload = (filepaths, subkey) => {
+    for (let i = 0; i < filepaths.length; i++) {
       const params = {
         Bucket: CloudInterface._bucket,
         Key: settings.get('event.name'),
         Body: ''
       };
       const path = String(filepaths[i]);
+      const sub = String(subkey);
       fs.readFile(path, (err, data) => {
         const filename = path.replace(/^.*[\\\/]/, '');
         params.Body = data;
-        params.Key = params.Key + '/' + filename;
+        params.Key = params.Key + '/' + sub + '/' + filename;
         this.s3.upload(params, (err, data) => {
           if (err) {
             console.log('Error', err);
@@ -41,7 +42,7 @@ export default class CloudInterface {
     }
   }
 
-  uploadOne = filepath => {
+  uploadSource = filepath => {
     return new Promise((resolve, reject) => {
       const params = {
         Bucket: CloudInterface._bucket,

@@ -3,14 +3,10 @@ const electron = window.require('electron');
 const settings = electron.remote.require('electron-settings');
 
 export default class ImageProcessor {
-  constructor() {
-
-  }
 
   reset = (images) => {
     const items = images.map((item, i) => {
       item.src = 'file://' + item.actual;
-      item.modified = null;
       return item;
     })
     return items;
@@ -71,11 +67,13 @@ export default class ImageProcessor {
   imgixEffectParams = (params) => {
     switch (params.type) {
       case 'focal': {
+        const fp_x = params.values.fp_x;
+        const fp_y = params.values.fp_y;
+        const fp_z = params.values.fp_z;
         const urlParams = 
-          `?fit=crop&crop=focalpoint&fp-x=${params.values.fp_x}&fp-y=${params.values.fp_y}&fp-z=${params.values.fp_z}`
+          `?fit=crop&crop=focalpoint&fp-x=${fp_x}&fp-y=${fp_y}&fp-z=${fp_z}`
         console.log(urlParams);
         return urlParams;
-        break;
       }
       default: {
         break;
@@ -109,7 +107,7 @@ export default class ImageProcessor {
             'photo.fp_y_' + index + '_' + camera)
           ),
           fp_z: Number.parseFloat(settings.get(
-            'photo.fp_z_' + index + '_' + camera) / 100
+            'photo.fp_z_' + index + '_' + camera) / 100.0
           )
         }
         console.log('got params for focal:');

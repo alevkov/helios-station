@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Dock from 'react-dock';
 import IconButton from '@material-ui/core/IconButton';
 // assets

@@ -72,7 +72,7 @@ export default class SortingEngine {
             this.onSortedPhotoAdded(index, path);
           });
           indexPathWatcher.on('unlink', path => {
-            this.onSortedPhotoRemovedHandler(index, path);
+            this.onSortedPhotoRemoved(index, path);
           });  
           SortingEngine._dirWatchSet.add(dir);    
         }
@@ -92,6 +92,9 @@ export default class SortingEngine {
         });
         mediaWatcher.on('add', path => {
           this.onMediaAdded(path);
+        });
+        mediaWatcher.on('unlink', path => {
+          this.onMediaRemoved(path);
         });
         break;
       }
@@ -123,7 +126,7 @@ export default class SortingEngine {
       'scale', Number.parseInt(index), Number.parseInt(camera));
     const cropParams = proc.effectParamsFromSettings(
       'crop');
-    cloud.uploadOne(path)
+    cloud.uploadSource(path)
       .then(location => {
         console.log('applying focal to ' + path);
         proc.doImgixEffect(focalParams, path)
@@ -159,7 +162,11 @@ export default class SortingEngine {
     emitter.emit(EVENT_PHOTO_ADDED, path);
   }
 
-  onSortedPhotoRemovedHandler = (index, path) => {
+  onSortedPhotoRemoved = (index, path) => {
+    //emitter.emit(EVENT_PHOTO_REMOVED, path);
+  }
+
+  onMediaRemoved = path => {
     emitter.emit(EVENT_PHOTO_REMOVED, path);
   }
 }
