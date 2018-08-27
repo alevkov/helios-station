@@ -11,8 +11,7 @@ import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
   emitter,
   EVENT_PHOTO_ADDED,
-  EVENT_PHOTO_REMOVED,
-  EVENT_FRAME_ADDED
+  EVENT_PHOTO_REMOVED
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -52,9 +51,10 @@ export const Home = observer(class Home extends Component {
   }
 
   onPhotoAdded = (...args) => {
+    console.log('media added')
     const path = args[0];
     const filename = path.replace(/^.*[\\\/]/, '');
-    const idx = Number.parseInt(filename.split('_')[0]);
+    const idx = Number.parseInt(filename.split('.')[0]);
     const image = {
       src: 'file://' + path,
       actual: path,
@@ -64,6 +64,7 @@ export const Home = observer(class Home extends Component {
       width: 3,
       height: 2
     }
+    console.log(image);
     Home._indexList.add(idx);
     Home.o_photosList.push(image);
   }

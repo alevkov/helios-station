@@ -43,6 +43,8 @@ export default class MediaEngine  {
         for (var i = 0; i < orderedFrames.length; i++) {
           finalFrames.push('file://' + orderedFrames[i]);
         }
+        const frameName = orderedFrames[0].replace(/^.*[\\\/]/, '');
+        const index = frameName.split('_')[0];
         gifshot.createGIF({
           'images': finalFrames,
           'numFrames': boomerang ? (2 * numFrames - 1) : numFrames,
@@ -94,7 +96,7 @@ export default class MediaEngine  {
             const buf = new Buffer(data, 'base64');
             fs.writeFile(settings.get('dir.media') + 
               (os.platform() === 'darwin' ? '/' : '\\') + 
-              'image.gif', buf);
+              index + '.gif', buf);
           } else {
             console.log(obj);
           }

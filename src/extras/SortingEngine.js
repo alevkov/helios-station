@@ -29,6 +29,7 @@ export default class SortingEngine {
     // emit source folder event for subscribing components
     emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, SortingEngine._sourceDir);
     this.initWatchDir('source', SortingEngine._sourceDir);
+    console.log('media dir: ' + SortingEngine._mediaDir);
     this.initWatchDir('media', SortingEngine._mediaDir);
   }
 
@@ -82,15 +83,17 @@ export default class SortingEngine {
         let mediaGlob = null;
         // set the watch dir according to OS
         if (os.platform() === 'darwin') {
-          watchGlob = dir + '/*.gif';
+          mediaGlob = dir + '/*.gif';
         } else {
-          watchGlob = dir + '\\*.gif'
+          mediaGlob = dir + '\\*.gif'
         }
+        console.log('glob: ' + mediaGlob);
         const mediaWatcher = choker.watch(mediaGlob, {
           ignored: /(^|[\/\\])\../,
           persistent: true
         });
         mediaWatcher.on('add', path => {
+          console.log('FILE ADDED!!!!');
           this.onMediaAdded(path);
         });
         mediaWatcher.on('unlink', path => {
@@ -131,10 +134,10 @@ export default class SortingEngine {
         console.log('applying focal to ' + path);
         proc.doImgixEffect(focalParams, path)
           .then(image => {
-            console.log('applying scale to ' + path);
+            //console.log('applying scale to ' + path);
             //const scaled = proc.doEffect(scaleParams, image);
-            console.log('applying crop to ' + path);
-            const cropped = proc.doEffect(cropParams, image);
+            //console.log('applying crop to ' + path);
+            //const cropped = proc.doEffect(cropParams, image);
             proc.writeImage(image, path)
               .then(() => {
                 console.log('wrote new image to ' + path);
@@ -159,6 +162,7 @@ export default class SortingEngine {
   }
 
   onMediaAdded = path => {
+    console.log('SortingEngine: media added: ' + path);
     emitter.emit(EVENT_PHOTO_ADDED, path);
   }
 
