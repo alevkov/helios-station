@@ -108,6 +108,7 @@ export default class SortingEngine {
   }
 
   onSourcePhotoAdded = path => {
+    console.log('file added!');
     const filename = path.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0];
     const camera = filename.split('_')[1].split('.')[0];

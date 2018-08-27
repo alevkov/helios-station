@@ -1,10 +1,13 @@
 {
   "homepage": "./",
-  "name": "electron-with-create-react-app",
+  "name": "helios-station",
+  "author": "Aleksey Levkovskyi",
+  "description": "Sharing Station",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
     "electron": "^1.4.14",
+    "electron-builder": "^20.28.2",
     "foreman": "^3.0.1",
     "react-scripts": "0.8.5"
   },
@@ -18,6 +21,7 @@
     "fbemitter": "^2.1.1",
     "gifshot": "^0.4.5",
     "jimp": "^0.3.5",
+    "jquery": "^3.3.1",
     "lodash": "^4.17.10",
     "material-ui": "^0.20.2",
     "material-ui-community-icons": "^0.15.0",
@@ -36,6 +40,7 @@
     "react-responsive-carousel": "^3.1.41",
     "react-router-dom": "^4.3.1",
     "react-select": "^2.0.0",
+    "react-tap-event-plugin": "^3.0.3",
     "segmented-control": "^0.1.10",
     "xfs": "^0.2.4"
   },
@@ -46,6 +51,15 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron . --allow-file-access-from-files",
-    "dev": "nf start"
+    "dev": "nf start",
+    "pack": "build --dir",
+    "dist": "npm run build && build",
+    "postinstall": "install-app-deps"
+  },
+  "build": {
+    "appId": "com.helios.sharing-station",
+    "directories": {
+      "buildResources": "public"
+    }
   }
 }
