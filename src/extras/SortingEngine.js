@@ -11,6 +11,7 @@ import CloudInterface from './CloudInterface';
 
 const electron = window.require('electron');
 const choker = electron.remote.require('chokidar');
+const path = electron.remote.require('path');
 const moveFile = electron.remote.require('move-file');
 const fs = electron.remote.require('fs');
 const os = window.require('os');
@@ -53,8 +54,14 @@ export default class SortingEngine {
         });
         console.log(sourceWatcher);
         // when a file is added, send event to subs
-        sourceWatcher.on('add', path => {
-          this.onSourcePhotoAdded(path);
+        sourceWatcher.on('add', dir => {
+          console.log(path.extname(dir));
+          if (path.basename(dir) === '.DS_Store') {
+            return;
+          }
+          if (path.extname(dir) === '.jpg' || path.extname(dir) === '.JPG') {
+            this.onSourcePhotoAdded(dir);
+          }
         });
         break;
       }
@@ -71,11 +78,17 @@ export default class SortingEngine {
             ignored: /(^|[\/\\])\../,
             persistent: true
           });
-          indexPathWatcher.on('add', path => {
-            this.onSortedPhotoAdded(index, path);
+          indexPathWatcher.on('add', dir => {
+            if (path.basename(dir) === '.DS_Store') {
+              return;
+            }
+            this.onSortedPhotoAdded(index, dir);
           });
-          indexPathWatcher.on('unlink', path => {
-            this.onSortedPhotoRemoved(index, path);
+          indexPathWatcher.on('unlink', dir => {
+            if (path.basename(dir) === '.DS_Store') {
+              return;
+            }
+            this.onSortedPhotoRemoved(index, dir);
           });  
           SortingEngine._dirWatchSet.add(dir);    
         }
@@ -94,12 +107,15 @@ export default class SortingEngine {
           ignored: /(^|[\/\\])\../,
           persistent: true
         });
-        mediaWatcher.on('add', path => {
+        mediaWatcher.on('add', dir => {
           console.log('FILE ADDED!!!!');
-          this.onMediaAdded(path);
+          if (path.basename(dir) === '.DS_Store') {
+            return;
+          }
+          this.onMediaAdded(dir);
         });
-        mediaWatcher.on('unlink', path => {
-          this.onMediaRemoved(path);
+        mediaWatcher.on('unlink', dir => {
+          this.onMediaRemoved(dir);
         });
         break;
       }
@@ -109,17 +125,17 @@ export default class SortingEngine {
     }
   }
 
-  onSourcePhotoAdded = path => {
+  onSourcePhotoAdded = dir => {
     console.log('file added!');
-    const filename = path.replace(/^.*[\\\/]/, '');
+    const filename = dir.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0];
     const camera = filename.split('_')[1].split('.')[0];
     const indexPath = SortingEngine._sortDir +
       (os.platform() === 'darwin' ? '/' : '\\') +
       index;
-    // start watching index path
+    // start watching index dir
     this.initWatchDir('index', indexPath);
-    // move photo to index path
+    // move photo to index dir
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
@@ -132,19 +148,19 @@ export default class SortingEngine {
       'scale', Number.parseInt(index), Number.parseInt(camera));
     const cropParams = proc.effectParamsFromSettings(
       'crop');
-    cloud.uploadSource(path)
+    cloud.uploadSource(dir)
       .then(location => {
-        console.log('applying focal to ' + path);
-        proc.doImgixEffect(focalParams, path)
+        console.log('applying focal to ' + dir);
+        proc.doImgixEffect(focalParams, dir)
           .then(image => {
-            // console.log('applying scale to ' + path);
+            // console.log('applying scale to ' + dir);
             // const scaled = proc.doEffect(scaleParams, image);
-            console.log('applying crop to ' + path);
+            console.log('applying crop to ' + dir);
             const cropped = proc.doEffect(cropParams, image);
-            proc.writeImage(cropped, path)
+            proc.writeImage(cropped, dir)
               .then(() => {
-                console.log('wrote new image to ' + path);
-                moveFile(path, destination)
+                console.log('wrote new image to ' + dir);
+                moveFile(dir, destination)
                 .then(() => {
                   console.log(filename + ' moved to ' + destination);
                 });
@@ -154,8 +170,8 @@ export default class SortingEngine {
   }
 
   // effects must be already applied at this point
-  onSortedPhotoAdded = (index, path) => {
-    SortingEngine._sortDirMap.get(index).add(path);
+  onSortedPhotoAdded = (index, dir) => {
+    SortingEngine._sortDirMap.get(index).add(dir);
     const maxNum = Number.parseInt(settings.get('media.frames'));
     if (SortingEngine._sortDirMap.get(index).size == maxNum) {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
@@ -164,16 +180,16 @@ export default class SortingEngine {
     }
   }
 
-  onMediaAdded = path => {
-    console.log('SortingEngine: media added: ' + path);
-    emitter.emit(EVENT_PHOTO_ADDED, path);
+  onMediaAdded = dir => {
+    console.log('SortingEngine: media added: ' + dir);
+    emitter.emit(EVENT_PHOTO_ADDED, dir);
   }
 
-  onSortedPhotoRemoved = (index, path) => {
-    //emitter.emit(EVENT_PHOTO_REMOVED, path);
+  onSortedPhotoRemoved = (index, dir) => {
+    //emitter.emit(EVENT_PHOTO_REMOVED, dir);
   }
 
-  onMediaRemoved = path => {
-    emitter.emit(EVENT_PHOTO_REMOVED, path);
+  onMediaRemoved = dir => {
+    emitter.emit(EVENT_PHOTO_REMOVED, dir);
   }
 }
