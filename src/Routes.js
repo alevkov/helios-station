@@ -8,5 +8,6 @@ export default () =>
   <Switch>
     <Route path="/" exact component={Home} />
     <Route path="/admin" exact component={Admin} />
-    <Route component={Home} />
+    <Route path="" exact component={Home} /> // prod
+    <Route component={NotFound} />
   </Switch>;

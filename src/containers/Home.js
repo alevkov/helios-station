@@ -10,14 +10,12 @@ import '../styles/Home.css';
 import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
   emitter,
+  settings,
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-
-const electron = window.require('electron');
-const settings = electron.remote.require('electron-settings');
 
 // declare as observer to observe the state of data structs declared above
 export const Home = observer(class Home extends Component {
@@ -26,7 +24,7 @@ export const Home = observer(class Home extends Component {
   static _PhotoRemovedSub = null;
   // observables
   static o_photosList = observable.array([], { deep: true });
-  static _indexList = new Set();
+  static _shotList = new Set();
 
   constructor(props) {
     super(props)
@@ -54,18 +52,18 @@ export const Home = observer(class Home extends Component {
     console.log('media added')
     const path = args[0];
     const filename = path.replace(/^.*[\\\/]/, '');
-    const idx = Number.parseInt(filename.split('.')[0]);
+    const shot = Number.parseInt(filename.split('.')[0]);
     const image = {
       src: 'file://' + path,
       actual: path,
       name: filename,
-      index: idx, // shot number
+      shot: shot, // shot number
       eventcode: settings.get('event.name'),
       width: 3,
       height: 2
     }
     console.log(image);
-    Home._indexList.add(idx);
+    Home._shotList.add(shot);
     Home.o_photosList.push(image);
   }
 

@@ -1,4 +1,6 @@
-import { emitter,
+import { 
+  emitter,
+  settings,
   EVENT_SOURCE_FOLDER_SELECTED,
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED
@@ -8,7 +10,6 @@ import ImageProcessor from './ImageProcessor';
 import CloudInterface from './CloudInterface';
 
 const electron = window.require('electron');
-const settings = electron.remote.require('electron-settings');
 const choker = electron.remote.require('chokidar');
 const moveFile = electron.remote.require('move-file');
 const fs = electron.remote.require('fs');
@@ -35,8 +36,8 @@ export default class SortingEngine {
 
   initWatchDir = (type, dir) => {
     // initialize dir string to watch
-    let watchGlob = null;
-    // set the watch dir according to OS
+    let watchGlob = dir;
+    //set the watch dir according to OS
     if (os.platform() === 'darwin') {
       watchGlob = dir + '/*.jpg';
     } else {
@@ -46,10 +47,11 @@ export default class SortingEngine {
     switch (type) {
       case 'source': {   
         // watch the source dir
-        const sourceWatcher = choker.watch(watchGlob, {
+        const sourceWatcher = choker.watch(dir, {
           ignored: /(^|[\/\\])\../,
           persistent: true
         });
+        console.log(sourceWatcher);
         // when a file is added, send event to subs
         sourceWatcher.on('add', path => {
           this.onSourcePhotoAdded(path);
@@ -80,7 +82,7 @@ export default class SortingEngine {
         break;
       }
       case 'media': {
-        let mediaGlob = null;
+        let mediaGlob = dir;
         // set the watch dir according to OS
         if (os.platform() === 'darwin') {
           mediaGlob = dir + '/*.gif';
@@ -88,7 +90,7 @@ export default class SortingEngine {
           mediaGlob = dir + '\\*.gif'
         }
         console.log('glob: ' + mediaGlob);
-        const mediaWatcher = choker.watch(mediaGlob, {
+        const mediaWatcher = choker.watch(dir, {
           ignored: /(^|[\/\\])\../,
           persistent: true
         });

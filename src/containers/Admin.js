@@ -8,12 +8,10 @@ import Select from 'react-select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
 import '../styles/Admin.css';
+import { settings } from '../common';
 import { observer } from 'mobx-react';
 
-// electron packages 
-const electron = window.require('electron'); 
-const {dialog} = window.require('electron').remote; 
-const settings = electron.remote.require('electron-settings');
+const { dialog } = window.require('electron').remote; 
 
 export const Admin = observer(class Admin extends Component {
   // sorting engine instance
@@ -26,12 +24,10 @@ export const Admin = observer(class Admin extends Component {
       sortDir: settings.get('dir.sort'),
       mediaDir: settings.get('dir.media'),
       selectedSegment: 'general',
-      selectedFrame: {value: 1, label: 'Frame 1'},
-      selectedIndex: {value: 0, label: 'Session 0'}
+      selectedFrame: {value: settings.get('photo.frame'), label: `Frame ${settings.get('photo.frame')}`},
+      selectedShot: {value: settings.get('photo.shot'), label: `Shot ${settings.get('photo.shot')}`}
     };
     this.initSortingEngineIfDirsSelected();
-    console.log('Admin: constructor');
-    console.log('Admin: sorting engine inited: ' + Admin._sortingEngine !== null);
   }
 
   componentDidMount() {
@@ -131,10 +127,10 @@ export const Admin = observer(class Admin extends Component {
         });
         break;
       }
-      case 'photo.index': {
+      case 'photo.shot': {
         console.log(option.value);
         this.setState({
-          selectedIndex: option
+          selectedShot: option
         });
         break;
       }
@@ -169,22 +165,31 @@ export const Admin = observer(class Admin extends Component {
     return options;
   }
 
-  indexSelectOptions = () => {
+  shotSelectOptions = () => {
     const options = [];
-    const indeces = Number.parseInt(settings.get('event.session'));
+    const indeces = Number.parseInt(settings.get('event.shots'));
     for (let i = 0; i < indeces; i++) {
-      const option = {value: i, label: `Session ${i}`};
+      const option = {value: i, label: `Shot ${i}`};
       options.push(option);
     }
     return options;
   }
 
   render() {
-    //const frameByIdxAndCam = Home.frameByIndexAndCamera(this.state.selectedIndex.value, this.state.selectedFrame.value);
-    const fp_x = settings.get('photo.fp_x_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
-    const fp_y = settings.get('photo.fp_y_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
-    const fp_z = settings.get('photo.fp_z_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
-    const scale = settings.get('photo.scale_' + this.state.selectedIndex.value + '_' + this.state.selectedFrame.value);
+    //const frameByIdxAndCam = Home.frameByIndexAndCamera(this.state.selectedShot.value, this.state.selectedFrame.value);
+    if (settings.get('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value) === undefined) {
+      settings.set('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 0.5);
+    }
+    if (settings.get('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value) === undefined) {
+      settings.set('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 0.5);
+    }
+    if (settings.get('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value) === undefined) {
+      settings.set('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 100);
+    }
+    const fp_x = settings.get('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
+    const fp_y = settings.get('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
+    const fp_z = settings.get('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
+    // const scale = settings.get('photo.scale_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
     const crop_x = settings.get('photo.crop-x');
     const crop_y = settings.get('photo.crop-y');
     const crop_w = settings.get('photo.crop-w');
@@ -203,10 +208,10 @@ export const Admin = observer(class Admin extends Component {
             value={settings.get('event.name')}
             margin='normal'/>
           <TextField
-            id='session'
-            label='# of Sessions'
-            onChange={this.onTextChanged('event.session')}
-            value={settings.get('event.session')}
+            id='shots'
+            label='# of Shots'
+            onChange={this.onTextChanged('event.shots')}
+            value={settings.get('event.shots')}
             type='number'
             margin='normal'/>
         </div>
@@ -327,28 +332,28 @@ export const Admin = observer(class Admin extends Component {
             id='crop-x'
             label='Crop-X'
             onChange={this.onTextChanged('photo.crop-x')}
-            value={crop_x === undefined ? 0 : crop_x}
+            value={crop_x}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-down'
             label='Crop-Y'
             onChange={this.onTextChanged('photo.crop-y')}
-            value={crop_y === undefined ? 0 : crop_y}
+            value={crop_y}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-left'
             label='Crop-W'
             onChange={this.onTextChanged('photo.crop-w')}
-            value={crop_w === undefined ? 0 : crop_w}
+            value={crop_w}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-right'
             label='Crop-H'
             onChange={this.onTextChanged('photo.crop-h')}
-            value={crop_h === undefined ? 0 : crop_h}
+            value={crop_h}
             type='number'
             margin='normal'/>
         </div>
@@ -359,30 +364,30 @@ export const Admin = observer(class Admin extends Component {
             placeholder='Frame...'
             onChange={this.onSelectChanged('photo.frame')}/>
         </div>
-        <div className='Admin-photo-index-select'>
+        <div className='Admin-photo-shot-select'>
           <Select 
-            options={this.indexSelectOptions()}
-            value={this.state.selectedIndex}
-            placeholder='Index...'
-            onChange={this.onSelectChanged('photo.index')}/>
+            options={this.shotSelectOptions()}
+            value={this.state.selectedShot}
+            placeholder='Shot...'
+            onChange={this.onSelectChanged('photo.shot')}/>
         </div>
         <div className='Admin-photo-form-focal'>
           <TextField
             id='fp-x'
             label='Focal Point X'
             onChange={this.onTextChanged('photo.fp_x_' +
-              this.state.selectedIndex.value + '_' +
+              this.state.selectedShot.value + '_' +
               this.state.selectedFrame.value)}
-            value={fp_x === undefined ? 0 : fp_x}
+            value={fp_x}
             type='number'
             margin='normal'/>
           <TextField
             id='fp-y'
             label='Focal Point Y'
             onChange={this.onTextChanged('photo.fp_y_' +
-              this.state.selectedIndex.value + '_' + 
+              this.state.selectedShot.value + '_' + 
               this.state.selectedFrame.value)}
-            value={fp_y === undefined ? 0 : fp_y}
+            value={fp_y}
             type='number'
             type='number'
             margin='normal'/>
@@ -390,9 +395,9 @@ export const Admin = observer(class Admin extends Component {
             id='fp-z'
             label='Focal Point Zoom (%)'
             onChange={this.onTextChanged('photo.fp_z_' + 
-              this.state.selectedIndex.value + '_' + 
+              this.state.selectedShot.value + '_' + 
               this.state.selectedFrame.value)}
-            value={fp_z === undefined ? 100 : fp_z}
+            value={fp_z}
             type='number'
             type='number'
             margin='normal'/>
@@ -403,7 +408,7 @@ export const Admin = observer(class Admin extends Component {
             id='scale'
             label='Scale (%)'
             onChange={this.onTextChanged('photo.scale_' + 
-            this.state.selectedIndex.value + '_' + 
+            this.state.selectedShot.value + '_' + 
             this.state.selectedFrame.value)}
             value={scale === undefined ? 100 : scale}
             type='number'
