@@ -66,6 +66,7 @@ export default class SortingEngine {
         break;
       }
       // e.g. _sortDir/000/
+      // this is the "shot number"
       case 'index': {
         const filename = dir.replace(/^.*[\\\/]/, '');
         const index = filename.split('_')[0];
@@ -128,7 +129,7 @@ export default class SortingEngine {
   onSourcePhotoAdded = dir => {
     console.log('file added!');
     const filename = dir.replace(/^.*[\\\/]/, '');
-    const index = filename.split('_')[0];
+    const index = filename.split('_')[0]; // shot number
     const camera = filename.split('_')[1].split('.')[0];
     const indexPath = SortingEngine._sortDir +
       (os.platform() === 'darwin' ? '/' : '\\') +
@@ -139,15 +140,18 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
-    // Appy effects before moving
     const cloud = new CloudInterface();
+    // Appy effects before moving
     const proc = new ImageProcessor();
     const focalParams = proc.effectParamsFromSettings(
       'focal', Number.parseInt(index), Number.parseInt(camera));
+    /*
     const scaleParams = proc.effectParamsFromSettings(
       'scale', Number.parseInt(index), Number.parseInt(camera));
+    */
     const cropParams = proc.effectParamsFromSettings(
       'crop');
+    // upload the source
     cloud.uploadSource(dir)
       .then(location => {
         console.log('applying focal to ' + dir);
@@ -166,7 +170,11 @@ export default class SortingEngine {
                 });
               });
           });
-        });
+        })
+      .catch(err => {
+        console.log('Failed uploading source: ' + dir);
+        console.log(err);
+      });
   }
 
   // effects must be already applied at this point

@@ -54,9 +54,19 @@
   margin: 1%;
 }
 
+.Admin-media-filter-select {
+  width: 20%;
+  margin-left:40%;
+  margin-top: 5%;
+}
+
 .Admin-media-format-select {
   width: 20%;
   margin-left:40%;
+  margin-top: 5%;
+}
+
+.Admin-media-form-preview {
   margin-top: 5%;
 }
 

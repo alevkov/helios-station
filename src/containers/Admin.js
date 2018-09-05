@@ -7,8 +7,9 @@ import Select from 'react-select';
 //import { Home } from './Home';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
+import ImageProcessor from '../extras/ImageProcessor';
 import '../styles/Admin.css';
-import { settings } from '../common';
+import { settings, setIfNot } from '../common';
 import { observer } from 'mobx-react';
 
 const { dialog } = window.require('electron').remote; 
@@ -25,7 +26,8 @@ export const Admin = observer(class Admin extends Component {
       mediaDir: settings.get('dir.media'),
       selectedSegment: 'general',
       selectedFrame: {value: settings.get('photo.frame'), label: `Frame ${settings.get('photo.frame')}`},
-      selectedShot: {value: settings.get('photo.shot'), label: `Shot ${settings.get('photo.shot')}`}
+      selectedShot: {value: settings.get('photo.shot'), label: `Shot ${settings.get('photo.shot')}`},
+      selectedFilter: settings.get('media.filter')
     };
     this.initSortingEngineIfDirsSelected();
   }
@@ -120,6 +122,14 @@ export const Admin = observer(class Admin extends Component {
         console.log(option);
         break;
       }
+      case 'media.filter': {
+        settings.set('media.filter', option);
+        this.setState({
+          selectedFilter: option
+        });
+        console.log(option);
+        break;
+      }
       case 'photo.frame': {
         console.log(option.value);
         this.setState({
@@ -176,16 +186,10 @@ export const Admin = observer(class Admin extends Component {
   }
 
   render() {
-    //const frameByIdxAndCam = Home.frameByIndexAndCamera(this.state.selectedShot.value, this.state.selectedFrame.value);
-    if (settings.get('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value) === undefined) {
-      settings.set('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 0.5);
-    }
-    if (settings.get('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value) === undefined) {
-      settings.set('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 0.5);
-    }
-    if (settings.get('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value) === undefined) {
-      settings.set('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 100);
-    }
+    const effectsTestImgSrc = 'http://helios-microsite.imgix.net/test/sample.jpg';
+    setIfNot('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 0.5);
+    setIfNot('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 0.5);
+    setIfNot('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value, 100);
     const fp_x = settings.get('photo.fp_x_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
     const fp_y = settings.get('photo.fp_y_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
     const fp_z = settings.get('photo.fp_z_' + this.state.selectedShot.value + '_' + this.state.selectedFrame.value);
@@ -194,7 +198,6 @@ export const Admin = observer(class Admin extends Component {
     const crop_y = settings.get('photo.crop-y');
     const crop_w = settings.get('photo.crop-w');
     const crop_h = settings.get('photo.crop-h');
-
     const stationSelectOptions = [
       {value: 1, label: 'Station 1'}
     ];
@@ -299,6 +302,20 @@ export const Admin = observer(class Admin extends Component {
                 value='checkedBoomerang'/>
             }
             label='Boomerang'/>
+        </div>
+        <div className='Admin-media-filter-select'>
+          <Select 
+            options={ImageProcessor.imgixFilters}
+            value={this.state.selectedFilter}
+            placeholder='Filter...'
+            onChange={this.onSelectChanged('media.filter')}/>
+        </div>
+        <div className='Admin-media-form-preview'>
+          <div style={{width: '800', height: '450'}} key={0}>
+            <img 
+              style={{maxWidth: '100%', maxHeight: '100%'}} 
+              src={`${effectsTestImgSrc}${this.state.selectedFilter.value}`} />
+          </div>
         </div>
         <div className='Admin-media-form-3'>
           <Button

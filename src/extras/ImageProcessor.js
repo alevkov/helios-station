@@ -4,15 +4,18 @@ const settings = electron.remote.require('electron-settings');
 
 export default class ImageProcessor {
 
-  reset = (images) => {
-    const items = images.map((item, i) => {
-      item.src = 'file://' + item.actual;
-      return item;
-    })
-    return items;
-  }
+  static imgixFilters = [
+    {value: '?mono=4AFF0000', label: 'Color 1'},
+    {value: '?mono=4A0067FF', label: 'Color 2'},
+    {value: '?mono=96101010', label: 'Color 3'},
+    {value: '?mono=69696B', label: 'Mono'},
+    {value: '?htn=0.9', label: 'Halftone'},
+    {value: '?sepia=50.2', label: 'Sepia'},
+    {value: '?blur=20', label: 'Blur'}
+  ];
 
   doImgixEffect = async (params, path) => {
+    // gets the url of the selected image and applies effect
     const url = this.getImgUrl(path);
     const urlParams = this.imgixEffectParams(params);
     return Jimp.read(url + urlParams);

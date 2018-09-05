@@ -32,6 +32,7 @@
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.5",
     "move-file": "^1.0.0",
+    "node-image-filter": "^1.0.0",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.1",
     "react-dock": "^0.2.4",
