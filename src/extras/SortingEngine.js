@@ -75,21 +75,23 @@ export default class SortingEngine {
         }
         if (SortingEngine._dirWatchSet.has(dir) === false) {
           SortingEngine._sortDirMap.set(index, new Set());
-          const indexPathWatcher = choker.watch(watchGlob, {
+          const indexPathWatcher = choker.watch(dir, {
             ignored: /(^|[\/\\])\../,
             persistent: true
           });
-          indexPathWatcher.on('add', dir => {
-            if (path.basename(dir) === '.DS_Store') {
+          indexPathWatcher.on('add', addedFilePath => {
+            if (path.basename(addedFilePath) === '.DS_Store') {
               return;
             }
-            this.onSortedPhotoAdded(index, dir);
+            if (path.extname(addedFilePath) === '.jpg' || path.extname(addedFilePath) === '.JPG') {
+              this.onSortedPhotoAdded(index, addedFilePath);
+            }
           });
-          indexPathWatcher.on('unlink', dir => {
-            if (path.basename(dir) === '.DS_Store') {
+          indexPathWatcher.on('unlink', addedFilePath => {
+            if (path.basename(addedFilePath) === '.DS_Store') {
               return;
             }
-            this.onSortedPhotoRemoved(index, dir);
+            this.onSortedPhotoRemoved(index, addedFilePath);
           });  
           SortingEngine._dirWatchSet.add(dir);    
         }
@@ -181,9 +183,12 @@ export default class SortingEngine {
   onSortedPhotoAdded = (index, dir) => {
     SortingEngine._sortDirMap.get(index).add(dir);
     const maxNum = Number.parseInt(settings.get('media.frames'));
+    console.log('Number of frames in ' + index + ': ' + SortingEngine._sortDirMap.get(index).size);
+    console.log('Max num: ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size == maxNum) {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       const mediaEngine = new MediaEngine(frames);
+      console.log('About to generate gif...');
       mediaEngine.generate('gif');
     }
   }
