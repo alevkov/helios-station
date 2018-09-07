@@ -129,6 +129,11 @@ export default class ImageProcessor {
         console.log(params);
         return params;
       }
+      case 'filter': {
+        params.values = {
+          color: settings.get('media.filter').value
+        }
+      }
       default: {
         break;
       }
