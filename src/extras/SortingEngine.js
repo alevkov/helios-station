@@ -54,13 +54,13 @@ export default class SortingEngine {
         });
         console.log(sourceWatcher);
         // when a file is added, send event to subs
-        sourceWatcher.on('add', dir => {
-          console.log(path.extname(dir));
-          if (path.basename(dir) === '.DS_Store') {
+        sourceWatcher.on('add', addedFilePath => {
+          console.log(path.extname(addedFilePath));
+          if (path.basename(addedFilePath) === '.DS_Store') {
             return;
           }
-          if (path.extname(dir) === '.jpg' || path.extname(dir) === '.JPG') {
-            this.onSourcePhotoAdded(dir);
+          if (path.extname(addedFilePath) === '.jpg' || path.extname(addedFilePath) === '.JPG') {
+            this.onSourcePhotoAdded(addedFilePath);
           }
         });
         break;
@@ -87,11 +87,11 @@ export default class SortingEngine {
               this.onSortedPhotoAdded(index, addedFilePath);
             }
           });
-          indexPathWatcher.on('unlink', addedFilePath => {
-            if (path.basename(addedFilePath) === '.DS_Store') {
+          indexPathWatcher.on('unlink', removedFilePath => {
+            if (path.basename(removedFilePath) === '.DS_Store') {
               return;
             }
-            this.onSortedPhotoRemoved(index, addedFilePath);
+            this.onSortedPhotoRemoved(index, removedFilePath);
           });  
           SortingEngine._dirWatchSet.add(dir);    
         }
@@ -110,15 +110,15 @@ export default class SortingEngine {
           ignored: /(^|[\/\\])\../,
           persistent: true
         });
-        mediaWatcher.on('add', dir => {
+        mediaWatcher.on('add', addedFilePath => {
           console.log('FILE ADDED!!!!');
-          if (path.basename(dir) === '.DS_Store') {
+          if (path.basename(addedFilePath) === '.DS_Store') {
             return;
           }
-          this.onMediaAdded(dir);
+          this.onMediaAdded(addedFilePath);
         });
-        mediaWatcher.on('unlink', dir => {
-          this.onMediaRemoved(dir);
+        mediaWatcher.on('unlink', removedFilePath => {
+          this.onMediaRemoved(removedFilePath);
         });
         break;
       }
@@ -142,40 +142,9 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
-    const cloud = new CloudInterface();
-    // Appy effects before moving
-    const proc = new ImageProcessor();
-    const focalParams = proc.effectParamsFromSettings(
-      'focal', Number.parseInt(index), Number.parseInt(camera));
-    /*
-    const scaleParams = proc.effectParamsFromSettings(
-      'scale', Number.parseInt(index), Number.parseInt(camera));
-    */
-    const cropParams = proc.effectParamsFromSettings(
-      'crop');
-    // upload the source
-    cloud.uploadSource(dir)
-      .then(location => {
-        console.log('applying focal to ' + dir);
-        proc.doImgixEffect(focalParams, dir)
-          .then(image => {
-            // console.log('applying scale to ' + dir);
-            // const scaled = proc.doEffect(scaleParams, image);
-            console.log('applying crop to ' + dir);
-            const cropped = proc.doEffect(cropParams, image);
-            proc.writeImage(cropped, dir)
-              .then(() => {
-                console.log('wrote new image to ' + dir);
-                moveFile(dir, destination)
-                .then(() => {
-                  console.log(filename + ' moved to ' + destination);
-                });
-              });
-          });
-        })
-      .catch(err => {
-        console.log('Failed uploading source: ' + dir);
-        console.log(err);
+    moveFile(dir, destination)
+      .then(() => {
+        console.log(filename + ' moved to ' + destination);
       });
   }
 
@@ -190,6 +159,7 @@ export default class SortingEngine {
       const mediaEngine = new MediaEngine(frames);
       console.log('About to generate gif...');
       mediaEngine.generate('gif');
+      SortingEngine._sortDirMap.set(index, new Set());
     }
   }
 
