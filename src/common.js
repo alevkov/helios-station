@@ -29,9 +29,5 @@ setIfNot('media.fps', 10);
 setIfNot('media.boomerang', true);
 setIfNot('media.format', 'gif');
 setIfNot('media.filter', ImageProcessor.imgixFilters[0]);
-setIfNot('photo.crop-x', 0);
-setIfNot('photo.crop-y', 0);
-setIfNot('photo.crop-w', 100);
-setIfNot('photo.crop-h', 100);
 setIfNot('photo.frame', 1);
 setIfNot('photo.shot', 0); // selected shot
