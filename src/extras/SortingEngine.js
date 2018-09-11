@@ -133,6 +133,8 @@ export default class SortingEngine {
     const filename = dir.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0]; // shot number
     const camera = filename.split('_')[1].split('.')[0];
+    const indexNum = Number.parseInt(index);
+    const cameraNum = Number.parseInt(camera);
     const indexPath = SortingEngine._sortDir +
       (os.platform() === 'darwin' ? '/' : '\\') +
       index;
@@ -143,12 +145,12 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: apply xform in ImageProcessor
-    const crop_x = settings.get(`photo.crop_x.shot_${Number.parseInt(index)}_frame_${Number.parseInt(camera)}`);
-    const crop_y = settings.get(`photo.crop_y.shot_${Number.parseInt(index)}_frame_${Number.parseInt(camera)}`);
-    const crop_w = settings.get(`photo.crop_w.shot_${Number.parseInt(index)}_frame_${Number.parseInt(camera)}`);
-    const crop_h = settings.get(`photo.crop_h.shot_${Number.parseInt(index)}_frame_${Number.parseInt(camera)}`);
-    const resize_w = settings.get(`photo.resize_w.shot_${Number.parseInt(index)}_frame_${Number.parseInt(camera)}`);
-    const resize_h = settings.get(`photo.resize_h.shot_${Number.parseInt(index)}_frame_${Number.parseInt(camera)}`);
+    const crop_x = settings.get(`photo.crop_x.shot_${indexNum}_frame_${cameraNum}`);
+    const crop_y = settings.get(`photo.crop_y.shot_${indexNum}_frame_${cameraNum}`);
+    const crop_w = settings.get(`photo.crop_w.shot_${indexNum}_frame_${cameraNum}`);
+    const crop_h = settings.get(`photo.crop_h.shot_${indexNum}_frame_${cameraNum}`);
+    const resize_w = settings.get(`photo.resize_w.shot_${indexNum}_frame_${cameraNum}`);
+    const resize_h = settings.get(`photo.resize_h.shot_${indexNum}_frame_${cameraNum}`);
     console.log(`Tranforming ${index}_${camera}`);
     console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
     gm(dir)
