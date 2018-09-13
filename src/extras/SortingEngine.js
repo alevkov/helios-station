@@ -154,7 +154,7 @@ export default class SortingEngine {
     console.log(`Tranforming ${index}_${camera}`);
     console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
     gm(dir)
-      .crop(crop_w, crop_h,crop_x, crop_y)
+      .crop(crop_w, crop_h, crop_x, crop_y)
       .resize(resize_w, resize_h)
       .write(dir, err => {
         if (err) {
