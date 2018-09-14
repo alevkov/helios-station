@@ -26,7 +26,6 @@ export const Admin = observer(class Admin extends Component {
       mediaDir: settings.get('dir.media'),
       selectedSegment: 'general',
       selectedFrame: {value: settings.get('photo.frame'), label: `Frame ${settings.get('photo.frame')}`},
-      selectedShot: {value: settings.get('photo.shot'), label: `Shot ${settings.get('photo.shot')}`},
       selectedFilter: settings.get('media.filter')
     };
     this.initSortingEngineIfDirsSelected();
@@ -38,16 +37,14 @@ export const Admin = observer(class Admin extends Component {
 
   initFrameOptions = () => {
     const frames = Number.parseInt(settings.get('media.frames'));
-    const shots = Number.parseInt(settings.get('event.shots'));
-    for (let i = 0; i < shots; i++) {
-      for (let j = 0; j < frames; j++) {
-        setIfNot(`photo.crop_x.shot_${i}_frame_${j}`, 0);
-        setIfNot(`photo.crop_y.shot_${i}_frame_${j}`, 0);
-        setIfNot(`photo.crop_w.shot_${i}_frame_${j}`, 100);
-        setIfNot(`photo.crop_h.shot_${i}_frame_${j}`, 100);
-        setIfNot(`photo.resize_w.shot_${i}_frame_${j}`, 50);
-        setIfNot(`photo.resize_h.shot_${i}_frame_${j}`, 50);
-      }
+    for (let i = 0; i < frames; i++) {
+      const j = i + 1;
+      setIfNot(`photo.crop_x.f_${j}`, 0);
+      setIfNot(`photo.crop_y.f_${j}`, 0);
+      setIfNot(`photo.crop_w.f_${j}`, 100);
+      setIfNot(`photo.crop_h.f_${j}`, 100);
+      setIfNot(`photo.resize_w.f_${j}`, 50);
+      setIfNot(`photo.resize_h.f_${j}`, 50);
     }
   }
 
@@ -56,6 +53,12 @@ export const Admin = observer(class Admin extends Component {
     this.setState({
       selectedSegment: segValue
     });
+    if (this.state.selectedFrame.value > Number.parseInt(settings.get('media.frames'))) {
+      this.setState({
+        selectedFrame: {value: 1, label: 'Frame 1'}
+      });
+      settings.set('photo.frame', 1);
+    }
   }
 
   // General Page
@@ -152,13 +155,6 @@ export const Admin = observer(class Admin extends Component {
         });
         break;
       }
-      case 'photo.shot': {
-        console.log(option.value);
-        this.setState({
-          selectedShot: option
-        });
-        break;
-      }
       default: {
         break;
       }
@@ -190,26 +186,16 @@ export const Admin = observer(class Admin extends Component {
     return options;
   }
 
-  shotSelectOptions = () => {
-    const options = [];
-    const indeces = Number.parseInt(settings.get('event.shots'));
-    for (let i = 0; i < indeces; i++) {
-      const option = {value: i, label: `Shot ${i}`};
-      options.push(option);
-    }
-    return options;
-  }
-
   render() {
     this.initFrameOptions();
     const effectsTestImgSrc = 'http://helios-microsite.imgix.net/test/sample.jpg';
     // options
-    const crop_x = settings.get(`photo.crop_x.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`);
-    const crop_y = settings.get(`photo.crop_y.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`);
-    const crop_w = settings.get(`photo.crop_w.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`);
-    const crop_h = settings.get(`photo.crop_h.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`);
-    const resize_w = settings.get(`photo.resize_w.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`);
-    const resize_h = settings.get(`photo.resize_h.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`);
+    const crop_x = settings.get(`photo.crop_x.f_${this.state.selectedFrame.value}`);
+    const crop_y = settings.get(`photo.crop_y.f_${this.state.selectedFrame.value}`);
+    const crop_w = settings.get(`photo.crop_w.f_${this.state.selectedFrame.value}`);
+    const crop_h = settings.get(`photo.crop_h.f_${this.state.selectedFrame.value}`);
+    const resize_w = settings.get(`photo.resize_w.f_${this.state.selectedFrame.value}`);
+    const resize_h = settings.get(`photo.resize_h.f_${this.state.selectedFrame.value}`);
     // station
     const stationSelectOptions = [
       {value: 1, label: 'Station 1'}
@@ -222,13 +208,6 @@ export const Admin = observer(class Admin extends Component {
             label='Event Name'
             onChange={this.onTextChanged('event.name')}
             value={settings.get('event.name')}
-            margin='normal'/>
-          <TextField
-            id='shots'
-            label='# of Shots'
-            onChange={this.onTextChanged('event.shots')}
-            value={settings.get('event.shots')}
-            type='number'
             margin='normal'/>
         </div>
         <Select 
@@ -364,53 +343,46 @@ export const Admin = observer(class Admin extends Component {
             placeholder='Frame...'
             onChange={this.onSelectChanged('photo.frame')}/>
         </div>
-        <div className='Admin-photo-shot-select'>
-          <Select 
-            options={this.shotSelectOptions()}
-            value={this.state.selectedShot}
-            placeholder='Shot...'
-            onChange={this.onSelectChanged('photo.shot')}/>
-        </div>
         <div className='Admin-photo-croptions'>
           <TextField
             id='crop-x'
             label='Crop-X'
-            onChange={this.onTextChanged(`photo.crop_x.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`)}
+            onChange={this.onTextChanged(`photo.crop_x.f_${this.state.selectedFrame.value}`)}
             value={crop_x}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-down'
             label='Crop-Y'
-            onChange={this.onTextChanged(`photo.crop_y.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`)}
+            onChange={this.onTextChanged(`photo.crop_y.f_${this.state.selectedFrame.value}`)}
             value={crop_y}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-left'
             label='Crop-W'
-            onChange={this.onTextChanged(`photo.crop_w.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`)}
+            onChange={this.onTextChanged(`photo.crop_w.f_${this.state.selectedFrame.value}`)}
             value={crop_w}
             type='number'
             margin='normal'/>
           <TextField
             id='crop-right'
             label='Crop-H'
-            onChange={this.onTextChanged(`photo.crop_h.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`)}
+            onChange={this.onTextChanged(`photo.crop_h.f_${this.state.selectedFrame.value}`)}
             value={crop_h}
             type='number'
             margin='normal'/>
           <TextField
             id='resize-w'
             label='Resize-W'
-            onChange={this.onTextChanged(`photo.resize_w.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`)}
+            onChange={this.onTextChanged(`photo.resize_w.f_${this.state.selectedFrame.value}`)}
             value={resize_w}
             type='number'
             margin='normal'/>
           <TextField
             id='resize-h'
             label='Resize-H'
-            onChange={this.onTextChanged(`photo.resize_h.shot_${this.state.selectedShot.value}_frame_${this.state.selectedFrame.value}`)}
+            onChange={this.onTextChanged(`photo.resize_h.f_${this.state.selectedFrame.value}`)}
             value={resize_h}
             type='number'
             margin='normal'/>

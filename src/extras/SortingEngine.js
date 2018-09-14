@@ -53,7 +53,6 @@ export default class SortingEngine {
           ignored: /(^|[\/\\])\../,
           persistent: true
         });
-        console.log(sourceWatcher);
         // when a file is added, send event to subs
         sourceWatcher.on('add', addedFilePath => {
           console.log(path.extname(addedFilePath));
@@ -145,12 +144,12 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: apply xform in ImageProcessor
-    const crop_x = settings.get(`photo.crop_x.shot_${indexNum}_frame_${cameraNum}`);
-    const crop_y = settings.get(`photo.crop_y.shot_${indexNum}_frame_${cameraNum}`);
-    const crop_w = settings.get(`photo.crop_w.shot_${indexNum}_frame_${cameraNum}`);
-    const crop_h = settings.get(`photo.crop_h.shot_${indexNum}_frame_${cameraNum}`);
-    const resize_w = settings.get(`photo.resize_w.shot_${indexNum}_frame_${cameraNum}`);
-    const resize_h = settings.get(`photo.resize_h.shot_${indexNum}_frame_${cameraNum}`);
+    const crop_x = settings.get(`photo.crop_x.f_${cameraNum}`);
+    const crop_y = settings.get(`photo.crop_y.f_${cameraNum}`);
+    const crop_w = settings.get(`photo.crop_w.f_${cameraNum}`);
+    const crop_h = settings.get(`photo.crop_h.f_${cameraNum}`);
+    const resize_w = settings.get(`photo.resize_w.f_${cameraNum}`);
+    const resize_h = settings.get(`photo.resize_h.f_${cameraNum}`);
     console.log(`Tranforming ${index}_${camera}`);
     console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
     gm(dir)

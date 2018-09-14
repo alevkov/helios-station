@@ -94,9 +94,10 @@ export default class MediaEngine  {
             console.log(obj);
             const data = obj.image.replace(/^data:image\/\w+;base64,/, '');
             const buf = new Buffer(data, 'base64');
-            fs.writeFile(settings.get('dir.media') + 
+            const dest = settings.get('dir.media') + 
               (os.platform() === 'darwin' ? '/' : '\\') + 
-              index + '.gif', buf);
+              index + '.gif';
+            fs.writeFileSync(dest, buf);
           } else {
             console.log(obj);
           }

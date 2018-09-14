@@ -21,7 +21,6 @@ export const setIfNot = (key, value) => {
 // Defaults
 setIfNot('event.name', 'abc');
 setIfNot('event.station', 1);
-setIfNot('event.shots', 1); // number of shots
 setIfNot('media.width', 100);
 setIfNot('media.height', 100);
 setIfNot('media.frames', 10);
@@ -30,4 +29,3 @@ setIfNot('media.boomerang', true);
 setIfNot('media.format', 'gif');
 setIfNot('media.filter', ImageProcessor.imgixFilters[0]);
 setIfNot('photo.frame', 1);
-setIfNot('photo.shot', 0); // selected shot
