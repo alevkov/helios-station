@@ -14,7 +14,7 @@ const choker = electron.remote.require('chokidar');
 const path = electron.remote.require('path');
 const moveFile = electron.remote.require('move-file');
 const fs = electron.remote.require('fs');
-const gm = electron.remote.require('gm').subClass({imageMagick: true});
+const jimp = electron.remote.require('jimp');
 const os = window.require('os');
 
 export default class SortingEngine {
@@ -144,28 +144,24 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: apply xform in ImageProcessor
-    const crop_x = settings.get(`photo.crop_x.f_${cameraNum}`);
-    const crop_y = settings.get(`photo.crop_y.f_${cameraNum}`);
-    const crop_w = settings.get(`photo.crop_w.f_${cameraNum}`);
-    const crop_h = settings.get(`photo.crop_h.f_${cameraNum}`);
-    const resize_w = settings.get(`photo.resize_w.f_${cameraNum}`);
-    const resize_h = settings.get(`photo.resize_h.f_${cameraNum}`);
-    console.log(`Tranforming ${index}_${camera}`);
+    const crop_x = Number.parseFloat(settings.get(`photo.crop_x.f_${cameraNum}`));
+    const crop_y = Number.parseFloat(settings.get(`photo.crop_y.f_${cameraNum}`));
+    const crop_w = Number.parseFloat(settings.get(`photo.crop_w.f_${cameraNum}`));
+    const crop_h = Number.parseFloat(settings.get(`photo.crop_h.f_${cameraNum}`));
+    const resize_w = Number.parseFloat(settings.get(`photo.resize_w.f_${cameraNum}`));
+    const resize_h = Number.parseFloat(settings.get(`photo.resize_h.f_${cameraNum}`));
     console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
-    gm(dir)
-      .crop(crop_w, crop_h, crop_x, crop_y)
-      .resize(resize_w, resize_h)
-      .write(dir, err => {
-        if (err) {
-          console.log(`Error tranforming ${index}_${camera}: ${err}`);
-        } else {
+    jimp.read(dir).then(image => {
+      image
+        .crop(crop_x, crop_y, crop_w, crop_h)
+        .resize(resize_w, resize_h)
+        .writeAsync(dir).then(() => {
           moveFile(dir, destination)
           .then(() => {
             console.log(filename + ' moved to ' + destination);
           });
-        }
-      })
-
+        });
+    })
   }
 
   // effects must be already applied at this point
