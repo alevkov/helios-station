@@ -52,7 +52,7 @@ export default class MediaEngine  {
           'gifWidth': width,
           'gifHeight': height,
           'filter': '',
-          /*'interval': interval,*/
+          'interval': duration,
           'frameDuration': duration,
           'text': '',
           'fontWeight': 'normal',
@@ -78,7 +78,7 @@ export default class MediaEngine  {
           // Callback function that provides the current progress of the current image
           //'progressCallback': null,
           // how many web workers to use to process the animated GIF frames. Default is 2.
-          'numWorkers': 2,
+          'numWorkers': 7,
           'waterMark': null,
           // If an image is given here, it will be stamped on top of the GIF frames
           'waterMarkHeight': null,

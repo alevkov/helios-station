@@ -185,6 +185,8 @@ export default class SortingEngine {
   }
 
   onSortedPhotoRemoved = (index, dir) => {
+    console.log(`Removed ${dir}, ${index}`);
+    SortingEngine._sortDirMap.get(index).delete(dir);
     //emitter.emit(EVENT_PHOTO_REMOVED, dir);
   }
 

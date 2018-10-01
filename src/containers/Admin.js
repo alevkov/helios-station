@@ -295,6 +295,7 @@ export const Admin = observer(class Admin extends Component {
             }
             label='Boomerang'/>
         </div>
+        {/*
         <div className='Admin-media-filter-select'>
           <Select 
             options={ImageProcessor.imgixFilters}
@@ -308,7 +309,7 @@ export const Admin = observer(class Admin extends Component {
               style={{maxWidth: '100%', maxHeight: '100%'}} 
               src={`${effectsTestImgSrc}${this.state.selectedFilter.value}`} />
           </div>
-        </div>
+        </div>*/}
         <div className='Admin-media-form-3'>
           <Button
             color='primary'

@@ -3819,7 +3819,7 @@ getpass@^0.1.1:
 
 gif-encoder@~0.4.1:
   version "0.4.3"
-  resolved "https://registry.yarnpkg.com/gif-encoder/-/gif-encoder-0.4.3.tgz#8a2b4fe8ca895a48e3a0b6cbb340a0a6a3571899"
+  resolved "http://registry.npmjs.org/gif-encoder/-/gif-encoder-0.4.3.tgz#8a2b4fe8ca895a48e3a0b6cbb340a0a6a3571899"
   dependencies:
     readable-stream "~1.1.9"
 
