@@ -23,7 +23,7 @@ export default class SortingEngine {
   static _sortDir = null;
   static _mediaDir = null;
   static _sortDirMap = new Map(); // [string: Set<string>]
-  static _dirWatchSet = new Set() // [string: bool]
+  static _dirWatchMap = new Map(); // [string: Watcher]
 
   constructor(source, sort, media) {
     SortingEngine._sourceDir = source;
@@ -71,9 +71,13 @@ export default class SortingEngine {
         const filename = dir.replace(/^.*[\\\/]/, '');
         const index = filename.split('_')[0];
         if (!fs.existsSync(dir)) {
+          if (SortingEngine._dirWatchMap.get(dir)) {
+            SortingEngine._dirWatchMap.get(dir).close();
+            SortingEngine._dirWatchMap.delete(dir);
+          }
           fs.mkdirSync(dir);
         }
-        if (SortingEngine._dirWatchSet.has(dir) === false) {
+        if (!SortingEngine._dirWatchMap.get(dir)) {
           SortingEngine._sortDirMap.set(index, new Set());
           const indexPathWatcher = choker.watch(dir, {
             ignored: /(^|[\/\\])\../,
@@ -93,7 +97,7 @@ export default class SortingEngine {
             }
             this.onSortedPhotoRemoved(index, removedFilePath);
           });  
-          SortingEngine._dirWatchSet.add(dir);    
+          SortingEngine._dirWatchMap.set(dir, indexPathWatcher);
         }
         break;
       }
