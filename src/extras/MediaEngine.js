@@ -26,10 +26,10 @@ export default class MediaEngine  {
     switch (type) {
       case 'gif': {
         const boomerang = Boolean(settings.get('media.boomerang'));
-        const numFrames = Number.parseInt(settings.get('media.frames'));
-        const width = Number.parseInt(settings.get('media.width'));
-        const height = Number.parseInt(settings.get('media.height'));
-        const duration = 1.0 / Number.parseInt(settings.get('media.fps')); 
+        const numFrames = Number.parseInt(settings.get('media.frames'), 10);
+        const width = Number.parseInt(settings.get('media.width'), 10);
+        const height = Number.parseInt(settings.get('media.height'), 10);
+        const duration = 1.0 / Number.parseInt(settings.get('media.fps'), 10); 
         // sort frames
         const sorted = this.sortedFrames(true);
         const sortedDescending = this.sortedFrames(false);
@@ -45,6 +45,7 @@ export default class MediaEngine  {
         }
         const frameName = orderedFrames[0].replace(/^.*[\\\/]/, '');
         const index = frameName.split('_')[0];
+
         gifshot.createGIF({
           'images': finalFrames,
           'numFrames': boomerang ? (2 * numFrames - 1) : numFrames,
@@ -52,7 +53,7 @@ export default class MediaEngine  {
           'gifWidth': width,
           'gifHeight': height,
           'filter': '',
-          /*'interval': interval,*/
+          'interval': duration,
           'frameDuration': duration,
           'text': '',
           'fontWeight': 'normal',
@@ -78,7 +79,8 @@ export default class MediaEngine  {
           // Callback function that provides the current progress of the current image
           //'progressCallback': null,
           // how many web workers to use to process the animated GIF frames. Default is 2.
-          'numWorkers': 2,
+          'numWorkers': 10,
+          'sampleInterval': 2,
           'waterMark': null,
           // If an image is given here, it will be stamped on top of the GIF frames
           'waterMarkHeight': null,
@@ -94,9 +96,10 @@ export default class MediaEngine  {
             console.log(obj);
             const data = obj.image.replace(/^data:image\/\w+;base64,/, '');
             const buf = new Buffer(data, 'base64');
-            fs.writeFile(settings.get('dir.media') + 
+            const dest = settings.get('dir.media') + 
               (os.platform() === 'darwin' ? '/' : '\\') + 
-              index + '.gif', buf);
+              index + '.gif';
+            fs.writeFileSync(dest, buf);
           } else {
             console.log(obj);
           }

@@ -107,5 +107,9 @@
 }
 
 .Admin-photo-croptions > div {
+  margin: 3%;
+}
+
+.Admin-photo-croptions {
   margin: 1%;
 }

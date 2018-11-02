@@ -52,7 +52,7 @@ export const Home = observer(class Home extends Component {
     console.log('media added')
     const path = args[0];
     const filename = path.replace(/^.*[\\\/]/, '');
-    const shot = Number.parseInt(filename.split('.')[0]);
+    const shot = Number.parseInt(filename.split('.')[0], 10);
     const image = {
       src: 'file://' + path,
       actual: path,
