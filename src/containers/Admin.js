@@ -7,7 +7,6 @@ import Select from 'react-select';
 //import { Home } from './Home';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
-import ImageProcessor from '../extras/ImageProcessor';
 import '../styles/Admin.css';
 import { settings, setIfNot } from '../common';
 import { observer } from 'mobx-react';
@@ -36,7 +35,7 @@ export const Admin = observer(class Admin extends Component {
   }
 
   initFrameOptions = () => {
-    const frames = Number.parseInt(settings.get('media.frames'));
+    const frames = Number.parseInt(settings.get('media.frames'), 10);
     for (let i = 0; i < frames; i++) {
       const j = i + 1;
       setIfNot(`photo.crop_x.f_${j}`, 0);
@@ -45,6 +44,7 @@ export const Admin = observer(class Admin extends Component {
       setIfNot(`photo.crop_h.f_${j}`, 100);
       setIfNot(`photo.resize_w.f_${j}`, 50);
       setIfNot(`photo.resize_h.f_${j}`, 50);
+      setIfNot(`photo.rotate.f_${j}`, 0);
     }
   }
 
@@ -53,7 +53,7 @@ export const Admin = observer(class Admin extends Component {
     this.setState({
       selectedSegment: segValue
     });
-    if (this.state.selectedFrame.value > Number.parseInt(settings.get('media.frames'))) {
+    if (this.state.selectedFrame.value > Number.parseInt(settings.get('media.frames'), 10)) {
       this.setState({
         selectedFrame: {value: 1, label: 'Frame 1'}
       });
@@ -178,7 +178,7 @@ export const Admin = observer(class Admin extends Component {
 
   frameSelectOptions = () => {
     const options = [];
-    const frames = Number.parseInt(settings.get('media.frames'));
+    const frames = Number.parseInt(settings.get('media.frames'), 10);
     for (let i = 0; i < frames; i++) {
       const option = {value: i+1, label: `Frame ${i+1}`};
       options.push(option);
@@ -188,7 +188,7 @@ export const Admin = observer(class Admin extends Component {
 
   render() {
     this.initFrameOptions();
-    const effectsTestImgSrc = 'http://helios-microsite.imgix.net/test/sample.jpg';
+    //const effectsTestImgSrc = 'http://helios-microsite.imgix.net/test/sample.jpg';
     // options
     const crop_x = settings.get(`photo.crop_x.f_${this.state.selectedFrame.value}`);
     const crop_y = settings.get(`photo.crop_y.f_${this.state.selectedFrame.value}`);
@@ -196,6 +196,7 @@ export const Admin = observer(class Admin extends Component {
     const crop_h = settings.get(`photo.crop_h.f_${this.state.selectedFrame.value}`);
     const resize_w = settings.get(`photo.resize_w.f_${this.state.selectedFrame.value}`);
     const resize_h = settings.get(`photo.resize_h.f_${this.state.selectedFrame.value}`);
+    const rotate = settings.get(`photo.rotate.f_${this.state.selectedFrame.value}`)
     // station
     const stationSelectOptions = [
       {value: 1, label: 'Station 1'}
@@ -385,6 +386,13 @@ export const Admin = observer(class Admin extends Component {
             label='Resize-H'
             onChange={this.onTextChanged(`photo.resize_h.f_${this.state.selectedFrame.value}`)}
             value={resize_h}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='rotate'
+            label='Rotate'
+            onChange={this.onTextChanged(`photo.rotate.f_${this.state.selectedFrame.value}`)}
+            value={rotate}
             type='number'
             margin='normal'/>
         </div>

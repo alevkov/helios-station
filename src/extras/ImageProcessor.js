@@ -92,10 +92,10 @@ export default class ImageProcessor {
     switch (effect) {
       case 'crop': {
         params.values = {
-          x: Number.parseInt(settings.get('photo.crop-x')),
-          y: Number.parseInt(settings.get('photo.crop-y')),
-          w: Number.parseInt(settings.get('photo.crop-w')),
-          h: Number.parseInt(settings.get('photo.crop-h'))
+          x: Number.parseInt(settings.get('photo.crop-x'), 10),
+          y: Number.parseInt(settings.get('photo.crop-y'), 10),
+          w: Number.parseInt(settings.get('photo.crop-w'), 10),
+          h: Number.parseInt(settings.get('photo.crop-h'), 10)
         }
         console.log('got params for crop:');
         console.log(params);
@@ -133,6 +133,7 @@ export default class ImageProcessor {
         params.values = {
           color: settings.get('media.filter').value
         }
+        return params;
       }
       default: {
         break;
