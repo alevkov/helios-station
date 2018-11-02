@@ -16,19 +16,22 @@ const jimp = electron.remote.require('jimp');
 const os = window.require('os');
 const graphicsmagick = electron.remote.require('graphicsmagick-static');
 const imagemagick = electron.remote.require('imagemagick-darwin-static');
+import AppPaths from './AppPaths';
+let imagemagickPath = electron.remote.require('imagemagick-darwin-static').path;
+let fixedPath = AppPaths.replaceAsar(imagemagickPath);
 
 const {subClass} = electron.remote.require('gm');
 let gm;
 
-if (os.platform() == 'win32') {
+if (os.platform() == "win32") {
     gm = subClass({
-        appPath: path.join(graphicsmagick.path, '/')
-    });
+        appPath: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))
+    })
 } else {
     gm = subClass({
         imageMagick: true,
-        appPath: path.join(imagemagick.path, '/')
-    });
+        appPath: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))
+    })
 }
 
 export default class SortingEngine {
@@ -175,6 +178,7 @@ export default class SortingEngine {
         .resize(resize_w, resize_h)
         .write(dir, err => {
           if (err) {
+            console.log('Ahhh!! ' + dir);
             console.log('Error! ' + err);
           } else {
             moveFile(dir, destination)
