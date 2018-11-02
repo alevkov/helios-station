@@ -2,3 +2,114 @@
   margin: 5%;
   text-align: center;
 }
+
+.Admin-general-form-1 {
+  margin: 1%;
+}
+
+.Admin-general-form-1 > div  {
+  margin: 1%;
+}
+
+.Admin-general-form-1 > button {
+  margin: 1%;
+}
+
+.Admin-general-form-2 {
+  margin: 2%;
+}
+
+.Admin-general-form-2 > button {
+  margin: 2%;
+}
+
+.Admin-general-station-select {
+  width: 20%;
+  margin-left: 40%;
+  margin-top: 5%;
+  margin-bottom: 5%;
+}
+
+.Admin-media-form-1 {
+  margin: 1%;
+}
+
+.Admin-media-form-1 > div {
+  margin: 1%;
+}
+
+.Admin-media-form-2 {
+  margin: 2%;
+}
+
+.Admin-media-form-2 > div {
+  margin: 1%;
+}
+
+.Admin-media-form-3 {
+  margin: 5%;
+}
+
+.Admin-media-form-3 > button {
+  margin: 1%;
+}
+
+.Admin-media-filter-select {
+  width: 20%;
+  margin-left:40%;
+  margin-top: 5%;
+}
+
+.Admin-media-format-select {
+  width: 20%;
+  margin-left:40%;
+  margin-top: 5%;
+}
+
+.Admin-media-form-preview {
+  margin-top: 5%;
+}
+
+.Admin-photo-form-1 {
+  margin: 2%;
+}
+
+.Admin-photo-form-1 > div {
+  margin: 1%;
+}
+
+.Admin-photo-form-2 {
+  width: 50%;
+  margin-left:25%;
+  margin-top: 5%;
+}
+
+.Admin-photo-shot-select {
+  width: 50%;
+  margin-left:25%;
+  margin-top: 5%;
+}
+
+.Admin-photo-form-focal {
+  margin: 3%;
+}
+
+.Admin-photo-form-focal > div {
+  margin: 1%;
+}
+
+.Admin-photo-form-scale {
+  margin: 3%;
+}
+
+.Admin-photo-form-scale > div {
+  margin: 3%;
+}
+
+.Admin-photo-croptions > div {
+  margin: 3%;
+}
+
+.Admin-photo-croptions {
+  margin: 1%;
+}
