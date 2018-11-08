@@ -80,7 +80,7 @@ export default class MediaEngine  {
           //'progressCallback': null,
           // how many web workers to use to process the animated GIF frames. Default is 2.
           'numWorkers': 10,
-          'sampleInterval': 2,
+          'sampleInterval': 1,
           'waterMark': null,
           // If an image is given here, it will be stamped on top of the GIF frames
           'waterMarkHeight': null,

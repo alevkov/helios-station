@@ -5,9 +5,10 @@ import {
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED
 } from '../common';
-import MediaEngine from './MediaEngine';
+import AppPaths from './AppPaths';
 
 const electron = window.require('electron');
+const { requireTaskPool } = electron.remote.require('electron-remote');
 const choker = electron.remote.require('chokidar');
 const path = electron.remote.require('path');
 const moveFile = electron.remote.require('move-file');
@@ -16,7 +17,8 @@ const jimp = electron.remote.require('jimp');
 const os = window.require('os');
 const graphicsmagick = electron.remote.require('graphicsmagick-static');
 const imagemagick = electron.remote.require('imagemagick-darwin-static');
-import AppPaths from './AppPaths';
+const MediaEngine = requireTaskPool(require.resolve('./MediaEngine'));
+
 let imagemagickPath = electron.remote.require('imagemagick-darwin-static').path;
 let fixedPath = AppPaths.replaceAsar(imagemagickPath);
 
@@ -199,8 +201,11 @@ export default class SortingEngine {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       const mediaEngine = new MediaEngine(frames);
       console.log('About to generate gif...');
-      mediaEngine.generate('gif');
-      SortingEngine._sortDirMap.set(index, new Set());
+      mediaEngine.generate('gif').then(res => {
+        SortingEngine._sortDirMap.set(index, new Set());
+        console.log('done!');
+      });
+      
     }
   }
 
