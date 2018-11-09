@@ -7,22 +7,19 @@ import {
 } from '../common';
 import AppPaths from './AppPaths';
 
-const electron = window.require('electron');
-const { requireTaskPool } = electron.remote.require('electron-remote');
-const choker = electron.remote.require('chokidar');
-const path = electron.remote.require('path');
-const moveFile = electron.remote.require('move-file');
-const fs = electron.remote.require('fs');
-const jimp = electron.remote.require('jimp');
+const { ipcRenderer, remote } = window.require('electron');
+const choker = remote.require('chokidar');
+const path = remote.require('path');
+const moveFile = remote.require('move-file');
+const fs = remote.require('fs');
+const jimp = remote.require('jimp');
 const os = window.require('os');
-const graphicsmagick = electron.remote.require('graphicsmagick-static');
-const imagemagick = electron.remote.require('imagemagick-darwin-static');
-const MediaEngine = requireTaskPool(require.resolve('./MediaEngine'));
-
-let imagemagickPath = electron.remote.require('imagemagick-darwin-static').path;
+const graphicsmagick = remote.require('graphicsmagick-static');
+const imagemagick = remote.require('imagemagick-darwin-static');
+let imagemagickPath = remote.require('imagemagick-darwin-static').path;
 let fixedPath = AppPaths.replaceAsar(imagemagickPath);
 
-const {subClass} = electron.remote.require('gm');
+const { subClass } = remote.require('gm');
 let gm;
 
 if (os.platform() == "win32") {
@@ -199,13 +196,14 @@ export default class SortingEngine {
     console.log('Max num: ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
-      const mediaEngine = new MediaEngine(frames);
       console.log('About to generate gif...');
-      mediaEngine.generate('gif').then(res => {
-        SortingEngine._sortDirMap.set(index, new Set());
-        console.log('done!');
+      ipcRenderer.send('generate-media', frames);
+      ipcRenderer.on('media-reply', (event, arg) => {  
+        console.log(arg);
       });
-      
+      ipcRenderer.on('media-error', (event, arg) => {  
+          console.log(arg);
+      });
     }
   }
 
