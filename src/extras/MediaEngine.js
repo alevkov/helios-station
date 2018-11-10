@@ -1,38 +1,35 @@
-import gifshot from 'gifshot';
+/* IPC ONLY */
+const gifshot = require('gifshot');
+const electron = require('electron');
+const settings = require('electron-settings');
+const fs = require('fs');
+const os = require('os');
 
-const electron = window.require('electron');
-const settings = electron.remote.require('electron-settings');
-const fs = electron.remote.require('fs');
-const os = window.require('os');
+function sortedFrames(frames, ascending) {
+  return frames.concat().sort((a, b) => {
+    const aFile = a.replace(/^.*[\\\/]/, '');
+    const aIndex = aFile.split('_')[1].split('.')[0];
+    const bFile = b.replace(/^.*[\\\/]/, '');
+    const bIndex = bFile.split('_')[1].split('.')[0];
+    return ascending ? 
+      (aIndex > bIndex ? 1 : -1) : 
+      (aIndex < bIndex ? 1 : -1);
+  });
+}
 
-export default class MediaEngine  {
-  constructor(frames) {
-    this.frames = frames;
-  }
-
-  sortedFrames = ascending => {
-    return this.frames.concat().sort((a, b) => {
-      const aFile = a.replace(/^.*[\\\/]/, '');
-      const aIndex = aFile.split('_')[1].split('.')[0];
-      const bFile = b.replace(/^.*[\\\/]/, '');
-      const bIndex = bFile.split('_')[1].split('.')[0];
-      return ascending ? 
-        (aIndex > bIndex ? 1 : -1) : 
-        (aIndex < bIndex ? 1 : -1);
-    });
-  }
-
-  generate = type => {
+function generate(frames, type) {
+  return new Promise((resolve, reject) => {
     switch (type) {
       case 'gif': {
+        console.log('in generate');
         const boomerang = Boolean(settings.get('media.boomerang'));
         const numFrames = Number.parseInt(settings.get('media.frames'), 10);
         const width = Number.parseInt(settings.get('media.width'), 10);
         const height = Number.parseInt(settings.get('media.height'), 10);
         const duration = 1.0 / Number.parseInt(settings.get('media.fps'), 10); 
         // sort frames
-        const sorted = this.sortedFrames(true);
-        const sortedDescending = this.sortedFrames(false);
+        const sorted = sortedFrames(frames, true);
+        const sortedDescending = sortedFrames(frames, false);
         // remove first element
         sortedDescending.shift();
         // if boomerang, append descending array
@@ -80,7 +77,7 @@ export default class MediaEngine  {
           //'progressCallback': null,
           // how many web workers to use to process the animated GIF frames. Default is 2.
           'numWorkers': 10,
-          'sampleInterval': 2,
+          'sampleInterval': 1,
           'waterMark': null,
           // If an image is given here, it will be stamped on top of the GIF frames
           'waterMarkHeight': null,
@@ -100,7 +97,9 @@ export default class MediaEngine  {
               (os.platform() === 'darwin' ? '/' : '\\') + 
               index + '.gif';
             fs.writeFileSync(dest, buf);
+            resolve(obj);
           } else {
+            reject(new Error(obj));
             console.log(obj);
           }
         });
@@ -109,6 +108,10 @@ export default class MediaEngine  {
       default: {
         break;
       }
-    }
-  }
+    }    
+  });
+
 }
+
+module.exports = generate;
+/* IPC ONLY */

@@ -1,6 +1,9 @@
 const electron = require('electron');
+const { requireTaskPool } = require('electron-remote');
+const generate = requireTaskPool(require.resolve('./extras/MediaEngine'));
 // Module to control application life.
 const app = electron.app;
+const ipcMain = electron.ipcMain;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
 
@@ -62,6 +65,16 @@ app.on('activate', function () {
         createWindow()
     }
 });
+
+ipcMain.on('generate-media', async (event, arg) => {
+    const frames = arg;
+    try {
+        const mediaResult = await generate(frames, 'gif');
+        event.sender.send('media-reply', result);
+    } catch (err) {
+        event.sender.send('media-error', err);
+    }
+})
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
