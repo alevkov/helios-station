@@ -177,7 +177,6 @@ export default class SortingEngine {
         .resize(resize_w, resize_h)
         .write(dir, err => {
           if (err) {
-            console.log('Ahhh!! ' + dir);
             console.log('Error! ' + err);
           } else {
             moveFile(dir, destination)
