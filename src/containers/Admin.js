@@ -23,11 +23,14 @@ export const Admin = observer(class Admin extends Component {
       sourceDir: settings.get('dir.source'),
       sortDir: settings.get('dir.sort'),
       mediaDir: settings.get('dir.media'),
+      overlayDir: settings.get('dir.overlay'),
+      overlayList: [],
       selectedSegment: 'general',
       selectedFrame: {value: settings.get('photo.frame'), label: `Frame ${settings.get('photo.frame')}`},
       selectedFilter: settings.get('media.filter')
     };
     this.initSortingEngineIfDirsSelected();
+    this.initOverlayListIfSelected();
   }
 
   componentDidMount() {
@@ -71,6 +74,7 @@ export const Admin = observer(class Admin extends Component {
           this.setState({
             sourceDir: settings.get('dir.source')
           });
+          this.initSortingEngineIfDirsSelected();
         }
     });
   }
@@ -84,6 +88,7 @@ export const Admin = observer(class Admin extends Component {
           this.setState({
             sortDir: settings.get('dir.sort')
           });
+          this.initSortingEngineIfDirsSelected();
         }
     });
   }
@@ -97,11 +102,13 @@ export const Admin = observer(class Admin extends Component {
           this.setState({
             mediaDir: settings.get('dir.media') 
           });
+          this.initSortingEngineIfDirsSelected();
         }
     });
   }
 
-  onLogoImageclick = frame => () => {
+  // Logo
+  onLogoImageclick = () => {
     dialog.showOpenDialog({
         properties: ['openFile']
     }, (dir) => {
@@ -114,10 +121,24 @@ export const Admin = observer(class Admin extends Component {
     });
   }
 
+  // Overlay
+  onOverlayClick = () => {
+    dialog.showOpenDialog({
+        properties: ['openDirectory']
+    }, (dir) => {
+        if (dir !== undefined) {
+          this.onDirSelected('overlay', dir);
+          this.setState({
+            overlayDir: dir
+          });
+          this.initOverlayListIfSelected();
+        }
+    });
+  }
+
   // Abstract 
   onDirSelected = (type, dir) => {
     settings.set('dir.' + type, dir);
-    this.initSortingEngineIfDirsSelected();
   }
 
   onTextChanged = name => event => {
@@ -173,6 +194,16 @@ export const Admin = observer(class Admin extends Component {
           settings.get('dir.sort'),
           settings.get('dir.media'));
       }
+    }
+  }
+
+  initOverlayListIfSelected = () => {
+    if (settings.get('dir.overlay') !== undefined) {
+      const overlays = Admin._sortingEngine
+        .unpackOverlays(settings.get('dir.overlay'));
+      this.setState({
+        overlayList: overlays
+      });
     }
   }
 
@@ -316,7 +347,13 @@ export const Admin = observer(class Admin extends Component {
             color='primary'
             onClick={this.onLogoImageclick}
             variant='contained'>
-            Logo Image
+            Logo
+          </Button>
+          <Button
+            color='secondary'
+            onClick={this.onOverlayClick}
+            variant='contained'>
+            Overlay
           </Button>
           <Select 
             className='Admin-media-format-select'
