@@ -23,6 +23,7 @@
     "electron-settings": "^3.2.0",
     "enzyme": "^3.5.0",
     "fbemitter": "^2.1.1",
+    "fsevents": "^2.0.1",
     "gifshot": "^0.4.5",
     "gm": "^1.23.1",
     "graphicsmagick-static": "^0.1.4",
@@ -63,7 +64,7 @@
     "electron": "electron . --allow-file-access-from-files",
     "dev": "nf start",
     "pack": "build --dir",
-    "dist": "npm run build && build",
+    "dist": "yarn run build && build",
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {

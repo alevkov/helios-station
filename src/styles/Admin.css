@@ -30,27 +30,27 @@
   margin-bottom: 5%;
 }
 
-.Admin-media-form-1 {
+.Admin-media-form-dimensions {
   margin: 1%;
 }
 
-.Admin-media-form-1 > div {
+.Admin-media-form-dimensions > div {
   margin: 1%;
 }
 
-.Admin-media-form-2 {
+.Admin-media-form-parameters {
   margin: 2%;
 }
 
-.Admin-media-form-2 > div {
+.Admin-media-form-parameters > div {
   margin: 1%;
 }
 
-.Admin-media-form-3 {
+.Admin-media-form-extra-assets {
   margin: 5%;
 }
 
-.Admin-media-form-3 > button {
+.Admin-media-form-extra-assets > button {
   margin: 1%;
 }
 
@@ -70,15 +70,7 @@
   margin-top: 5%;
 }
 
-.Admin-photo-form-1 {
-  margin: 2%;
-}
-
-.Admin-photo-form-1 > div {
-  margin: 1%;
-}
-
-.Admin-photo-form-2 {
+.Admin-photo-form-frame-select {
   width: 50%;
   margin-left:25%;
   margin-top: 5%;

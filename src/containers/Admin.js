@@ -23,6 +23,7 @@ export const Admin = observer(class Admin extends Component {
       sourceDir: settings.get('dir.source'),
       sortDir: settings.get('dir.sort'),
       mediaDir: settings.get('dir.media'),
+      logoDir: settings.get('dir.logo'),
       overlayDir: settings.get('dir.overlay'),
       overlayList: [],
       selectedSegment: 'general',
@@ -115,7 +116,7 @@ export const Admin = observer(class Admin extends Component {
         if (dir !== undefined) {
           this.onDirSelected('logo', dir);
           this.setState({
-            sortDir: settings.get('dir.logo')
+            logoDir: settings.get('dir.logo')
           });
         }
     });
@@ -227,7 +228,9 @@ export const Admin = observer(class Admin extends Component {
     const crop_h = settings.get(`photo.crop_h.f_${this.state.selectedFrame.value}`);
     const resize_w = settings.get(`photo.resize_w.f_${this.state.selectedFrame.value}`);
     const resize_h = settings.get(`photo.resize_h.f_${this.state.selectedFrame.value}`);
-    const rotate = settings.get(`photo.rotate.f_${this.state.selectedFrame.value}`)
+    const rotate = settings.get(`photo.rotate.f_${this.state.selectedFrame.value}`);
+    const logo_x = settings.get(`media.logo_x`);
+    const logo_y = settings.get(`media.logo_y`);
     // station
     const stationSelectOptions = [
       {value: 1, label: 'Station 1'}
@@ -280,7 +283,7 @@ export const Admin = observer(class Admin extends Component {
     ];
     const mediaSegment = () => (
       <div className='Admin-media-form'>
-        <div className='Admin-media-form-1'>
+        <div className='Admin-media-form-dimensions'>
           <TextField
             id='width'
             label='Width'
@@ -296,7 +299,7 @@ export const Admin = observer(class Admin extends Component {
             type='number'
             margin='normal'/>
         </div>
-        <div className='Admin-media-form-2'>
+        <div className='Admin-media-form-parameters'>
           <TextField
             id='frames'
             label='# of Frames'
@@ -342,7 +345,7 @@ export const Admin = observer(class Admin extends Component {
               src={`${effectsTestImgSrc}${this.state.selectedFilter.value}`} />
           </div>
         </div>*/}
-        <div className='Admin-media-form-3'>
+        <div className='Admin-media-form-extra-assets'>
           <Button
             color='primary'
             onClick={this.onLogoImageclick}
@@ -362,6 +365,22 @@ export const Admin = observer(class Admin extends Component {
             onChange={this.onSelectChanged('media.format')}
             options={mediaSelectOptions} />
         </div>
+        <div className='Admin-media-form-logo-coordinates'>
+          <TextField
+            id='logo-x'
+            label='Logo Position-X'
+            onChange={this.onTextChanged('media.logo_x')}
+            value={logo_x}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='logo-y'
+            label='Logo Position-Y'
+            onChange={this.onTextChanged('media.logo_y')}
+            value={logo_y}
+            type='number'
+            margin='normal'/>
+        </div>
       </div>
     );
     const photoSegment = () => (
@@ -375,7 +394,7 @@ export const Admin = observer(class Admin extends Component {
               src={frameByIdxAndCam.src} />
           </div>) : null}
         </div>*/}
-        <div className='Admin-photo-form-2'>
+        <div className='Admin-photo-form-frame-select'>
           <Select 
             options={this.frameSelectOptions()}
             value={this.state.selectedFrame}
