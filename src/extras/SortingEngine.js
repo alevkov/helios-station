@@ -170,6 +170,9 @@ export default class SortingEngine {
     const resize_w = Number.parseFloat(settings.get(`photo.resize_w.f_${cameraNum}`));
     const resize_h = Number.parseFloat(settings.get(`photo.resize_h.f_${cameraNum}`));
     const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${cameraNum}`))
+    const logo_x = Number.parseInt(settings.get('media.logo_x'), 10);
+    const logo_y = Number.parseInt(settings.get('media.logo_y'), 10);
+    const logo_dir = settings.get('dir.logo');
     console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
     gm(dir)
         .rotate('white', rotate)
@@ -179,10 +182,26 @@ export default class SortingEngine {
           if (err) {
             console.log('Error! ' + err);
           } else {
-            moveFile(dir, destination)
-              .then(() => {
-                console.log(filename + ' moved to ' + destination);
-              });
+            if (settings.get('dir.logo') === undefined) {
+              moveFile(dir, destination)
+                .then(() => {
+                  console.log(filename + ' moved to ' + destination);
+                });  
+            } else {
+              gm(dir)
+                .composite(logo_dir)
+                .geometry(`+${logo_x}+${logo_y}`)
+                .write(dir, err => {
+                  if (err) {
+                    console.log('Error! ' + err);
+                  } else {
+                    moveFile(dir, destination)
+                      .then(() => {
+                        console.log(filename + ' moved to ' + destination);
+                      });
+                  }
+                });
+            }
           }
         });
   }
@@ -199,9 +218,6 @@ export default class SortingEngine {
       ipcRenderer.send('generate-media', frames);
       ipcRenderer.on('media-reply', (event, arg) => {  
         console.log(arg);
-      });
-      ipcRenderer.on('media-error', (event, arg) => {  
-          console.log(arg);
       });
     }
   }
