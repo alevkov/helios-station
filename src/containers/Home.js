@@ -220,7 +220,6 @@ export const Home = observer(class Home extends Component {
           photos={this.state.photos}
           onClick={this.onSelectPhoto}
           onExpand={this.onExpandPhoto}
-          onEffects={this.onPhotoEffects}
           ImageComponent={SelectedImage} /> : null }
       </div>
     );
