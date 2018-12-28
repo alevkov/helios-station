@@ -52,6 +52,18 @@ export default class SortingEngine {
     this.initWatchDir('media', SortingEngine._mediaDir);
   }
 
+  sortedFrames = (frames, ascending) => {
+    return frames.concat().sort((a, b) => {
+      const aFile = a.replace(/^.*[\\\/]/, '');
+      const aIndex = aFile.split('_')[1].split('.')[0];
+      const bFile = b.replace(/^.*[\\\/]/, '');
+      const bIndex = bFile.split('_')[1].split('.')[0];
+      return ascending ? 
+        (aIndex > bIndex ? 1 : -1) : 
+        (aIndex < bIndex ? 1 : -1);
+    });
+  }
+
   initWatchDir = (type, dir) => {
     // initialize dir string to watch
     let watchGlob = dir;
@@ -71,7 +83,6 @@ export default class SortingEngine {
         });
         // when a file is added, send event to subs
         sourceWatcher.on('add', addedFilePath => {
-          console.log(path.extname(addedFilePath));
           if (path.basename(addedFilePath) === '.DS_Store') {
             return;
           }
@@ -149,6 +160,26 @@ export default class SortingEngine {
 
   onSourcePhotoAdded = dir => {
     console.log('file added!');
+    let overlayFrames = []
+    let applyOverlay = settings.get('media.applyOverlay') && settings.get('media.overlay') != undefined;
+    let applyLogo = settings.get('media.applyLogo') && settings.get('dir.logo') != undefined;
+    console.log(applyOverlay);
+    console.log(applyLogo);
+
+    if (applyOverlay) {
+      console.log('getting overlay frames');
+      fs.readdirSync(settings.get('media.overlay').value).forEach(file => {
+        overlayFrames.push(settings.get('media.overlay').value + (os.platform() === 'darwin' ? '/' : '\\') + file);
+      });
+      if (overlayFrames.length < Number.parseInt(settings.get('media.frames'), 10)) {
+        console.log('Warning! Not enough overlay frames');
+        applyOverlay = false;
+      }
+    }
+
+    overlayFrames = this.sortedFrames(overlayFrames, true);
+    console.log(overlayFrames);
+
     const filename = dir.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0]; // shot number
     const camera = filename.split('_')[1].split('.')[0];
@@ -163,44 +194,89 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: apply xform in ImageProcessor
-    const crop_x = Number.parseFloat(settings.get(`photo.crop_x.f_${cameraNum}`));
-    const crop_y = Number.parseFloat(settings.get(`photo.crop_y.f_${cameraNum}`));
-    const crop_w = Number.parseFloat(settings.get(`photo.crop_w.f_${cameraNum}`));
-    const crop_h = Number.parseFloat(settings.get(`photo.crop_h.f_${cameraNum}`));
-    const resize_w = Number.parseFloat(settings.get(`photo.resize_w.f_${cameraNum}`));
-    const resize_h = Number.parseFloat(settings.get(`photo.resize_h.f_${cameraNum}`));
-    const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${cameraNum}`))
-    const logo_x = Number.parseInt(settings.get('media.logo_x'), 10);
-    const logo_y = Number.parseInt(settings.get('media.logo_y'), 10);
-    const logo_dir = settings.get('dir.logo');
-    console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
+    const zoom =  Number.parseInt(settings.get(`photo.zoom.f_${cameraNum}`), 10);
+    const cropW = Number.parseInt(settings.get(`photo.crop_w`), 10);
+    const cropH = Number.parseInt(settings.get(`photo.crop_h`), 10);
+    const cropDeltaX = Number.parseInt(settings.get(`photo.crop_delta_x.f_${cameraNum}`), 10);
+    const cropDeltaY = Number.parseInt(settings.get(`photo.crop_delta_y.f_${cameraNum}`), 10);
+    const fullW = Number.parseInt(settings.get(`photo.full_w`), 10);
+    const fullH = Number.parseInt(settings.get(`photo.full_h`), 10);
+    const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${cameraNum}`));
+    const logoX = Number.parseInt(settings.get('media.logo_x'), 10);
+    const logoY = Number.parseInt(settings.get('media.logo_y'), 10);
+
+    const cropOffsetX = ((fullW - cropW)/2) + cropDeltaX + 
+    ((cropW * (zoom / 100) - cropW) / 2);
+    const cropOffsetY = ((fullH - cropH)/2) + cropDeltaY + 
+    ((cropH * (zoom / 100) - cropH) / 2);
+
+    const logoDir = settings.get('dir.logo');
+    console.log('camera ' + cameraNum);
+    console.log(logoDir);
+    console.log([cropOffsetX, cropOffsetY]);
+    console.log([zoom, cropW, cropH, rotate]);
+    //TODO: convert to pipeline
     gm(dir)
         .rotate('white', rotate)
-        .crop(crop_w, crop_h, crop_x, crop_y)
-        .resize(resize_w, resize_h)
+        .crop((zoom / 100.0) * cropW,
+              (zoom / 100.0) * cropH,
+              cropOffsetX,
+              cropOffsetY)
         .write(dir, err => {
           if (err) {
             console.log('Error! ' + err);
           } else {
-            if (settings.get('dir.logo') === undefined) {
-              moveFile(dir, destination)
-                .then(() => {
-                  console.log(filename + ' moved to ' + destination);
-                });  
-            } else {
+            if (applyLogo) { // logo
               gm(dir)
-                .composite(logo_dir)
-                .geometry(`+${logo_x}+${logo_y}`)
+                .composite(logoDir)
+                .geometry(`+${logoX}+${logoY}`)
                 .write(dir, err => {
-                  if (err) {
-                    console.log('Error! ' + err);
+                  if(err) {
+                    console.log('Error! ' + err)
                   } else {
-                    moveFile(dir, destination)
-                      .then(() => {
-                        console.log(filename + ' moved to ' + destination);
-                      });
+                    if (applyOverlay) { // logo + overlay
+                      gm(dir)
+                        .composite(overlayFrames[cameraNum])
+                        .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
+                        .write(dir, err => {
+                          if (err) {
+                            console.log('Error! ' + err);
+                          } else {
+                            moveFile(dir, destination)
+                              .then(() => {
+                                console.log(filename + ' moved to ' + destination);
+                              });
+                          }
+                      })
+                    } else {
+                      moveFile(dir, destination)
+                        .then(() => {
+                          console.log(filename + ' moved to ' + destination);
+                        });
+                    }
                   }
-                });
+                })
+            } else {
+              if (applyOverlay) { // overlay, no logo
+                gm(dir)
+                  .composite(overlayFrames[cameraNum])
+                  .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
+                  .write(dir, err => {
+                    if (err) {
+                      console.log('Error! ' + err);
+                    } else {
+                      moveFile(dir, destination)
+                        .then(() => {
+                          console.log(filename + ' moved to ' + destination);
+                        });
+                    }
+                })
+              } else { // no overlay, no logo
+                 moveFile(dir, destination)
+                  .then(() => {
+                    console.log(filename + ' moved to ' + destination);
+                  });
+              }
             }
           }
         });
@@ -235,5 +311,13 @@ export default class SortingEngine {
 
   onMediaRemoved = dir => {
     emitter.emit(EVENT_PHOTO_REMOVED, dir);
+  }
+
+  unpackOverlays = dir => {
+    const overlays = []
+    fs.readdirSync(dir).forEach(file => {
+      overlays.push(dir + (os.platform() === 'darwin' ? '/' : '\\') + file);
+    });
+    return overlays;
   }
 }

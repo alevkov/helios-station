@@ -1,0 +1,41 @@
+.Adjuster-select-media button {
+  margin: 3%
+}
+
+.Adjuster-param-full div {
+  margin: 3%
+}
+
+.Adjuster-param-canvas div {
+  margin: 3%
+}
+
+.Adjuster-preview-window canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.Adjuster-param-full div {
+  margin: 3%
+}
+
+.Adjuster-param-crop div {
+  margin: 3%
+}
+
+.Adjuster-param-delta div {
+  margin: 3%
+}
+
+.Adjuster-param-zoom div {
+  margin: 3%
+}
+
+.Adjuster-photo-form-frame-select {
+  width: 50%;
+  margin-left:25%;
+  margin-top: 5%;
+}

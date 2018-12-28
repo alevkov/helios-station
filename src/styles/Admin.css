@@ -82,6 +82,12 @@
   margin-top: 5%;
 }
 
+.Admin-media-overlay-select > div {
+  width: 45%;
+  margin-left:27.5%;
+  margin-top: 5%;
+}
+
 .Admin-photo-form-focal {
   margin: 3%;
 }
