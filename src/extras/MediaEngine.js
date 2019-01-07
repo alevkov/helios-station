@@ -42,8 +42,8 @@ function generateGif(frames) {
     // get cached parameters
     const boomerang = Boolean(settings.get('media.boomerang'));
     const numFrames = Number.parseInt(settings.get('media.frames'), 10);
-    const width = Number.parseInt(settings.get(`photo.crop_w`), 10);
-    const height = Number.parseInt(settings.get(`photo.crop_h`), 10);
+    const width = Number.parseInt(settings.get(`media.width`), 10);
+    const height = Number.parseInt(settings.get(`media.height`), 10);
     const duration = 1.0 / Number.parseInt(settings.get('media.fps'), 10);
     // sort frames
     const sorted = sortedFrames(frames, true);

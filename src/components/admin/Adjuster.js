@@ -62,13 +62,13 @@ export default class SelectDock extends React.Component {
 
     console.log([cropOffsetX, cropOffsetY]);
 
-    const _this = this;
+    const that = this;
     // load images and display in canvas
     Promise.all(this.loadImages()).then(() => {
-      const ctx = _this.refs.canvas.getContext('2d');
-      let full = _this.state.loadedImages[_this.getImgUrl('full-frame')]
-      let ref = _this.state.loadedImages[_this.getImgUrl('ref-frame')]
-      ctx.clearRect(0, 0, _this.refs.canvas.width, _this.refs.canvas.height);
+      const ctx = that.refs.canvas.getContext('2d');
+      let full = that.state.loadedImages[that.getImgUrl('full-frame')]
+      let ref = that.state.loadedImages[that.getImgUrl('ref-frame')]
+      ctx.clearRect(0, 0, that.refs.canvas.width, that.refs.canvas.height);
       ctx.drawImage(full, 0, 0, 
         fullW, 
         fullH
@@ -104,12 +104,12 @@ export default class SelectDock extends React.Component {
       this.getImgUrl('full-frame'), 
       this.getImgUrl('ref-frame')
     ];
-    const _this = this;
+    const that = this;
     let promiseArray = images.map(function(imgurl){
       let prom = new Promise(function(resolve,reject){
         let img = new Image();
         img.onload = function(){
-            _this.state.loadedImages[imgurl] = img;
+            that.state.loadedImages[imgurl] = img;
             resolve();
         };
         img.src = imgurl;

@@ -306,6 +306,22 @@ export const Admin = observer(class Admin extends Component {
     ];
     const mediaSegment = () => (
       <div className='Admin-media-form'>
+        <div className='Admin-media-form-dimensions'>
+          <TextField
+            id='width'
+            label='Width'
+            onChange={this.onTextChanged('media.width')}
+            value={settings.get('media.width')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='height'
+            label='Height'
+            onChange={this.onTextChanged('media.height')}
+            value={settings.get('media.height')}
+            type='number'
+            margin='normal'/>        
+        </div>
         <div className='Admin-media-form-parameters'>
           <TextField
             id='frames'
