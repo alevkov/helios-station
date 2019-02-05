@@ -54,10 +54,10 @@ export const Admin = observer(class Admin extends Component {
     setIfNot(`canvas.zoom`, 100);
     for (let i = 0; i < frames; i++) {
       const j = i + 1;
-      setIfNot(`photo.rotate.f_${j}`, 0);
+      setIfNot(`photo.rotate.f_${j}`, 0.0);
       setIfNot(`photo.crop_delta_x.f_${j}`, 100);
       setIfNot(`photo.crop_delta_y.f_${j}`, 100);
-      setIfNot(`photo.zoom.f_${j}`, 100);
+      setIfNot(`photo.zoom.f_${j}`, 100.0);
     }
   }
 

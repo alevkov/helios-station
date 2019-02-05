@@ -43,7 +43,7 @@ export default class SelectDock extends React.Component {
     const fullH = (canvasZoom/100) * Number.parseInt(settings.get(`photo.full_h`), 10);
     const cropDeltaX = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_delta_x.f_${this.props.selectedFrame.value}`), 10);
     const cropDeltaY = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_delta_y.f_${this.props.selectedFrame.value}`), 10);
-    const zoom =  Number.parseInt(settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`), 10);
+    const zoom =  Number.parseFloat(settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`), 10);
     const cropW = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_w`), 10);
     const cropH = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_h`), 10);
     const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${this.props.selectedFrame.value}`));
@@ -150,7 +150,7 @@ export default class SelectDock extends React.Component {
     const cropDeltaY = Number.parseInt(
       settings.get(`photo.crop_delta_y.f_${this.props.selectedFrame.value}`), 10
     );
-    const zoom = Number.parseInt(
+    const zoom = Number.parseFloat(
       settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`), 10
     );
     const cropW = Number.parseInt(settings.get(`photo.crop_w`), 10);
