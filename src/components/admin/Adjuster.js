@@ -93,7 +93,9 @@ export default class SelectDock extends React.Component {
         ctx.globalAlpha = 1.0; 
         ctx.strokeStyle = '#ff0000';
         // draw bounding rect
-        ctx.strokeRect(cropOffsetX, cropOffsetY, cropW * (zoom / 100), cropH * (zoom / 100));
+        ctx.strokeRect(
+          cropOffsetX, cropOffsetY, cropW * (zoom / 100), cropH * (zoom / 100)
+        );
         ctx.resetTransform();
       }
     });
