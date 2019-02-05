@@ -10,7 +10,8 @@ export default class CloudInterface {
   static _accessKeyId = 'AKIAIXRLQLXZXCINEXTQ';
   static _secretAccessKey = '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';
 
-  constructor() {
+  constructor(uploadProgressHandler) {
+    this.progressHandler = uploadProgressHandler;
     this.s3 = new AWS.S3({
       region: CloudInterface._region,
       accessKeyId: CloudInterface._accessKeyId,
@@ -19,6 +20,7 @@ export default class CloudInterface {
   }
 
   upload = (filepaths, subkey) => {
+    const that = this;
     for (let i = 0; i < filepaths.length; i++) {
       const params = {
         Bucket: CloudInterface._bucket,
@@ -31,13 +33,13 @@ export default class CloudInterface {
         const filename = path.replace(/^.*[\\\/]/, '');
         params.Body = data;
         params.Key = params.Key + '/' + sub + '/' + filename;
-        this.s3.upload(params, (err, data) => {
-          if (err) {
-            console.log('Error', err);
-          } if (data) {
-            console.log('Upload Success', data.Location);
-          }
-        });
+        
+        this.s3.upload(params)
+          .on('httpUploadProgress', function(evt) {
+            that.progressHandler(parseInt((evt.loaded * 100) / evt.total));
+          }).send(function(err, data) {
+            alert("File uploaded successfully.");
+          });
       });
     }
   }

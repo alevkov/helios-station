@@ -6,6 +6,7 @@ import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
 import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
+import { Line } from 'rc-progress';
 import '../styles/Home.css';
 import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
@@ -33,7 +34,8 @@ export const Home = observer(class Home extends Component {
       showPhotoCarousel: false,
       carouselStartPos: 0,
       selectedEffect: '',
-      selectedPhotosList: new Set()
+      selectedPhotosList: new Set(),
+      uploadProgress: 0
     }
   }
 
@@ -116,13 +118,19 @@ export const Home = observer(class Home extends Component {
   }
 
   onLoveItClick = () => {
-    const cloud = new CloudInterface();
+    const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
     cloud.upload(selected, 'loveit');
   }
 
   onCarouselNav = pos => {
     console.log(pos);
+  }
+
+  onUploadProgressReceived = progress => {
+    this.setState({
+      uploadProgress: progress
+    });
   }
   /*
   onSelectChanged = name => option => {
@@ -198,6 +206,9 @@ export const Home = observer(class Home extends Component {
             placeholder='Effects..'
             onChange={this.onSelectChanged('photo.effect')}/> : null }
         </div> ***/} 
+      { this.state.uploadProgress > 0 && this.state.uploadProgress < 100 ? 
+        <Line percent={this.state.uploadProgress} strokeWidth="2" strokeColor="#4b0082" />
+        : null }
       {/*** Close Button ***/}
         { this.state.showPhotoCarousel === true ? 
         (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>
