@@ -81,7 +81,7 @@ function generateGif(frames) {
     let finalFrames = [];
     // append file URL prefix
     for (let i = 0; i < orderedFrames.length; i++) {
-      finalFrames.push('file://' + orderedFrames[i]);
+      finalFrames.push(orderedFrames[i]);
     }
     const frameName = orderedFrames[0].replace(/^.*[\\\/]/, '');
     const index = frameName.split('_')[0];

@@ -194,7 +194,7 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: apply xform in ImageProcessor
-    const zoom =  Number.parseInt(settings.get(`photo.zoom.f_${cameraNum}`), 10);
+    const zoom =  Number.parseFloat(settings.get(`photo.zoom.f_${cameraNum}`));
     const cropW = Number.parseInt(settings.get(`photo.crop_w`), 10);
     const cropH = Number.parseInt(settings.get(`photo.crop_h`), 10);
     const cropDeltaX = Number.parseInt(settings.get(`photo.crop_delta_x.f_${cameraNum}`), 10);
@@ -205,10 +205,8 @@ export default class SortingEngine {
     const logoX = Number.parseInt(settings.get('media.logo_x'), 10);
     const logoY = Number.parseInt(settings.get('media.logo_y'), 10);
 
-    const cropOffsetX = ((fullW - cropW)/2) + cropDeltaX + 
-    ((cropW * (zoom / 100) - cropW) / 2);
-    const cropOffsetY = ((fullH - cropH)/2) + cropDeltaY + 
-    ((cropH * (zoom / 100) - cropH) / 2);
+    const cropOffsetX = ((fullW - (cropW * (zoom / 100)))/2) + cropDeltaX;
+    const cropOffsetY = ((fullH - (cropH * (zoom / 100)))/2) + cropDeltaY;
 
     const logoDir = settings.get('dir.logo');
     console.log('camera ' + cameraNum);
@@ -217,11 +215,11 @@ export default class SortingEngine {
     console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
     gm(dir)
+        .rotate('white', rotate)
         .crop((zoom / 100.0) * cropW,
               (zoom / 100.0) * cropH,
               cropOffsetX,
               cropOffsetY)
-        .rotate('white', rotate)
         .write(dir, err => {
           if (err) {
             console.log('Error! ' + err);
