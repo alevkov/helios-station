@@ -55,11 +55,9 @@ export default class SelectDock extends React.Component {
     console.log([zoom, cropW, cropH, rotate]);
 
     // calculate crop frame offsets
-    const cropOffsetX = ((fullW - cropW)/2) + cropDeltaX + 
-    ((cropW * (zoom / 100) - cropW) / 2);
-    const cropOffsetY = ((fullH - cropH)/2) + cropDeltaY + 
-    ((cropH * (zoom / 100) - cropH) / 2);
-
+    const cropOffsetX = ((fullW - (cropW * (zoom / 100)))/2) + cropDeltaX;
+    const cropOffsetY = ((fullH - (cropH * (zoom / 100)))/2) + cropDeltaY;
+    
     console.log([cropOffsetX, cropOffsetY]);
 
     const that = this;

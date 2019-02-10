@@ -1,9 +1,33 @@
 /* IPC ONLY */
+const path = require('path');
+class AppPaths {
+    static replaceAsar(path = "") {
+        return path.replace(".asar", ".asar.unpacked");
+    }
+}
 const gifshot = require('gifshot');
 const electron = require('electron');
 const settings = require('electron-settings');
 const fs = require('fs');
 const os = require('os');
+const graphicsmagick = require('graphicsmagick-static');
+const imagemagick = require('imagemagick-darwin-static');
+let imagemagickPath = require('imagemagick-darwin-static').path;
+let fixedPath = AppPaths.replaceAsar(imagemagickPath);
+
+const { subClass } = require('gm');
+let gm;
+
+if (os.platform() == "win32") {
+    gm = subClass({
+        appPath: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))
+    })
+} else {
+    gm = subClass({
+        imageMagick: true,
+        appPath: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))
+    })
+}
 
 function sortedFrames(frames, ascending) {
   return frames.concat().sort((a, b) => {
@@ -41,9 +65,10 @@ function generateGif(frames) {
     console.log('in generate');
     // get cached parameters
     const boomerang = Boolean(settings.get('media.boomerang'));
+    const loop = Boolean(settings.get('media.loop'));
     const numFrames = Number.parseInt(settings.get('media.frames'), 10);
-    const width = Number.parseInt(settings.get(`photo.crop_w`), 10);
-    const height = Number.parseInt(settings.get(`photo.crop_h`), 10);
+    const width = Number.parseInt(settings.get(`media.width`), 10);
+    const height = Number.parseInt(settings.get(`media.height`), 10);
     const duration = 1.0 / Number.parseInt(settings.get('media.fps'), 10);
     // sort frames
     const sorted = sortedFrames(frames, true);
@@ -54,60 +79,25 @@ function generateGif(frames) {
     const orderedFrames = boomerang ? 
       sorted.concat(sortedDescending) : sorted;
     let finalFrames = [];
-    // append file URL
+    // append file URL prefix
     for (let i = 0; i < orderedFrames.length; i++) {
-      finalFrames.push('file://' + orderedFrames[i]);
+      finalFrames.push(orderedFrames[i]);
     }
     const frameName = orderedFrames[0].replace(/^.*[\\\/]/, '');
     const index = frameName.split('_')[0];
-    gifshot.createGIF({
-      'images': finalFrames,
-      'numFrames': boomerang ? (2 * numFrames - 1) : numFrames,
-      'keepCameraOn': false,
-      'gifWidth': width,
-      'gifHeight': height,
-      'filter': '',
-      'interval': duration,
-      'frameDuration': duration,
-      'text': '',
-      'fontWeight': 'normal',
-      // The font size of the text that covers the animated GIF
-      'fontSize': '16px',
-      // The minimum font size of the text that covers the animated GIF
-      // Note: This option is only applied if the text being applied is cut off
-      'minFontSize': '10px',
-      // Whether or not the animated GIF text will be resized to fit within the GIF container
-      'resizeFont': false,
-      // The font family of the text that covers the animated GIF
-      'fontFamily': 'sans-serif',
-      // The font color of the text that covers the animated GIF
-      'fontColor': '#ffffff',
-      // The horizontal text alignment of the text that covers the animated GIF
-      'textAlign': 'center',
-      // The vertical text alignment of the text that covers the animated GIF
-      'textBaseline': 'bottom',
-      // The X (horizontal) Coordinate of the text that covers the animated GIF (only use this if the default textAlign and textBaseline options don't work for you)
-      'textXCoordinate': null,
-      // The Y (vertical) Coordinate of the text that covers the animated GIF (only use this if the default textAlign and textBaseline options don't work for you)
-      'textYCoordinate': null,
-      // Callback function that provides the current progress of the current image
-      //'progressCallback': null,
-      // how many web workers to use to process the animated GIF frames. Default is 2.
-      'numWorkers': 10,
-      'sampleInterval': 1
-    }, (obj) => {
-      if (!obj.error) {
-        const data = obj.image.replace(/^data:image\/\w+;base64,/, '');
-        const buf = new Buffer(data, 'base64');
-        const dest = settings.get('dir.media') + 
+    const dest = settings.get('dir.media') + 
           (os.platform() === 'darwin' ? '/' : '\\') + 
           index + '.gif';
-        fs.writeFileSync(dest, buf);
-        resolve(logo_dir);
-      } else {
-        resolve(obj);
-      }
-    });    
+    const convert = gm().command('convert');
+    for (let i = 0; i < finalFrames.length; i++) {
+      convert.in(finalFrames[i]);
+    }
+    convert.delay(duration);
+    convert.resize(width, height);
+    convert.write(dest, function(err) {
+      if (err) { alert(err); reject(err); }
+      resolve(dest);
+    }) 
   });
 
 }
