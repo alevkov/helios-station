@@ -1,4 +1,7 @@
-/* IPC ONLY */
+/* IPC ONLY
+  The following functions are executed in a BrowserWindow background process using electron-remote.
+  This file must be included in the "public" folder before distribution, since it is used by the application starter.
+*/
 const path = require('path');
 class AppPaths {
     static replaceAsar(path = "") {
@@ -75,6 +78,7 @@ function generateGif(frames) {
     const sortedDescending = sortedFrames(frames, false);
     // remove first element
     sortedDescending.shift();
+    sorted.splice(-1, 1);
     // if boomerang, append descending array
     const orderedFrames = boomerang ? 
       sorted.concat(sortedDescending) : sorted;
