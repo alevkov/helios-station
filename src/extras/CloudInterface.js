@@ -38,7 +38,8 @@ export default class CloudInterface {
           .on('httpUploadProgress', function(evt) {
             that.progressHandler(parseInt((evt.loaded * 100) / evt.total));
           }).send(function(err, data) {
-            alert("File uploaded successfully.");
+            if (err) { console.log(err); }
+            else { console.log(data); }
           });
       });
     }
