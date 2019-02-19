@@ -47,12 +47,13 @@ export default class SelectDock extends React.Component {
     const cropW = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_w`), 10);
     const cropH = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_h`), 10);
     const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${this.props.selectedFrame.value}`));
+    const rotateRad = rotate * Math.PI / 180;
     const showAdjustOverlay = settings.get('canvas.adjustFrameOn');
     const adjustOpacity = Number.parseFloat(settings.get(`canvas.adjustOpacity`));
     const referenceOpacity = Number.parseFloat(settings.get(`canvas.referenceOpacity`));
 
     console.log([canvasZoom, fullW, fullH, cropDeltaX, cropDeltaY]);
-    console.log([zoom, cropW, cropH, rotate]);
+    console.log([zoom, cropW, cropH, rotateRad]);
 
     // calculate crop frame offsets
     const cropOffsetX = ((fullW - (cropW * (zoom / 100)))/2) + cropDeltaX;
@@ -77,11 +78,12 @@ export default class SelectDock extends React.Component {
           cropOffsetX + (cropW * (zoom / 100) / 2), 
           cropOffsetY + (cropH * (zoom / 100) / 2)
         )
-        ctx.rotate(rotate * Math.PI / 180);
+        ctx.rotate(rotateRad);
         ctx.translate(
           -(cropOffsetX + (cropW * (zoom / 100) / 2)), 
           -(cropOffsetY + (cropH * (zoom / 100) / 2))
         )
+
         ctx.globalAlpha = isNaN(adjustOpacity) ? 0 : adjustOpacity;
         // draw cross image
         ctx.drawImage(ref, cropOffsetX, cropOffsetY,  
