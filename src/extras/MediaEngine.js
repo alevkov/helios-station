@@ -72,7 +72,7 @@ function generateGif(frames) {
     const numFrames = Number.parseInt(settings.get('media.frames'), 10);
     const width = Number.parseInt(settings.get(`media.width`), 10);
     const height = Number.parseInt(settings.get(`media.height`), 10);
-    const duration = 1.0 / Number.parseInt(settings.get('media.fps'), 10);
+    const duration = (1.0 / Number.parseInt(settings.get('media.fps'), 10)) * 100;
     // sort frames
     const sorted = sortedFrames(frames, true);
     const sortedDescending = sortedFrames(frames, false);
@@ -98,6 +98,7 @@ function generateGif(frames) {
     }
     convert.delay(duration);
     convert.resize(width, height);
+    convert.quality(100);
     convert.write(dest, function(err) {
       if (err) { alert(err); reject(err); }
       resolve(dest);
