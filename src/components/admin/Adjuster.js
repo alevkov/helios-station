@@ -67,23 +67,24 @@ export default class SelectDock extends React.Component {
       const ctx = that.refs.canvas.getContext('2d');
       let full = that.state.loadedImages[that.getImgUrl('full-frame')]
       let ref = that.state.loadedImages[that.getImgUrl('ref-frame')]
+      ctx.save();
       ctx.clearRect(0, 0, that.refs.canvas.width, that.refs.canvas.height);
+      ctx.translate(
+        fullW / 2, 
+        fullW / 2
+      )
+      ctx.rotate(rotateRad);
+      ctx.translate(
+        -(fullW / 2), 
+        -(fullW / 2)
+      )
       ctx.drawImage(full, 0, 0, 
         fullW, 
         fullH
       );
+      ctx.restore();
+      
       if (showAdjustOverlay) {
-        // rotate about center
-        ctx.translate(
-          cropOffsetX + (cropW * (zoom / 100) / 2), 
-          cropOffsetY + (cropH * (zoom / 100) / 2)
-        )
-        ctx.rotate(rotateRad);
-        ctx.translate(
-          -(cropOffsetX + (cropW * (zoom / 100) / 2)), 
-          -(cropOffsetY + (cropH * (zoom / 100) / 2))
-        )
-
         ctx.globalAlpha = isNaN(adjustOpacity) ? 0 : adjustOpacity;
         // draw cross image
         ctx.drawImage(ref, cropOffsetX, cropOffsetY,  
