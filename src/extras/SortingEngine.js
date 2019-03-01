@@ -215,9 +215,10 @@ export default class SortingEngine {
     console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
     gm(dir)
+        .resize((zoom / 100.0) * fullW, (zoom / 100.0) * fullH)
         .rotate('white', rotate)
-        .crop((zoom / 100.0) * cropW,
-              (zoom / 100.0) * cropH,
+        .crop(cropW,
+              cropH,
               cropOffsetX,
               cropOffsetY)
         .write(dir, err => {

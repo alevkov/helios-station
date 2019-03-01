@@ -68,15 +68,15 @@ export default class SelectDock extends React.Component {
       let full = that.state.loadedImages[that.getImgUrl('full-frame')]
       let ref = that.state.loadedImages[that.getImgUrl('ref-frame')]
       ctx.save();
-      ctx.clearRect(0, 0, that.refs.canvas.width, that.refs.canvas.height);
+      ctx.clearRect(0, 0, fullW, fullH);
       ctx.translate(
         fullW / 2, 
-        fullW / 2
+        fullH / 2
       )
       ctx.rotate(rotateRad);
       ctx.translate(
         -(fullW / 2), 
-        -(fullW / 2)
+        -(fullH / 2)
       )
       ctx.drawImage(full, 0, 0, 
         fullW, 
