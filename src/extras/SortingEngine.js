@@ -216,7 +216,7 @@ export default class SortingEngine {
     //TODO: convert to pipeline
     gm(dir)
         .resize((zoom / 100.0) * fullW, (zoom / 100.0) * fullH)
-        .rotate('white', rotate)
+        .in('-distort', 'SRT', `${rotate}`)
         .crop(cropW,
               cropH,
               cropOffsetX,
