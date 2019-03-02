@@ -56,8 +56,8 @@ export default class SelectDock extends React.Component {
     console.log([zoom, cropW, cropH, rotateRad]);
 
     // calculate crop frame offsets
-    const cropOffsetX = ((fullW - (cropW * (zoom / 100)))/2) + cropDeltaX;
-    const cropOffsetY = ((fullH - (cropH * (zoom / 100)))/2) + cropDeltaY;
+    const cropOffsetX = /*((fullW * (zoom / 100) - cropW) / 2)*/ 0 + cropDeltaX;
+    const cropOffsetY = /*((fullH * (zoom / 100) - cropH) / 2)*/ 0 + cropDeltaY;
     
     console.log([cropOffsetX, cropOffsetY]);
 
@@ -68,35 +68,27 @@ export default class SelectDock extends React.Component {
       let full = that.state.loadedImages[that.getImgUrl('full-frame')]
       let ref = that.state.loadedImages[that.getImgUrl('ref-frame')]
       ctx.save();
-      ctx.clearRect(0, 0, fullW, fullH);
+      ctx.clearRect(0, 0, this.refs.canvas.width, this.refs.canvas.height);
+      //ctx.setTransform((zoom / 100),0,0,(zoom / 100),-((zoom / 100)-1)*this.refs.canvas.width/2,-((zoom / 100)-1)*this.refs.canvas.height/2)
       ctx.translate(
-        fullW / 2, 
-        fullH / 2
+        fullW * (zoom / 100) / 2, 
+        fullH * (zoom / 100) / 2
       )
       ctx.rotate(rotateRad);
       ctx.translate(
-        -(fullW / 2), 
-        -(fullH / 2)
+        -(fullW * (zoom / 100) / 2), 
+        -(fullH * (zoom / 100) / 2)
       )
-      ctx.drawImage(full, 0, 0, 
-        fullW, 
-        fullH
-      );
+      ctx.drawImage(full, 0, 0, fullW * (zoom / 100), fullH * (zoom / 100));
       ctx.restore();
-      
       if (showAdjustOverlay) {
         ctx.globalAlpha = isNaN(adjustOpacity) ? 0 : adjustOpacity;
         // draw cross image
-        ctx.drawImage(ref, cropOffsetX, cropOffsetY,  
-          cropW * (zoom / 100),
-          cropH * (zoom / 100)
-        );
+        ctx.drawImage(ref, cropOffsetX, cropOffsetY, cropW, cropH);
         ctx.globalAlpha = 1.0; 
         ctx.strokeStyle = '#ff0000';
         // draw bounding rect
-        ctx.strokeRect(
-          cropOffsetX, cropOffsetY, cropW * (zoom / 100), cropH * (zoom / 100)
-        );
+        ctx.strokeRect(cropOffsetX, cropOffsetY, cropW, cropH);
         ctx.resetTransform();
       }
     });
