@@ -205,14 +205,14 @@ export default class SortingEngine {
     const logoY = Number.parseInt(settings.get('media.logo_y'), 10);
     const cropOffsetX = cropDeltaX;
     const cropOffsetY = cropDeltaY;
-
     const logoDir = settings.get('dir.logo');
+
     console.log('camera ' + cameraNum);
     console.log(logoDir);
     console.log([cropOffsetX, cropOffsetY]);
     console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
-    const passThrough = new stream.PassThrough();
+    let passThrough = new stream.PassThrough();
     gm(dir)
     .command('convert')
     .in('-resize', `${zoom}%`)
@@ -220,9 +220,23 @@ export default class SortingEngine {
     .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
     .stream()
     .pipe(passThrough)
+    if (applyLogo) {
+      let str = gm(passThrough)
+      .composite(logoDir)
+      .geometry(`+${logoX}+${logoY}`)
+      .stream()
+      passThrough = new stream.PassThrough();
+      str.pipe(passThrough)
+    }
+    if (applyOverlay) {
+      let str = gm(passThrough)
+      .composite(overlayFrames[cameraNum])
+      .geometry(`${cropW}x${cropH}+0+0`)
+      .stream()
+      passThrough = new stream.PassThrough();
+      str.pipe(passThrough)
+    }
     gm(passThrough)
-    .composite(logoDir)
-    .geometry(`+${logoX}+${logoY}`)
     .write(dir, err => {
       if (err) { console.log(err); }
       else {
@@ -232,64 +246,6 @@ export default class SortingEngine {
         });
       }
     })
-        // .write(dir, err => {
-        //   if (err) {
-        //     console.log('Error! ' + err);
-        //   } else {
-        //     if (applyLogo) { // logo
-        //       gm(dir)
-        //         .composite(logoDir)
-        //         .geometry(`+${logoX}+${logoY}`)
-        //         .write(dir, err => {
-        //           if(err) {
-        //             console.log('Error! ' + err)
-        //           } else {
-        //             if (applyOverlay) { // logo + overlay
-        //               gm(dir)
-        //                 .composite(overlayFrames[cameraNum])
-        //                 .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
-        //                 .write(dir, err => {
-        //                   if (err) {
-        //                     console.log('Error! ' + err);
-        //                   } else {
-        //                     moveFile(dir, destination)
-        //                       .then(() => {
-        //                         console.log(filename + ' moved to ' + destination);
-        //                       });
-        //                   }
-        //               })
-        //             } else {
-        //               moveFile(dir, destination)
-        //                 .then(() => {
-        //                   console.log(filename + ' moved to ' + destination);
-        //                 });
-        //             }
-        //           }
-        //         })
-        //     } else {
-        //       if (applyOverlay) { // overlay, no logo
-        //         gm(dir)
-        //           .composite(overlayFrames[cameraNum])
-        //           .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
-        //           .write(dir, err => {
-        //             if (err) {
-        //               console.log('Error! ' + err);
-        //             } else {
-        //               moveFile(dir, destination)
-        //                 .then(() => {
-        //                   console.log(filename + ' moved to ' + destination);
-        //                 });
-        //             }
-        //         })
-        //       } else { // no overlay, no logo
-        //          moveFile(dir, destination)
-        //           .then(() => {
-        //             console.log(filename + ' moved to ' + destination);
-        //           });
-        //       }
-        //     }
-        //   }
-        // });
   }
 
   // effects must be already applied at this point
