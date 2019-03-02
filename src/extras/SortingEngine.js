@@ -202,9 +202,8 @@ export default class SortingEngine {
     const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${cameraNum}`));
     const logoX = Number.parseInt(settings.get('media.logo_x'), 10);
     const logoY = Number.parseInt(settings.get('media.logo_y'), 10);
-
-    const cropOffsetX = ((fullW - cropW) / 2) + cropDeltaX;
-    const cropOffsetY = ((fullH - cropH) / 2) + cropDeltaY;
+    const cropOffsetX = cropDeltaX;
+    const cropOffsetY = cropDeltaY;
 
     const logoDir = settings.get('dir.logo');
     console.log('camera ' + cameraNum);
