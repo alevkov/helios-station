@@ -13,6 +13,7 @@ const path = remote.require('path');
 const moveFile = remote.require('move-file');
 const fs = remote.require('fs');
 const jimp = remote.require('jimp');
+const stream = remote.require('stream');
 const os = window.require('os');
 const graphicsmagick = remote.require('graphicsmagick-static');
 const imagemagick = remote.require('imagemagick-darwin-static');
@@ -211,69 +212,84 @@ export default class SortingEngine {
     console.log([cropOffsetX, cropOffsetY]);
     console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
+    const passThrough = new stream.PassThrough();
     gm(dir)
-        .command('convert')
-        .in('-resize', `${zoom}%`)
-        .in('-distort', 'SRT', `${rotate}`)
-        .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
-        .write(dir, err => {
-          if (err) {
-            console.log('Error! ' + err);
-          } else {
-            if (applyLogo) { // logo
-              gm(dir)
-                .composite(logoDir)
-                .geometry(`+${logoX}+${logoY}`)
-                .write(dir, err => {
-                  if(err) {
-                    console.log('Error! ' + err)
-                  } else {
-                    if (applyOverlay) { // logo + overlay
-                      gm(dir)
-                        .composite(overlayFrames[cameraNum])
-                        .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
-                        .write(dir, err => {
-                          if (err) {
-                            console.log('Error! ' + err);
-                          } else {
-                            moveFile(dir, destination)
-                              .then(() => {
-                                console.log(filename + ' moved to ' + destination);
-                              });
-                          }
-                      })
-                    } else {
-                      moveFile(dir, destination)
-                        .then(() => {
-                          console.log(filename + ' moved to ' + destination);
-                        });
-                    }
-                  }
-                })
-            } else {
-              if (applyOverlay) { // overlay, no logo
-                gm(dir)
-                  .composite(overlayFrames[cameraNum])
-                  .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
-                  .write(dir, err => {
-                    if (err) {
-                      console.log('Error! ' + err);
-                    } else {
-                      moveFile(dir, destination)
-                        .then(() => {
-                          console.log(filename + ' moved to ' + destination);
-                        });
-                    }
-                })
-              } else { // no overlay, no logo
-                 moveFile(dir, destination)
-                  .then(() => {
-                    console.log(filename + ' moved to ' + destination);
-                  });
-              }
-            }
-          }
+    .command('convert')
+    .in('-resize', `${zoom}%`)
+    .in('-distort', 'SRT', `${rotate}`)
+    .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
+    .stream()
+    .pipe(passThrough)
+    gm(passThrough)
+    .composite(logoDir)
+    .geometry(`+${logoX}+${logoY}`)
+    .write(dir, err => {
+      if (err) { console.log(err); }
+      else {
+        moveFile(dir, destination)
+        .then(() => {
+          console.log(filename + ' moved to ' + destination);
         });
+      }
+    })
+        // .write(dir, err => {
+        //   if (err) {
+        //     console.log('Error! ' + err);
+        //   } else {
+        //     if (applyLogo) { // logo
+        //       gm(dir)
+        //         .composite(logoDir)
+        //         .geometry(`+${logoX}+${logoY}`)
+        //         .write(dir, err => {
+        //           if(err) {
+        //             console.log('Error! ' + err)
+        //           } else {
+        //             if (applyOverlay) { // logo + overlay
+        //               gm(dir)
+        //                 .composite(overlayFrames[cameraNum])
+        //                 .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
+        //                 .write(dir, err => {
+        //                   if (err) {
+        //                     console.log('Error! ' + err);
+        //                   } else {
+        //                     moveFile(dir, destination)
+        //                       .then(() => {
+        //                         console.log(filename + ' moved to ' + destination);
+        //                       });
+        //                   }
+        //               })
+        //             } else {
+        //               moveFile(dir, destination)
+        //                 .then(() => {
+        //                   console.log(filename + ' moved to ' + destination);
+        //                 });
+        //             }
+        //           }
+        //         })
+        //     } else {
+        //       if (applyOverlay) { // overlay, no logo
+        //         gm(dir)
+        //           .composite(overlayFrames[cameraNum])
+        //           .geometry(`${(zoom / 100.0) * cropW}x${(zoom / 100.0) * cropH}+0+0`)
+        //           .write(dir, err => {
+        //             if (err) {
+        //               console.log('Error! ' + err);
+        //             } else {
+        //               moveFile(dir, destination)
+        //                 .then(() => {
+        //                   console.log(filename + ' moved to ' + destination);
+        //                 });
+        //             }
+        //         })
+        //       } else { // no overlay, no logo
+        //          moveFile(dir, destination)
+        //           .then(() => {
+        //             console.log(filename + ' moved to ' + destination);
+        //           });
+        //       }
+        //     }
+        //   }
+        // });
   }
 
   // effects must be already applied at this point
