@@ -203,8 +203,8 @@ export default class SortingEngine {
     const logoX = Number.parseInt(settings.get('media.logo_x'), 10);
     const logoY = Number.parseInt(settings.get('media.logo_y'), 10);
 
-    const cropOffsetX = ((fullW - (cropW * (zoom / 100)))/2) + cropDeltaX;
-    const cropOffsetY = ((fullH - (cropH * (zoom / 100)))/2) + cropDeltaY;
+    const cropOffsetX = ((fullW - cropW) / 2) + cropDeltaX;
+    const cropOffsetY = ((fullH - cropH) / 2) + cropDeltaY;
 
     const logoDir = settings.get('dir.logo');
     console.log('camera ' + cameraNum);
@@ -213,12 +213,10 @@ export default class SortingEngine {
     console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
     gm(dir)
-        .resize((zoom / 100.0) * fullW, (zoom / 100.0) * fullH)
+        .command('convert')
+        .in('-resize', `${zoom}%`)
         .in('-distort', 'SRT', `${rotate}`)
-        .crop(cropW,
-              cropH,
-              cropOffsetX,
-              cropOffsetY)
+        .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
         .write(dir, err => {
           if (err) {
             console.log('Error! ' + err);
