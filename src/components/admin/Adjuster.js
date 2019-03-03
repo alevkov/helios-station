@@ -4,7 +4,12 @@ import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import Select from 'react-select';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { settings, setIfNot } from '../../common';
+import { 
+  settings,
+  setIfNot,
+  getInt, 
+  getFloat 
+} from '../../common';
 import '../../styles/Adjuster.css';
 
 const { dialog } = window.require('electron').remote; 
@@ -38,22 +43,22 @@ export default class SelectDock extends React.Component {
       return;
     }
     // get params
-    const canvasZoomScalar = Number.parseFloat(settings.get(`canvas.zoom`)) / 100;
-    const fullW = canvasZoomScalar * Number.parseInt(settings.get(`photo.full_w`), 10);
-    const fullH = canvasZoomScalar * Number.parseInt(settings.get(`photo.full_h`), 10);
-    const cropDeltaX = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_delta_x.f_${this.props.selectedFrame.value}`), 10);
-    const cropDeltaY = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_delta_y.f_${this.props.selectedFrame.value}`), 10);
-    const zoomScalar =  Number.parseFloat(settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`)) / 100;
-    const cropW = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_w`), 10);
-    const cropH = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_h`), 10);
-    const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${this.props.selectedFrame.value}`));
+    const canvasZoomScalar = getFloat(`canvas.zoom`) / 100;
+    const fullW = canvasZoomScalar * getInt(`photo.full_w`);
+    const fullH = canvasZoomScalar * getInt(`photo.full_h`);
+    const cropDeltaX = canvasZoomScalar * getInt(`photo.crop_delta_x.f_${this.props.selectedFrame.value}`);
+    const cropDeltaY = canvasZoomScalar * getInt(`photo.crop_delta_y.f_${this.props.selectedFrame.value}`);
+    const zoomScalar =  getFloat(`photo.zoom.f_${this.props.selectedFrame.value}`) / 100;
+    const cropW = canvasZoomScalar * getInt(`photo.crop_w`);
+    const cropH = canvasZoomScalar * getInt(`photo.crop_h`);
+    const rotate = getFloat(`photo.rotate.f_${this.props.selectedFrame.value}`);
     const rotateRad = rotate * Math.PI / 180;
     const showAdjustOverlay = settings.get('canvas.adjustFrameOn');
-    const adjustOpacity = Number.parseFloat(settings.get(`canvas.adjustOpacity`));
-    const referenceOpacity = Number.parseFloat(settings.get(`canvas.referenceOpacity`));
+    const adjustOpacity = getFloat(`canvas.adjustOpacity`);
+    const referenceOpacity = getFloat(`canvas.referenceOpacity`);
 
     console.log([canvasZoomScalar, fullW, fullH, cropDeltaX, cropDeltaY]);
-    console.log([zoom, cropW, cropH, rotateRad]);
+    console.log([zoomScalar, cropW, cropH, rotateRad]);
 
     // calculate crop frame offsets
     const cropOffsetX = cropDeltaX;
@@ -140,8 +145,8 @@ export default class SelectDock extends React.Component {
   }
 
   render() {
-    const fullW = Number.parseInt(settings.get(`photo.full_w`), 10);
-    const fullH = Number.parseInt(settings.get(`photo.full_h`), 10);
+    const fullW = getInt(`photo.full_w`);
+    const fullH = getInt(`photo.full_h`);
     const cropDeltaX = Number.parseInt(
       settings.get(`photo.crop_delta_x.f_${this.props.selectedFrame.value}`), 10
     );
@@ -151,9 +156,9 @@ export default class SelectDock extends React.Component {
     const zoom = Number.parseFloat(
       settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`), 10
     );
-    const cropW = Number.parseInt(settings.get(`photo.crop_w`), 10);
-    const cropH = Number.parseInt(settings.get(`photo.crop_h`), 10);
-    const canvasZoom = Number.parseFloat(settings.get(`canvas.zoom`));
+    const cropW = getInt(`photo.crop_w`);
+    const cropH = getInt(`photo.crop_h`);
+    const canvasZoom = getFloat(`canvas.zoom`);
     const adjustOpacity = Number.parseFloat(
       settings.get(`canvas.adjustOpacity`)
     );

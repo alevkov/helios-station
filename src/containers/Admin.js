@@ -250,7 +250,6 @@ export const Admin = observer(class Admin extends Component {
 
   render() {
     this.initFrameOptions();
-    //const effectsTestImgSrc = 'http://helios-microsite.imgix.net/test/sample.jpg';
     // options
     const logo_x = settings.get(`media.logo_x`);
     const logo_y = settings.get(`media.logo_y`);

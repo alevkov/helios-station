@@ -18,6 +18,18 @@ export const setIfNot = (key, value) => {
   if (settings.get(key) === undefined) settings.set(key, value);
 }
 
+export const getInt = (key) => {
+  return Number.parseInt(settings.get(key), 10);
+}
+
+export const getFloat = (key) => {
+  return Number.parseFloat(settings.get(key));
+}
+
+export const getStr = (key) => {
+  return `${settings.get(key)}`;
+}
+
 // Defaults
 setIfNot('event.name', 'abc');
 setIfNot('event.station', 1);
