@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import Admin from './Admin';
+import SortingEngine from '../extras/SortingEngine';
 import Gallery from '../components/neptunian/Gallery';
 import { Carousel } from 'react-responsive-carousel';
 import SelectedImage from '../components/neptunian/SelectedImage';
@@ -48,6 +50,7 @@ export const Home = observer(class Home extends Component {
       Home._PhotoRemovedSub = emitter.addListener(EVENT_PHOTO_REMOVED,
        this.onPhotoRemoved);
     }
+    this.initSortingEngineIfDirsSelected();
   }
 
   onPhotoAdded = (...args) => {
@@ -132,46 +135,24 @@ export const Home = observer(class Home extends Component {
       uploadProgress: progress
     });
   }
-  /*
-  onSelectChanged = name => option => {
-    switch (name) {
-      case 'photo.effect': {
-        const proc = new ImageProcessor();
-        let params;
-        const effectName = option.value;
-        if (effectName === 'original') {
-          const newImages = proc.reset(Home.o_photosList.slice());
-          Home.o_photosList.replace(newImages);
-          this.setState({
-            selectedEffect: option.value
-          });
-        } else {
-          if (effectName === 'grayscale') {
-            params = {
-              type: effectName
-            };
-          } else if (effectName === 'sepia') {
-            params = {
-              type: effectName
-            };
-          }
-          proc.applyEffect(params, Home.o_photosList.slice())
-            .then((newImages) => {
-              Home.o_photosList.replace(newImages);
-              this.setState({
-                selectedEffect: option.value
-              });
-            });
-        }
-      }
-      default: {
-        break;
-      }
-    }
-  }*/
 
   onTextChanged = name => event => {
     settings.set(name, event.target.value);
+  }
+
+  initSortingEngineIfDirsSelected = () => {
+    if (settings.get('dir.source') !== undefined &&
+        settings.get('dir.sort') !== undefined &&
+        settings.get('dir.media') !== undefined) {
+      // initialize sorting engine
+      if (Admin._sortingEngine == null) {
+              Admin._sortingEngine =
+        new SortingEngine(
+          settings.get('dir.source'), 
+          settings.get('dir.sort'),
+          settings.get('dir.media'));
+      }
+    }
   }
 
   render() {
@@ -197,15 +178,6 @@ export const Home = observer(class Home extends Component {
     );
     return (
       <div className='Home'> 
-      {/*** Select Effects 
-        <div className='Home-top-bar'>
-        { this.state.photos.length > 0 ? 
-          <Select
-            autorize={false}
-            options={effectsList} 
-            placeholder='Effects..'
-            onChange={this.onSelectChanged('photo.effect')}/> : null }
-        </div> ***/} 
       { this.state.uploadProgress > 0 && this.state.uploadProgress < 100 ? 
         <Line percent={this.state.uploadProgress} strokeWidth="2" strokeColor="#4b0082" />
         : null }
