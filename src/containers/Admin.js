@@ -190,7 +190,7 @@ export const Admin = observer(class Admin extends Component {
         break;
       }
       case 'photo.frame': {
-        console.log(option.value);
+        console.log(option);
         this.setState({
           selectedFrame: option
         });

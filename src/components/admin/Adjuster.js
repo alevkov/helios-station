@@ -127,8 +127,11 @@ export default class SelectDock extends React.Component {
         properties: ['openFile']
     }, (dir) => {
         if (dir !== undefined) {
+          const filename = dir[0].replace(/^.*[\\\/]/, '');
+          const camera = Number.parseInt(filename.split('_')[1].split('.')[0], 10);
           this.props.onDirSelected('full-frame', dir);
           this.updateCanvas();
+          this.props.onSelectChanged('photo.frame')({value: camera, label: `Frame ${camera}`});
         }
     });
   }
