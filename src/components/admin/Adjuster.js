@@ -38,21 +38,21 @@ export default class SelectDock extends React.Component {
       return;
     }
     // get params
-    const canvasZoom = Number.parseFloat(settings.get(`canvas.zoom`));
-    const fullW = (canvasZoom/100) * Number.parseInt(settings.get(`photo.full_w`), 10);
-    const fullH = (canvasZoom/100) * Number.parseInt(settings.get(`photo.full_h`), 10);
-    const cropDeltaX = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_delta_x.f_${this.props.selectedFrame.value}`), 10);
-    const cropDeltaY = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_delta_y.f_${this.props.selectedFrame.value}`), 10);
-    const zoom =  Number.parseFloat(settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`), 10);
-    const cropW = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_w`), 10);
-    const cropH = (canvasZoom/100) * Number.parseInt(settings.get(`photo.crop_h`), 10);
+    const canvasZoomScalar = Number.parseFloat(settings.get(`canvas.zoom`)) / 100;
+    const fullW = canvasZoomScalar * Number.parseInt(settings.get(`photo.full_w`), 10);
+    const fullH = canvasZoomScalar * Number.parseInt(settings.get(`photo.full_h`), 10);
+    const cropDeltaX = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_delta_x.f_${this.props.selectedFrame.value}`), 10);
+    const cropDeltaY = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_delta_y.f_${this.props.selectedFrame.value}`), 10);
+    const zoomScalar =  Number.parseFloat(settings.get(`photo.zoom.f_${this.props.selectedFrame.value}`)) / 100;
+    const cropW = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_w`), 10);
+    const cropH = canvasZoomScalar * Number.parseInt(settings.get(`photo.crop_h`), 10);
     const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${this.props.selectedFrame.value}`));
     const rotateRad = rotate * Math.PI / 180;
     const showAdjustOverlay = settings.get('canvas.adjustFrameOn');
     const adjustOpacity = Number.parseFloat(settings.get(`canvas.adjustOpacity`));
     const referenceOpacity = Number.parseFloat(settings.get(`canvas.referenceOpacity`));
 
-    console.log([canvasZoom, fullW, fullH, cropDeltaX, cropDeltaY]);
+    console.log([canvasZoomScalar, fullW, fullH, cropDeltaX, cropDeltaY]);
     console.log([zoom, cropW, cropH, rotateRad]);
 
     // calculate crop frame offsets
@@ -68,22 +68,25 @@ export default class SelectDock extends React.Component {
       let full = that.state.loadedImages[that.getImgUrl('full-frame')]
       let ref = that.state.loadedImages[that.getImgUrl('ref-frame')]
       ctx.save();
+      // create outer rect
       ctx.clearRect(0, 0, this.refs.canvas.width, this.refs.canvas.height);
-      //ctx.setTransform((zoom / 100),0,0,(zoom / 100),-((zoom / 100)-1)*this.refs.canvas.width/2,-((zoom / 100)-1)*this.refs.canvas.height/2)
+      // move to center
       ctx.translate(
-        fullW * (zoom / 100) / 2, 
-        fullH * (zoom / 100) / 2
+        fullW * zoomScalar / 2, 
+        fullH * zoomScalar / 2
       )
+      // rotate about center
       ctx.rotate(rotateRad);
       ctx.translate(
-        -(fullW * (zoom / 100) / 2), 
-        -(fullH * (zoom / 100) / 2)
+        -(fullW * zoomScalar / 2), 
+        -(fullH * zoomScalar / 2)
       )
-      ctx.drawImage(full, 0, 0, fullW * (zoom / 100), fullH * (zoom / 100));
+      // draw full frame
+      ctx.drawImage(full, 0, 0, fullW * zoomScalar, fullH * zoomScalar);
       ctx.restore();
       if (showAdjustOverlay) {
         ctx.globalAlpha = isNaN(adjustOpacity) ? 0 : adjustOpacity;
-        // draw cross image
+        // draw crop frame
         ctx.drawImage(ref, cropOffsetX, cropOffsetY, cropW, cropH);
         ctx.globalAlpha = 1.0; 
         ctx.strokeStyle = '#ff0000';
