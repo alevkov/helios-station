@@ -12,17 +12,21 @@ const os = require('os');
 const graphicsmagick = require('graphicsmagick-static');
 const imagemagick = require('imagemagick-darwin-static');
 
+function getDelim () {
+ return os.platform() === 'darwin' ? '/' : '\\';
+}
+
 const { subClass } = require('gm');
 let gm;
 
 if (os.platform() == "win32") {
     gm = subClass({
-        appPath: `${graphicsmagick.path}/`
+        appPath: `${graphicsmagick.path}${getDelim()}`
     })
 } else {
     gm = subClass({
         imageMagick: true,
-        appPath: `${imagemagick.path}/`
+        appPath: `${imagemagick.path}${getDelim()}`
     })
 }
 

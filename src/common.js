@@ -2,6 +2,7 @@ import ImageProcessor from './extras/ImageProcessor';
 
 const { EventEmitter } = require('fbemitter');
 const electron = window.require('electron'); 
+const os = require('os');
 
 export const emitter = new EventEmitter();
 
@@ -32,6 +33,10 @@ export const getStr = key => {
 
 export const getBool = key => {
   return Boolean(settings.get(key));
+}
+
+export const getDelim = () => {
+ return os.platform() === 'darwin' ? '/' : '\\';
 }
 
 // Defaults

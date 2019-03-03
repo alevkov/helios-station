@@ -259,7 +259,7 @@ export default class SortingEngine {
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
       ipcRenderer.on('media-reply', (event, arg) => {  
-        console.log(arg);
+        emitter.emit(EVENT_PHOTO_ADDED, arg);
       });
     }
   }

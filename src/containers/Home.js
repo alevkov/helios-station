@@ -70,6 +70,7 @@ export const Home = observer(class Home extends Component {
     console.log(image);
     Home._shotList.add(shot);
     Home.o_photosList.push(image);
+    this.forceUpdate();
   }
 
   onPhotoRemoved = (...args) => {
