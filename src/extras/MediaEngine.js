@@ -2,33 +2,27 @@
   The following functions are executed in a BrowserWindow background process using electron-remote.
   This file must be included in the "public" folder before distribution, since it is used by the application starter.
 */
-const path = require('path');
-class AppPaths {
-    static replaceAsar(path = "") {
-        return path.replace(".asar", ".asar.unpacked");
-    }
-}
+
 const gifshot = require('gifshot');
 const electron = require('electron');
 const settings = require('electron-settings');
 const fs = require('fs');
+const path = require('path');
 const os = require('os');
 const graphicsmagick = require('graphicsmagick-static');
 const imagemagick = require('imagemagick-darwin-static');
-let imagemagickPath = require('imagemagick-darwin-static').path;
-let fixedPath = AppPaths.replaceAsar(imagemagickPath);
 
 const { subClass } = require('gm');
 let gm;
 
 if (os.platform() == "win32") {
     gm = subClass({
-        appPath: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))
+        appPath: `${graphicsmagick.path}/`
     })
 } else {
     gm = subClass({
         imageMagick: true,
-        appPath: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))
+        appPath: `${imagemagick.path}/`
     })
 }
 

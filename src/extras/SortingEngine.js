@@ -7,20 +7,18 @@ import {
   getInt,
   getFloat
 } from '../common';
-import AppPaths from './AppPaths';
 
 const { ipcRenderer, remote } = window.require('electron');
 const choker = remote.require('chokidar');
-const path = remote.require('path');
+const path = require('path');
 const moveFile = remote.require('move-file');
 const fs = remote.require('fs');
-const jimp = remote.require('jimp');
 const stream = remote.require('stream');
 const os = window.require('os');
 const graphicsmagick = remote.require('graphicsmagick-static');
 const imagemagick = remote.require('imagemagick-darwin-static');
 let imagemagickPath = remote.require('imagemagick-darwin-static').path;
-let fixedPath = AppPaths.replaceAsar(imagemagickPath);
+console.log(imagemagickPath);
 
 const { subClass } = remote.require('gm');
 let gm;
@@ -30,8 +28,8 @@ if (os.platform() == "win32") {
 } else {
     gm = subClass({
         imageMagick: true,
-        appPath: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))
-    })
+        appPath: path.join(`${imagemagickPath}`, '/')
+    });
 }
 
 export default class SortingEngine {

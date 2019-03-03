@@ -73,9 +73,6 @@
     "directories": {
       "buildResources": "public"
     },
-    "asar": true,
-    "asarUnpack": [
-      "**node_modules/imagemagick-darwin-static/**"
-    ]
+    "asar": false
   }
 }
