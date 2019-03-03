@@ -4,6 +4,7 @@ import {
   EVENT_SOURCE_FOLDER_SELECTED,
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED,
+  EVENT_GALLERY_REFRESH,
   getInt,
   getFloat
 } from '../common';
@@ -259,7 +260,8 @@ export default class SortingEngine {
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
       ipcRenderer.on('media-reply', (event, arg) => {  
-        emitter.emit(EVENT_PHOTO_ADDED, arg);
+        console.log(arg);
+        emitter.emit(EVENT_GALLERY_REFRESH, arg);
       });
     }
   }
@@ -272,7 +274,6 @@ export default class SortingEngine {
   onSortedPhotoRemoved = (index, dir) => {
     console.log(`Removed ${dir}, ${index}`);
     SortingEngine._sortDirMap.get(index).delete(dir);
-    //emitter.emit(EVENT_PHOTO_REMOVED, dir);
   }
 
   onMediaRemoved = dir => {
