@@ -3,7 +3,9 @@ import {
   settings,
   EVENT_SOURCE_FOLDER_SELECTED,
   EVENT_PHOTO_ADDED,
-  EVENT_PHOTO_REMOVED
+  EVENT_PHOTO_REMOVED,
+  getInt,
+  getFloat
 } from '../common';
 import AppPaths from './AppPaths';
 
@@ -170,7 +172,7 @@ export default class SortingEngine {
       fs.readdirSync(settings.get('media.overlay').value).forEach(file => {
         overlayFrames.push(settings.get('media.overlay').value + (os.platform() === 'darwin' ? '/' : '\\') + file);
       });
-      if (overlayFrames.length < Number.parseInt(settings.get('media.frames'), 10)) {
+      if (overlayFrames.length < getInt('media.frames')) {
         console.log('Warning! Not enough overlay frames');
         applyOverlay = false;
       }
@@ -193,16 +195,16 @@ export default class SortingEngine {
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
     // TODO: apply xform in ImageProcessor
-    const zoom =  Number.parseFloat(settings.get(`photo.zoom.f_${cameraNum}`));
-    const cropW = Number.parseInt(settings.get(`photo.crop_w`), 10);
-    const cropH = Number.parseInt(settings.get(`photo.crop_h`), 10);
-    const cropDeltaX = Number.parseInt(settings.get(`photo.crop_delta_x.f_${cameraNum}`), 10);
-    const cropDeltaY = Number.parseInt(settings.get(`photo.crop_delta_y.f_${cameraNum}`), 10);
-    const fullW = Number.parseInt(settings.get(`photo.full_w`), 10);
-    const fullH = Number.parseInt(settings.get(`photo.full_h`), 10);
-    const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${cameraNum}`));
-    const logoX = Number.parseInt(settings.get('media.logo_x'), 10);
-    const logoY = Number.parseInt(settings.get('media.logo_y'), 10);
+    const zoom =  getFloat(`photo.zoom.f_${cameraNum}`);
+    const cropW = getInt(`photo.crop_w`);
+    const cropH = getInt(`photo.crop_h`);
+    const cropDeltaX = getInt(`photo.crop_delta_x.f_${cameraNum}`);
+    const cropDeltaY = getInt(`photo.crop_delta_y.f_${cameraNum}`);
+    const fullW = getInt(`photo.full_w`);
+    const fullH = getInt(`photo.full_h`);
+    const rotate = getFloat(`photo.rotate.f_${cameraNum}`);
+    const logoX = getInt('media.logo_x');
+    const logoY = getInt('media.logo_y');
     const cropOffsetX = cropDeltaX;
     const cropOffsetY = cropDeltaY;
     const logoDir = settings.get('dir.logo');
@@ -251,7 +253,7 @@ export default class SortingEngine {
   // effects must be already applied at this point
   onSortedPhotoAdded = (index, dir) => {
     SortingEngine._sortDirMap.get(index).add(dir);
-    const maxNum = Number.parseInt(settings.get('media.frames'), 10);
+    const maxNum = getInt('media.frames');
     console.log('Number of frames in ' + index + ': ' + SortingEngine._sortDirMap.get(index).size);
     console.log('Max num: ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
