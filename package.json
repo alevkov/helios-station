@@ -72,6 +72,10 @@
     "appId": "com.helios.sharing-station",
     "directories": {
       "buildResources": "public"
-    }
+    },
+    "asar": true,
+    "asarUnpack": [
+      "**node_modules/imagemagick-darwin-static/**"
+    ]
   }
 }
