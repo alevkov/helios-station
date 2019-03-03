@@ -22,9 +22,7 @@ const { subClass } = require('gm');
 let gm;
 
 if (os.platform() == "win32") {
-    gm = subClass({
-        appPath: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))
-    })
+    gm = subClass({imageMagick: true})
 } else {
     gm = subClass({
         imageMagick: true,
