@@ -22,7 +22,9 @@ const { subClass } = require('gm');
 let gm;
 
 if (os.platform() == "win32") {
-    gm = subClass({imageMagick: true})
+    gm = subClass({
+        appPath: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))
+    })
 } else {
     gm = subClass({
         imageMagick: true,
@@ -66,11 +68,11 @@ function generateGif(frames) {
     console.log('in generate');
     // get cached parameters
     const boomerang = Boolean(settings.get('media.boomerang'));
-    const loop = Boolean(settings.get('media.loop'));
+    const loop = Number.parseInt(!Boolean(settings.get('media.loop')), 10);
     const numFrames = Number.parseInt(settings.get('media.frames'), 10);
     const width = Number.parseInt(settings.get(`media.width`), 10);
     const height = Number.parseInt(settings.get(`media.height`), 10);
-    const duration = (1.0 / Number.parseInt(settings.get('media.fps'), 10)) * 100;
+    const duration = 100.0 / Number.parseInt(settings.get('media.fps'), 10);
     // sort frames
     const sorted = sortedFrames(frames, true);
     const sortedDescending = sortedFrames(frames, false);
@@ -94,9 +96,9 @@ function generateGif(frames) {
     for (let i = 0; i < finalFrames.length; i++) {
       convert.in(finalFrames[i]);
     }
-    convert.delay(duration);
-    convert.resize(width, height);
-    convert.quality(100);
+    convert.in('-delay', `${duration}`);
+    convert.in('-resize', `${width}x${height}`)
+    convert.in('-quality', `100`);
     convert.write(dest, function(err) {
       if (err) { alert(err); reject(err); }
       resolve(dest);

@@ -18,16 +18,20 @@ export const setIfNot = (key, value) => {
   if (settings.get(key) === undefined) settings.set(key, value);
 }
 
-export const getInt = (key) => {
+export const getInt = key => {
   return Number.parseInt(settings.get(key), 10);
 }
 
-export const getFloat = (key) => {
+export const getFloat = key => {
   return Number.parseFloat(settings.get(key));
 }
 
-export const getStr = (key) => {
+export const getStr = key => {
   return `${settings.get(key)}`;
+}
+
+export const getBool = key => {
+  return Boolean(settings.get(key));
 }
 
 // Defaults
