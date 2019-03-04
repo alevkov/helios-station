@@ -4,7 +4,6 @@ import {
   EVENT_SOURCE_FOLDER_SELECTED,
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED,
-  EVENT_GALLERY_REFRESH,
   getInt,
   getFloat
 } from '../common';
@@ -12,8 +11,7 @@ import {
 const { ipcRenderer, remote } = window.require('electron');
 const choker = remote.require('chokidar');
 const path = require('path');
-const moveFile = remote.require('move-file');
-const fs = remote.require('fs');
+const fs = remote.require('fs-extra');
 const stream = remote.require('stream');
 const os = window.require('os');
 const graphicsmagick = remote.require('graphicsmagick-static');
@@ -242,10 +240,10 @@ export default class SortingEngine {
       .write(dir, err => {
         if (err) { console.log(err); }
         else {
-          moveFile(dir, destination)
-          .then(() => {
+          fs.move(dir, destination, err => {
+            if (err) { console.log(err); }
             console.log(filename + ' moved to ' + destination);
-          });
+          })
         }
       });      
     });
