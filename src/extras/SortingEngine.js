@@ -104,6 +104,7 @@ export default class SortingEngine {
             SortingEngine._dirWatchMap.delete(dir);
           }
           fs.mkdirSync(dir);
+          fs.mkdirSync(`${dir}-backup`)
         }
         if (!SortingEngine._dirWatchMap.get(dir)) {
           SortingEngine._sortDirMap.set(index, new Set());
@@ -191,6 +192,9 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
+    const backupDestination = `${indexPath}-backup` + 
+      (os.platform() === 'darwin' ? '/' : '\\') +
+      filename;
     // TODO: apply xform in ImageProcessor
     const zoom =  getFloat(`photo.zoom.f_${cameraNum}`);
     const cropW = getInt(`photo.crop_w`);
@@ -208,39 +212,43 @@ export default class SortingEngine {
 
     //TODO: convert to pipeline
     let passThrough = new stream.PassThrough();
-    gm(dir)
-    .command('convert')
-    .in('-resize', `${zoom}%`)
-    .in('-distort', 'SRT', `${rotate}`)
-    .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
-    .stream()
-    .pipe(passThrough)
-    if (applyLogo) {
-      let str = gm(passThrough)
-      .composite(logoDir)
-      .geometry(`+${logoX}+${logoY}`)
+    // make backup copy
+    gm(dir).write(backupDestination, err => {
+      gm(backupDestination)
+      // xform: zoom -> rotate abt center -> crop
+      .command('convert')
+      .in('-resize', `${zoom}%`)
+      .in('-distort', 'SRT', `${rotate}`)
+      .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
       .stream()
-      passThrough = new stream.PassThrough();
-      str.pipe(passThrough)
-    }
-    if (applyOverlay) {
-      let str = gm(passThrough)
-      .composite(overlayFrames[cameraNum])
-      .geometry(`${cropW}x${cropH}+0+0`)
-      .stream()
-      passThrough = new stream.PassThrough();
-      str.pipe(passThrough)
-    }
-    gm(passThrough)
-    .write(dir, err => {
-      if (err) { console.log(err); }
-      else {
-        moveFile(dir, destination)
-        .then(() => {
-          console.log(filename + ' moved to ' + destination);
-        });
+      .pipe(passThrough)
+      if (applyLogo) {
+        let str = gm(passThrough)
+        .composite(logoDir)
+        .geometry(`+${logoX}+${logoY}`)
+        .stream()
+        passThrough = new stream.PassThrough();
+        str.pipe(passThrough)
       }
-    })
+      if (applyOverlay) {
+        let str = gm(passThrough)
+        .composite(overlayFrames[cameraNum])
+        .geometry(`${cropW}x${cropH}+0+0`)
+        .stream()
+        passThrough = new stream.PassThrough();
+        str.pipe(passThrough)
+      }
+      gm(passThrough)
+      .write(dir, err => {
+        if (err) { console.log(err); }
+        else {
+          moveFile(dir, destination)
+          .then(() => {
+            console.log(filename + ' moved to ' + destination);
+          });
+        }
+      });      
+    });
   }
 
   // effects must be already applied at this point
