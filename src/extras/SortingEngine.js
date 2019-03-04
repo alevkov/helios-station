@@ -160,15 +160,13 @@ export default class SortingEngine {
   }
 
   onSourcePhotoAdded = dir => {
-    console.log('file added!');
     let overlayFrames = []
     let applyOverlay = settings.get('media.applyOverlay') && settings.get('media.overlay') != undefined;
     let applyLogo = settings.get('media.applyLogo') && settings.get('dir.logo') != undefined;
-    console.log(applyOverlay);
-    console.log(applyLogo);
+    console.log('overlay: ' + applyOverlay);
+    console.log('logo: ' + applyLogo);
 
     if (applyOverlay) {
-      console.log('getting overlay frames');
       fs.readdirSync(settings.get('media.overlay').value).forEach(file => {
         overlayFrames.push(settings.get('media.overlay').value + (os.platform() === 'darwin' ? '/' : '\\') + file);
       });
@@ -179,7 +177,6 @@ export default class SortingEngine {
     }
 
     overlayFrames = this.sortedFrames(overlayFrames, true);
-    console.log(overlayFrames);
 
     const filename = dir.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0]; // shot number
@@ -209,10 +206,6 @@ export default class SortingEngine {
     const cropOffsetY = cropDeltaY;
     const logoDir = settings.get('dir.logo');
 
-    console.log('camera ' + cameraNum);
-    console.log(logoDir);
-    console.log([cropOffsetX, cropOffsetY]);
-    console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
     let passThrough = new stream.PassThrough();
     gm(dir)
@@ -254,25 +247,21 @@ export default class SortingEngine {
   onSortedPhotoAdded = (index, dir) => {
     SortingEngine._sortDirMap.get(index).add(dir);
     const maxNum = getInt('media.frames');
-    console.log('Number of frames in ' + index + ': ' + SortingEngine._sortDirMap.get(index).size);
-    console.log('Max num: ' + maxNum);
+    console.log('frame ' + SortingEngine._sortDirMap.get(index).size + ' out of ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
       SortingEngine._isCreatingMedia = true;
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
       ipcRenderer.once('media-reply', (event, arg) => {  
-        console.log(arg);
         emitter.emit(EVENT_PHOTO_ADDED, arg);
       });
     }
   }
 
   onMediaAdded = dir => {
-    console.log('is creating: ' + SortingEngine._isCreatingMedia)
     console.log('SortingEngine: media added: ' + dir);
     if (!SortingEngine._isCreatingMedia) {
-      console.log('emitting EVENT');
       emitter.emit(EVENT_PHOTO_ADDED, dir);
     }
   }
