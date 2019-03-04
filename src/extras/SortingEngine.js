@@ -261,10 +261,9 @@ export default class SortingEngine {
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
-      ipcRenderer.on('media-reply', (event, arg) => {  
+      ipcRenderer.once('media-reply', (event, arg) => {  
         console.log(arg);
         emitter.emit(EVENT_PHOTO_ADDED, arg);
-        SortingEngine._isCreatingMedia = false;
       });
     }
   }
@@ -273,6 +272,7 @@ export default class SortingEngine {
     console.log('is creating: ' + SortingEngine._isCreatingMedia)
     console.log('SortingEngine: media added: ' + dir);
     if (!SortingEngine._isCreatingMedia) {
+      console.log('emitting EVENT');
       emitter.emit(EVENT_PHOTO_ADDED, dir);
     }
   }
