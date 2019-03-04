@@ -40,6 +40,7 @@ export default class SortingEngine {
   static _mediaDir = null;
   static _sortDirMap = new Map(); // [string: Set<string>]
   static _dirWatchMap = new Map(); // [string: Watcher]
+  static _isCreatingMedia = false;
 
   constructor(source, sort, media) {
     SortingEngine._sourceDir = source;
@@ -256,19 +257,24 @@ export default class SortingEngine {
     console.log('Number of frames in ' + index + ': ' + SortingEngine._sortDirMap.get(index).size);
     console.log('Max num: ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
+      SortingEngine._isCreatingMedia = true;
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
       ipcRenderer.on('media-reply', (event, arg) => {  
         console.log(arg);
-        emitter.emit(EVENT_GALLERY_REFRESH, arg);
+        emitter.emit(EVENT_PHOTO_ADDED, arg);
+        SortingEngine._isCreatingMedia = false;
       });
     }
   }
 
   onMediaAdded = dir => {
+    console.log('is creating: ' + SortingEngine._isCreatingMedia)
     console.log('SortingEngine: media added: ' + dir);
-    emitter.emit(EVENT_PHOTO_ADDED, dir);
+    if (!SortingEngine._isCreatingMedia) {
+      emitter.emit(EVENT_PHOTO_ADDED, dir);
+    }
   }
 
   onSortedPhotoRemoved = (index, dir) => {

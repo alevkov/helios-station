@@ -95,7 +95,6 @@ export const Home = observer(class Home extends Component {
       trick to refresh the gallery view,
       since gifs don't load fully immediately after creation
     */
-    Home.o_photosList.concat(observable([]));
   }
 
   onSelectPhoto = (event, obj) => {
