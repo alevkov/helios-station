@@ -4,7 +4,6 @@ import {
   EVENT_SOURCE_FOLDER_SELECTED,
   EVENT_PHOTO_ADDED,
   EVENT_PHOTO_REMOVED,
-  EVENT_GALLERY_REFRESH,
   getInt,
   getFloat
 } from '../common';
@@ -12,8 +11,7 @@ import {
 const { ipcRenderer, remote } = window.require('electron');
 const choker = remote.require('chokidar');
 const path = require('path');
-const moveFile = remote.require('move-file');
-const fs = remote.require('fs');
+const fs = remote.require('fs-extra');
 const stream = remote.require('stream');
 const os = window.require('os');
 const graphicsmagick = remote.require('graphicsmagick-static');
@@ -104,6 +102,7 @@ export default class SortingEngine {
             SortingEngine._dirWatchMap.delete(dir);
           }
           fs.mkdirSync(dir);
+          fs.mkdirSync(`${dir}-backup`)
         }
         if (!SortingEngine._dirWatchMap.get(dir)) {
           SortingEngine._sortDirMap.set(index, new Set());
@@ -160,15 +159,13 @@ export default class SortingEngine {
   }
 
   onSourcePhotoAdded = dir => {
-    console.log('file added!');
     let overlayFrames = []
     let applyOverlay = settings.get('media.applyOverlay') && settings.get('media.overlay') != undefined;
     let applyLogo = settings.get('media.applyLogo') && settings.get('dir.logo') != undefined;
-    console.log(applyOverlay);
-    console.log(applyLogo);
+    console.log('overlay: ' + applyOverlay);
+    console.log('logo: ' + applyLogo);
 
     if (applyOverlay) {
-      console.log('getting overlay frames');
       fs.readdirSync(settings.get('media.overlay').value).forEach(file => {
         overlayFrames.push(settings.get('media.overlay').value + (os.platform() === 'darwin' ? '/' : '\\') + file);
       });
@@ -179,7 +176,6 @@ export default class SortingEngine {
     }
 
     overlayFrames = this.sortedFrames(overlayFrames, true);
-    console.log(overlayFrames);
 
     const filename = dir.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0]; // shot number
@@ -194,6 +190,9 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
+    const backupDestination = `${indexPath}-backup` + 
+      (os.platform() === 'darwin' ? '/' : '\\') +
+      filename;
     // TODO: apply xform in ImageProcessor
     const zoom =  getFloat(`photo.zoom.f_${cameraNum}`);
     const cropW = getInt(`photo.crop_w`);
@@ -209,68 +208,64 @@ export default class SortingEngine {
     const cropOffsetY = cropDeltaY;
     const logoDir = settings.get('dir.logo');
 
-    console.log('camera ' + cameraNum);
-    console.log(logoDir);
-    console.log([cropOffsetX, cropOffsetY]);
-    console.log([zoom, cropW, cropH, rotate]);
     //TODO: convert to pipeline
     let passThrough = new stream.PassThrough();
-    gm(dir)
-    .command('convert')
-    .in('-resize', `${zoom}%`)
-    .in('-distort', 'SRT', `${rotate}`)
-    .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
-    .stream()
-    .pipe(passThrough)
-    if (applyLogo) {
-      let str = gm(passThrough)
-      .composite(logoDir)
-      .geometry(`+${logoX}+${logoY}`)
+    // make backup copy
+    gm(dir).write(backupDestination, err => {
+      gm(backupDestination)
+      // xform: zoom -> rotate abt center -> crop
+      .command('convert')
+      .in('-resize', `${zoom}%`)
+      .in('-distort', 'SRT', `${rotate}`)
+      .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
       .stream()
-      passThrough = new stream.PassThrough();
-      str.pipe(passThrough)
-    }
-    if (applyOverlay) {
-      let str = gm(passThrough)
-      .composite(overlayFrames[cameraNum])
-      .geometry(`${cropW}x${cropH}+0+0`)
-      .stream()
-      passThrough = new stream.PassThrough();
-      str.pipe(passThrough)
-    }
-    gm(passThrough)
-    .write(dir, err => {
-      if (err) { console.log(err); }
-      else {
-        moveFile(dir, destination)
-        .then(() => {
-          console.log(filename + ' moved to ' + destination);
-        });
+      .pipe(passThrough)
+      if (applyLogo) {
+        let str = gm(passThrough)
+        .composite(logoDir)
+        .geometry(`+${logoX}+${logoY}`)
+        .stream()
+        passThrough = new stream.PassThrough();
+        str.pipe(passThrough)
       }
-    })
+      if (applyOverlay) {
+        let str = gm(passThrough)
+        .composite(overlayFrames[cameraNum])
+        .geometry(`${cropW}x${cropH}+0+0`)
+        .stream()
+        passThrough = new stream.PassThrough();
+        str.pipe(passThrough)
+      }
+      gm(passThrough)
+      .write(dir, err => {
+        if (err) { console.log(err); }
+        else {
+          fs.move(dir, destination, err => {
+            if (err) { console.log(err); }
+            console.log(filename + ' moved to ' + destination);
+          })
+        }
+      });      
+    });
   }
 
   // effects must be already applied at this point
   onSortedPhotoAdded = (index, dir) => {
     SortingEngine._sortDirMap.get(index).add(dir);
     const maxNum = getInt('media.frames');
-    console.log('Number of frames in ' + index + ': ' + SortingEngine._sortDirMap.get(index).size);
-    console.log('Max num: ' + maxNum);
+    console.log('frame ' + SortingEngine._sortDirMap.get(index).size + ' out of ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
       SortingEngine._isCreatingMedia = true;
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
-      ipcRenderer.on('media-reply', (event, arg) => {  
-        console.log(arg);
+      ipcRenderer.once('media-reply', (event, arg) => {  
         emitter.emit(EVENT_PHOTO_ADDED, arg);
-        SortingEngine._isCreatingMedia = false;
       });
     }
   }
 
   onMediaAdded = dir => {
-    console.log('is creating: ' + SortingEngine._isCreatingMedia)
     console.log('SortingEngine: media added: ' + dir);
     if (!SortingEngine._isCreatingMedia) {
       emitter.emit(EVENT_PHOTO_ADDED, dir);

@@ -15,8 +15,7 @@ import {
   emitter,
   settings,
   EVENT_PHOTO_ADDED,
-  EVENT_PHOTO_REMOVED,
-  EVENT_GALLERY_REFRESH
+  EVENT_PHOTO_REMOVED
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
@@ -26,7 +25,6 @@ export const Home = observer(class Home extends Component {
   // sub sandwhiches
   static _PhotoAddedSub = null;
   static _PhotoRemovedSub = null;
-  static _GalleryRefreshSub = null;
   // observables
   static o_photosList = observable.array([], { deep: true });
   static _shotList = new Set();
@@ -52,10 +50,6 @@ export const Home = observer(class Home extends Component {
       Home._PhotoRemovedSub = emitter.addListener(EVENT_PHOTO_REMOVED,
        this.onPhotoRemoved);
     }
-    if (Home._GalleryRefreshSub === null) {
-      Home._GalleryRefreshSub = emitter.addListener(EVENT_GALLERY_REFRESH,
-       this.onGalleryRefresh);
-    }
     this.initSortingEngineIfDirsSelected();
   }
 
@@ -76,8 +70,6 @@ export const Home = observer(class Home extends Component {
     console.log(image);
     Home._shotList.add(shot);
     Home.o_photosList.push(image);
-
-    this.forceUpdate();
   }
 
   onPhotoRemoved = (...args) => {
@@ -87,14 +79,6 @@ export const Home = observer(class Home extends Component {
       return item.src === 'file://' + removedPath;
     });
     Home.o_photosList.remove(Home.o_photosList[idx]);
-  }
-
-  onGalleryRefresh = (...args) => {
-    console.log('refresh');
-    /*
-      trick to refresh the gallery view,
-      since gifs don't load fully immediately after creation
-    */
   }
 
   onSelectPhoto = (event, obj) => {
