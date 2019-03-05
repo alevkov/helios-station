@@ -4,9 +4,9 @@ import { SegmentedControl } from 'segmented-control'
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
 import Select from 'react-select';
-//import { Home } from './Home';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import SortingEngine from '../extras/SortingEngine';
+import Adjuster from '../components/admin/Adjuster';
 import '../styles/Admin.css';
 import { settings, setIfNot } from '../common';
 import { observer } from 'mobx-react';
@@ -23,28 +23,41 @@ export const Admin = observer(class Admin extends Component {
       sourceDir: settings.get('dir.source'),
       sortDir: settings.get('dir.sort'),
       mediaDir: settings.get('dir.media'),
+      logoDir: settings.get('dir.logo'),
+      overlayDir: settings.get('dir.overlay'),
+      overlayList: [],
+      applyOverlay: settings.get('media.applyOverlay'),
       selectedSegment: 'general',
-      selectedFrame: {value: settings.get('photo.frame'), label: `Frame ${settings.get('photo.frame')}`},
-      selectedFilter: settings.get('media.filter')
+      selectedFrame: {
+        value: settings.get('photo.frame'),
+        label: `Frame ${settings.get('photo.frame')}`
+      },
+      selectedFilter: settings.get('media.filter'),
+      selectedOverlay: settings.get('media.overlay')
     };
     this.initSortingEngineIfDirsSelected();
   }
 
   componentDidMount() {
     console.log('Admin: did mount');
+    this.initOverlayListIfSelected();
   }
 
   initFrameOptions = () => {
     const frames = Number.parseInt(settings.get('media.frames'), 10);
+    setIfNot(`photo.crop_w`, 100);
+    setIfNot(`photo.crop_h`, 100);
+    setIfNot(`photo.full_w`, 0);
+    setIfNot(`photo.full_h`, 0);
+    setIfNot(`canvas.referenceOpacity`, 0.5);
+    setIfNot(`canvas.adjustOpacity`, 0.5);
+    setIfNot(`canvas.zoom`, 100);
     for (let i = 0; i < frames; i++) {
       const j = i + 1;
-      setIfNot(`photo.crop_x.f_${j}`, 0);
-      setIfNot(`photo.crop_y.f_${j}`, 0);
-      setIfNot(`photo.crop_w.f_${j}`, 100);
-      setIfNot(`photo.crop_h.f_${j}`, 100);
-      setIfNot(`photo.resize_w.f_${j}`, 50);
-      setIfNot(`photo.resize_h.f_${j}`, 50);
-      setIfNot(`photo.rotate.f_${j}`, 0);
+      setIfNot(`photo.rotate.f_${j}`, 0.0);
+      setIfNot(`photo.crop_delta_x.f_${j}`, 100);
+      setIfNot(`photo.crop_delta_y.f_${j}`, 100);
+      setIfNot(`photo.zoom.f_${j}`, 100.0);
     }
   }
 
@@ -71,6 +84,7 @@ export const Admin = observer(class Admin extends Component {
           this.setState({
             sourceDir: settings.get('dir.source')
           });
+          this.initSortingEngineIfDirsSelected();
         }
     });
   }
@@ -84,6 +98,7 @@ export const Admin = observer(class Admin extends Component {
           this.setState({
             sortDir: settings.get('dir.sort')
           });
+          this.initSortingEngineIfDirsSelected();
         }
     });
   }
@@ -97,27 +112,45 @@ export const Admin = observer(class Admin extends Component {
           this.setState({
             mediaDir: settings.get('dir.media') 
           });
+          this.initSortingEngineIfDirsSelected();
         }
     });
   }
 
-  onLogoImageclick = frame => () => {
+  // Logo
+  onLogoImageclick = () => {
     dialog.showOpenDialog({
         properties: ['openFile']
     }, (dir) => {
         if (dir !== undefined) {
           this.onDirSelected('logo', dir);
           this.setState({
-            sortDir: settings.get('dir.logo')
+            logoDir: settings.get('dir.logo')
           });
+        }
+    });
+  }
+
+  // Overlay
+  onOverlayClick = () => {
+    dialog.showOpenDialog({
+        properties: ['openDirectory']
+    }, (dir) => {
+        if (dir !== undefined) {
+          this.onDirSelected('overlay', dir);
+          console.log(dir);
+          this.setState({
+            overlayDir: dir
+          });
+          this.initOverlayListIfSelected();
         }
     });
   }
 
   // Abstract 
   onDirSelected = (type, dir) => {
+    console.log(dir);
     settings.set('dir.' + type, dir);
-    this.initSortingEngineIfDirsSelected();
   }
 
   onTextChanged = name => event => {
@@ -126,6 +159,7 @@ export const Admin = observer(class Admin extends Component {
   }
 
   onCheckboxChanged = name => event => {
+    console.log(name);
     settings.set(name, event.target.checked);
     this.forceUpdate();
   }
@@ -145,11 +179,18 @@ export const Admin = observer(class Admin extends Component {
         this.setState({
           selectedFilter: option
         });
+        break;
+      }
+      case 'media.overlay': {
+        settings.set('media.overlay', option);
+        this.setState({
+          selectedOverlay: option
+        });
         console.log(option);
         break;
       }
       case 'photo.frame': {
-        console.log(option.value);
+        console.log(option);
         this.setState({
           selectedFrame: option
         });
@@ -176,6 +217,17 @@ export const Admin = observer(class Admin extends Component {
     }
   }
 
+  initOverlayListIfSelected = () => {
+    if (settings.get('dir.overlay') !== undefined) {
+      // why is this an array?
+      const overlays = Admin._sortingEngine
+        .unpackOverlays(settings.get('dir.overlay')[0]);
+      this.setState({
+        overlayList: overlays
+      });
+    }
+  }
+
   frameSelectOptions = () => {
     const options = [];
     const frames = Number.parseInt(settings.get('media.frames'), 10);
@@ -186,17 +238,21 @@ export const Admin = observer(class Admin extends Component {
     return options;
   }
 
+  overlaySelectOptions = () => {
+    if (this.state.overlayList === undefined) return;
+    let options = [];
+    for (let i = 0; i < this.state.overlayList.length; i++) {
+      const option = {value: this.state.overlayList[i], label: this.state.overlayList[i]};
+      options.push(option);
+    }
+    return options;
+  }
+
   render() {
     this.initFrameOptions();
-    //const effectsTestImgSrc = 'http://helios-microsite.imgix.net/test/sample.jpg';
     // options
-    const crop_x = settings.get(`photo.crop_x.f_${this.state.selectedFrame.value}`);
-    const crop_y = settings.get(`photo.crop_y.f_${this.state.selectedFrame.value}`);
-    const crop_w = settings.get(`photo.crop_w.f_${this.state.selectedFrame.value}`);
-    const crop_h = settings.get(`photo.crop_h.f_${this.state.selectedFrame.value}`);
-    const resize_w = settings.get(`photo.resize_w.f_${this.state.selectedFrame.value}`);
-    const resize_h = settings.get(`photo.resize_h.f_${this.state.selectedFrame.value}`);
-    const rotate = settings.get(`photo.rotate.f_${this.state.selectedFrame.value}`)
+    const logo_x = settings.get(`media.logo_x`);
+    const logo_y = settings.get(`media.logo_y`);
     // station
     const stationSelectOptions = [
       {value: 1, label: 'Station 1'}
@@ -249,7 +305,7 @@ export const Admin = observer(class Admin extends Component {
     ];
     const mediaSegment = () => (
       <div className='Admin-media-form'>
-        <div className='Admin-media-form-1'>
+        <div className='Admin-media-form-dimensions'>
           <TextField
             id='width'
             label='Width'
@@ -263,9 +319,9 @@ export const Admin = observer(class Admin extends Component {
             onChange={this.onTextChanged('media.height')}
             value={settings.get('media.height')}
             type='number'
-            margin='normal'/>
+            margin='normal'/>        
         </div>
-        <div className='Admin-media-form-2'>
+        <div className='Admin-media-form-parameters'>
           <TextField
             id='frames'
             label='# of Frames'
@@ -295,6 +351,22 @@ export const Admin = observer(class Admin extends Component {
                 value='checkedBoomerang'/>
             }
             label='Boomerang'/>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={settings.get('media.applyOverlay')}
+                onChange={this.onCheckboxChanged('media.applyOverlay')}
+                value='checkedOverlay'/>
+            }
+            label='Overlay'/>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={settings.get('media.applyLogo')}
+                onChange={this.onCheckboxChanged('media.applyLogo')}
+                value='checkedLogo'/>
+            }
+            label='Logo'/>
         </div>
         {/*
         <div className='Admin-media-filter-select'>
@@ -311,12 +383,18 @@ export const Admin = observer(class Admin extends Component {
               src={`${effectsTestImgSrc}${this.state.selectedFilter.value}`} />
           </div>
         </div>*/}
-        <div className='Admin-media-form-3'>
+        <div className='Admin-media-form-extra-assets'>
           <Button
             color='primary'
             onClick={this.onLogoImageclick}
             variant='contained'>
-            Logo Image
+            Logo
+          </Button>
+          <Button
+            color='secondary'
+            onClick={this.onOverlayClick}
+            variant='contained'>
+            Overlay
           </Button>
           <Select 
             className='Admin-media-format-select'
@@ -324,99 +402,39 @@ export const Admin = observer(class Admin extends Component {
             value={{value: 'gif', label: '.gif'}}
             onChange={this.onSelectChanged('media.format')}
             options={mediaSelectOptions} />
+          <Select 
+            className='Admin-media-overlay-select'
+            placeholder='Overlay...'
+            value={this.state.selectedOverlay}
+            onChange={this.onSelectChanged('media.overlay')}
+            options={this.overlaySelectOptions()} />
+        </div>
+        <div className='Admin-media-form-logo-coordinates'>
+          <TextField
+            id='logo-x'
+            label='Logo Position-X'
+            onChange={this.onTextChanged('media.logo_x')}
+            value={logo_x}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='logo-y'
+            label='Logo Position-Y'
+            onChange={this.onTextChanged('media.logo_y')}
+            value={logo_y}
+            type='number'
+            margin='normal'/>
         </div>
       </div>
     );
     const photoSegment = () => (
-      <div className='Admin-photo-form'>
-        {/*
-        <div className='Admin-photo-form-1'>
-          {frameByIdxAndCam !== undefined ?
-          (<div style={{width: '800', height: '450'}} key={0}>
-            <img 
-              style={{maxWidth: '100%', maxHeight: '100%'}} 
-              src={frameByIdxAndCam.src} />
-          </div>) : null}
-        </div>*/}
-        <div className='Admin-photo-form-2'>
-          <Select 
-            options={this.frameSelectOptions()}
-            value={this.state.selectedFrame}
-            placeholder='Frame...'
-            onChange={this.onSelectChanged('photo.frame')}/>
-        </div>
-        <div className='Admin-photo-croptions'>
-          <TextField
-            id='crop-x'
-            label='Crop-X'
-            onChange={this.onTextChanged(`photo.crop_x.f_${this.state.selectedFrame.value}`)}
-            value={crop_x}
-            type='number'
-            margin='normal'/>
-          <TextField
-            id='crop-down'
-            label='Crop-Y'
-            onChange={this.onTextChanged(`photo.crop_y.f_${this.state.selectedFrame.value}`)}
-            value={crop_y}
-            type='number'
-            margin='normal'/>
-          <TextField
-            id='crop-left'
-            label='Crop-W'
-            onChange={this.onTextChanged(`photo.crop_w.f_${this.state.selectedFrame.value}`)}
-            value={crop_w}
-            type='number'
-            margin='normal'/>
-          <TextField
-            id='crop-right'
-            label='Crop-H'
-            onChange={this.onTextChanged(`photo.crop_h.f_${this.state.selectedFrame.value}`)}
-            value={crop_h}
-            type='number'
-            margin='normal'/>
-          <TextField
-            id='resize-w'
-            label='Resize-W'
-            onChange={this.onTextChanged(`photo.resize_w.f_${this.state.selectedFrame.value}`)}
-            value={resize_w}
-            type='number'
-            margin='normal'/>
-          <TextField
-            id='resize-h'
-            label='Resize-H'
-            onChange={this.onTextChanged(`photo.resize_h.f_${this.state.selectedFrame.value}`)}
-            value={resize_h}
-            type='number'
-            margin='normal'/>
-          <TextField
-            id='rotate'
-            label='Rotate'
-            onChange={this.onTextChanged(`photo.rotate.f_${this.state.selectedFrame.value}`)}
-            value={rotate}
-            type='number'
-            margin='normal'/>
-        </div>
-        {/**** UNUSED
-        <div className='Admin-photo-form-scale'>
-          <TextField
-            id='scale'
-            label='Scale (%)'
-            onChange={this.onTextChanged('photo.scale_' + 
-            this.state.selectedShot.value + '_' + 
-            this.state.selectedFrame.value)}
-            value={scale === undefined ? 100 : scale}
-            type='number'
-            margin='normal'/>
-        </div> */}
-        <div className='Admin-photo-logo-image'>
-          <Button
-            color='primary'
-            onClick={this.onLogoImageclick}
-            variant='contained'>
-            Logo Image
-          </Button>
-        </div>
-      </div>
+      <Adjuster 
+        onTextChanged={this.onTextChanged} 
+        onDirSelected={this.onDirSelected}
+        onCheckboxChanged={this.onCheckboxChanged}
+        selectedFrame={this.state.selectedFrame}
+        frameSelectOptions={this.frameSelectOptions}
+        onSelectChanged={this.onSelectChanged}/>
     );
     return (
       <div className='Admin'>
@@ -432,8 +450,9 @@ export const Admin = observer(class Admin extends Component {
         { this.state.selectedSegment === 'general' ? generalSegment() : null }
         { this.state.selectedSegment === 'media' ? mediaSegment() : null }
         { this.state.selectedSegment === 'photo' ? photoSegment() : null }
+
       </div>
-    );
+    )
   }
 });
 

@@ -66,15 +66,14 @@ app.on('activate', function () {
     }
 });
 
-ipcMain.on('generate-media', async (event, arg) => {
+ipcMain.on('generate-media', (event, arg) => {
+    console.log('generate-media');
     const frames = arg;
-    try {
-        const mediaResult = await generate(frames, 'gif');
+    generate(frames)
+    .then(result => {
         event.sender.send('media-reply', result);
-    } catch (err) {
-        event.sender.send('media-error', err);
-    }
-})
+    });
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

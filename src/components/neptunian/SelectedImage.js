@@ -24,19 +24,6 @@ const Preview = ({ selected, onExpand, index }) => (
   </div>
 );
 
-const Effects = ({ selected, onEffects, index }) => (
-  <div
-    onClick={onEffects(index)}
-    style={selected ? { right: '45px', top: '52px', position: 'absolute', zIndex: '1' } : { display: 'none' }}>
-    <svg style={{ position: 'absolute' }} width="50px" height="50px">
-      <style>
-        {`svg:hover{fill: #06befa}`}
-      </style>
-      <path d="M10,4.75c-5.316,0-9.625,4.505-9.625,10.062c0,0.241,0.196,0.438,0.438,0.438h7.875c0.242,0,0.438-0.196,0.438-0.438c0-0.725,0.392-1.312,0.875-1.312s0.875,0.588,0.875,1.312c0,0.241,0.195,0.438,0.438,0.438h7.875c0.242,0,0.438-0.196,0.438-0.438C19.625,9.255,15.316,4.75,10,4.75 M11.715,14.375c-0.162-0.998-0.868-1.75-1.715-1.75s-1.553,0.752-1.715,1.75H6.523c0.193-1.968,1.676-3.5,3.477-3.5c1.801,0,3.284,1.532,3.477,3.5H11.715z M14.354,14.375C14.153,11.923,12.282,10,10,10s-4.154,1.923-4.355,4.375h-1.75C4.106,10.957,6.755,8.25,10,8.25s5.894,2.707,6.104,6.125H14.354zM16.979,14.375c-0.214-3.902-3.252-7-6.979-7s-6.765,3.098-6.979,7h-1.75C1.49,9.505,5.308,5.625,10,5.625c4.691,0,8.51,3.88,8.729,8.75H16.979z"></path>
-    </svg>
-  </div>
-);
-
 const imgStyle = {
   display: 'block',
   transition: 'transform .135s cubic-bezier(0.0,0.0,0.2,1),opacity linear .15s'
@@ -53,7 +40,7 @@ const cont = {
   position: 'relative'
 }
 
-const SelectedImage = ({ index, onClick, photo, margin, onExpand, onEffects }) => {
+const SelectedImage = ({ index, onClick, photo, margin, onExpand }) => {
   //calculate x,y scale
   const sx = (100 - ((30 / photo.width) * 100)) / 100;
   const sy = (100 - ((30 / photo.height) * 100)) / 100;
@@ -63,7 +50,6 @@ const SelectedImage = ({ index, onClick, photo, margin, onExpand, onEffects }) =
 
       <Checkmark selected={photo.selected ? true : false} />
       <Preview selected={photo.selected ? true : false} onExpand={onExpand} index={index}/>
-      {/*<Effects selected={photo.selected ? true : false} onEffects={onEffects} index={index}/>*/}
       <img style={photo.selected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle }} {...photo} onClick={(e) => onClick(e, { index, photo })} />
 
       <style>

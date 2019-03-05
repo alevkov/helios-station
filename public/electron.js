@@ -1,6 +1,9 @@
 const electron = require('electron');
+const { requireTaskPool } = require('electron-remote');
+const generate = requireTaskPool(require.resolve('./MediaEngine'));
 // Module to control application life.
 const app = electron.app;
+const ipcMain = electron.ipcMain;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
 
@@ -61,6 +64,15 @@ app.on('activate', function () {
     if (mainWindow === null) {
         createWindow()
     }
+});
+
+ipcMain.on('generate-media', (event, arg) => {
+    console.log('generate-media');
+    const frames = arg;
+    generate(frames)
+    .then(result => {
+        event.sender.send('media-reply', result);
+    });
 });
 
 // In this file you can include the rest of your app's specific main process

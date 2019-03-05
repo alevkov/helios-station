@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import Admin from './Admin';
+import SortingEngine from '../extras/SortingEngine';
 import Gallery from '../components/neptunian/Gallery';
 import { Carousel } from 'react-responsive-carousel';
 import SelectedImage from '../components/neptunian/SelectedImage';
@@ -6,6 +8,7 @@ import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
 import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
+import { Line } from 'rc-progress';
 import '../styles/Home.css';
 import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
@@ -33,7 +36,8 @@ export const Home = observer(class Home extends Component {
       showPhotoCarousel: false,
       carouselStartPos: 0,
       selectedEffect: '',
-      selectedPhotosList: new Set()
+      selectedPhotosList: new Set(),
+      uploadProgress: 0
     }
   }
 
@@ -46,6 +50,7 @@ export const Home = observer(class Home extends Component {
       Home._PhotoRemovedSub = emitter.addListener(EVENT_PHOTO_REMOVED,
        this.onPhotoRemoved);
     }
+    this.initSortingEngineIfDirsSelected();
   }
 
   onPhotoAdded = (...args) => {
@@ -116,7 +121,7 @@ export const Home = observer(class Home extends Component {
   }
 
   onLoveItClick = () => {
-    const cloud = new CloudInterface();
+    const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
     cloud.upload(selected, 'loveit');
   }
@@ -124,46 +129,30 @@ export const Home = observer(class Home extends Component {
   onCarouselNav = pos => {
     console.log(pos);
   }
-  /*
-  onSelectChanged = name => option => {
-    switch (name) {
-      case 'photo.effect': {
-        const proc = new ImageProcessor();
-        let params;
-        const effectName = option.value;
-        if (effectName === 'original') {
-          const newImages = proc.reset(Home.o_photosList.slice());
-          Home.o_photosList.replace(newImages);
-          this.setState({
-            selectedEffect: option.value
-          });
-        } else {
-          if (effectName === 'grayscale') {
-            params = {
-              type: effectName
-            };
-          } else if (effectName === 'sepia') {
-            params = {
-              type: effectName
-            };
-          }
-          proc.applyEffect(params, Home.o_photosList.slice())
-            .then((newImages) => {
-              Home.o_photosList.replace(newImages);
-              this.setState({
-                selectedEffect: option.value
-              });
-            });
-        }
-      }
-      default: {
-        break;
-      }
-    }
-  }*/
+
+  onUploadProgressReceived = progress => {
+    this.setState({
+      uploadProgress: progress
+    });
+  }
 
   onTextChanged = name => event => {
     settings.set(name, event.target.value);
+  }
+
+  initSortingEngineIfDirsSelected = () => {
+    if (settings.get('dir.source') !== undefined &&
+        settings.get('dir.sort') !== undefined &&
+        settings.get('dir.media') !== undefined) {
+      // initialize sorting engine
+      if (Admin._sortingEngine == null) {
+              Admin._sortingEngine =
+        new SortingEngine(
+          settings.get('dir.source'), 
+          settings.get('dir.sort'),
+          settings.get('dir.media'));
+      }
+    }
   }
 
   render() {
@@ -189,15 +178,9 @@ export const Home = observer(class Home extends Component {
     );
     return (
       <div className='Home'> 
-      {/*** Select Effects 
-        <div className='Home-top-bar'>
-        { this.state.photos.length > 0 ? 
-          <Select
-            autorize={false}
-            options={effectsList} 
-            placeholder='Effects..'
-            onChange={this.onSelectChanged('photo.effect')}/> : null }
-        </div> ***/} 
+      { this.state.uploadProgress > 0 && this.state.uploadProgress < 100 ? 
+        <Line percent={this.state.uploadProgress} strokeWidth="2" strokeColor="#4b0082" />
+        : null }
       {/*** Close Button ***/}
         { this.state.showPhotoCarousel === true ? 
         (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>
@@ -220,7 +203,6 @@ export const Home = observer(class Home extends Component {
           photos={this.state.photos}
           onClick={this.onSelectPhoto}
           onExpand={this.onExpandPhoto}
-          onEffects={this.onPhotoEffects}
           ImageComponent={SelectedImage} /> : null }
       </div>
     );

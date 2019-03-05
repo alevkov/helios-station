@@ -3,34 +3,32 @@ import {
   settings,
   EVENT_SOURCE_FOLDER_SELECTED,
   EVENT_PHOTO_ADDED,
-  EVENT_PHOTO_REMOVED
+  EVENT_PHOTO_REMOVED,
+  getInt,
+  getFloat
 } from '../common';
-import AppPaths from './AppPaths';
 
 const { ipcRenderer, remote } = window.require('electron');
 const choker = remote.require('chokidar');
-const path = remote.require('path');
-const moveFile = remote.require('move-file');
-const fs = remote.require('fs');
-const jimp = remote.require('jimp');
+const path = require('path');
+const fs = remote.require('fs-extra');
+const stream = remote.require('stream');
 const os = window.require('os');
 const graphicsmagick = remote.require('graphicsmagick-static');
 const imagemagick = remote.require('imagemagick-darwin-static');
 let imagemagickPath = remote.require('imagemagick-darwin-static').path;
-let fixedPath = AppPaths.replaceAsar(imagemagickPath);
+console.log(imagemagickPath);
 
 const { subClass } = remote.require('gm');
 let gm;
 
 if (os.platform() == "win32") {
-    gm = subClass({
-        appPath: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))
-    })
+    gm = subClass({imageMagick: true})
 } else {
     gm = subClass({
         imageMagick: true,
-        appPath: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))
-    })
+        appPath: path.join(`${imagemagickPath}`, '/')
+    });
 }
 
 export default class SortingEngine {
@@ -40,6 +38,7 @@ export default class SortingEngine {
   static _mediaDir = null;
   static _sortDirMap = new Map(); // [string: Set<string>]
   static _dirWatchMap = new Map(); // [string: Watcher]
+  static _isCreatingMedia = false;
 
   constructor(source, sort, media) {
     SortingEngine._sourceDir = source;
@@ -50,6 +49,18 @@ export default class SortingEngine {
     this.initWatchDir('source', SortingEngine._sourceDir);
     console.log('media dir: ' + SortingEngine._mediaDir);
     this.initWatchDir('media', SortingEngine._mediaDir);
+  }
+
+  sortedFrames = (frames, ascending) => {
+    return frames.concat().sort((a, b) => {
+      const aFile = a.replace(/^.*[\\\/]/, '');
+      const aIndex = aFile.split('_')[1].split('.')[0];
+      const bFile = b.replace(/^.*[\\\/]/, '');
+      const bIndex = bFile.split('_')[1].split('.')[0];
+      return ascending ? 
+        (aIndex > bIndex ? 1 : -1) : 
+        (aIndex < bIndex ? 1 : -1);
+    });
   }
 
   initWatchDir = (type, dir) => {
@@ -71,7 +82,6 @@ export default class SortingEngine {
         });
         // when a file is added, send event to subs
         sourceWatcher.on('add', addedFilePath => {
-          console.log(path.extname(addedFilePath));
           if (path.basename(addedFilePath) === '.DS_Store') {
             return;
           }
@@ -92,6 +102,7 @@ export default class SortingEngine {
             SortingEngine._dirWatchMap.delete(dir);
           }
           fs.mkdirSync(dir);
+          fs.mkdirSync(`${dir}-backup`)
         }
         if (!SortingEngine._dirWatchMap.get(dir)) {
           SortingEngine._sortDirMap.set(index, new Set());
@@ -148,7 +159,24 @@ export default class SortingEngine {
   }
 
   onSourcePhotoAdded = dir => {
-    console.log('file added!');
+    let overlayFrames = []
+    let applyOverlay = settings.get('media.applyOverlay') && settings.get('media.overlay') != undefined;
+    let applyLogo = settings.get('media.applyLogo') && settings.get('dir.logo') != undefined;
+    console.log('overlay: ' + applyOverlay);
+    console.log('logo: ' + applyLogo);
+
+    if (applyOverlay) {
+      fs.readdirSync(settings.get('media.overlay').value).forEach(file => {
+        overlayFrames.push(settings.get('media.overlay').value + (os.platform() === 'darwin' ? '/' : '\\') + file);
+      });
+      if (overlayFrames.length < getInt('media.frames')) {
+        console.log('Warning! Not enough overlay frames');
+        applyOverlay = false;
+      }
+    }
+
+    overlayFrames = this.sortedFrames(overlayFrames, true);
+
     const filename = dir.replace(/^.*[\\\/]/, '');
     const index = filename.split('_')[0]; // shot number
     const camera = filename.split('_')[1].split('.')[0];
@@ -162,63 +190,102 @@ export default class SortingEngine {
     const destination = indexPath + 
       (os.platform() === 'darwin' ? '/' : '\\') +
       filename
+    const backupDestination = `${indexPath}-backup` + 
+      (os.platform() === 'darwin' ? '/' : '\\') +
+      filename;
     // TODO: apply xform in ImageProcessor
-    const crop_x = Number.parseFloat(settings.get(`photo.crop_x.f_${cameraNum}`));
-    const crop_y = Number.parseFloat(settings.get(`photo.crop_y.f_${cameraNum}`));
-    const crop_w = Number.parseFloat(settings.get(`photo.crop_w.f_${cameraNum}`));
-    const crop_h = Number.parseFloat(settings.get(`photo.crop_h.f_${cameraNum}`));
-    const resize_w = Number.parseFloat(settings.get(`photo.resize_w.f_${cameraNum}`));
-    const resize_h = Number.parseFloat(settings.get(`photo.resize_h.f_${cameraNum}`));
-    const rotate = Number.parseFloat(settings.get(`photo.rotate.f_${cameraNum}`))
-    console.log([crop_x, crop_y, crop_w, crop_h, resize_h, resize_w]);
-    gm(dir)
-        .rotate('white', rotate)
-        .crop(crop_w, crop_h, crop_x, crop_y)
-        .resize(resize_w, resize_h)
-        .write(dir, err => {
-          if (err) {
-            console.log('Ahhh!! ' + dir);
-            console.log('Error! ' + err);
-          } else {
-            moveFile(dir, destination)
-              .then(() => {
-                console.log(filename + ' moved to ' + destination);
-              });
-          }
-        });
+    const zoom =  getFloat(`photo.zoom.f_${cameraNum}`);
+    const cropW = getInt(`photo.crop_w`);
+    const cropH = getInt(`photo.crop_h`);
+    const cropDeltaX = getInt(`photo.crop_delta_x.f_${cameraNum}`);
+    const cropDeltaY = getInt(`photo.crop_delta_y.f_${cameraNum}`);
+    const fullW = getInt(`photo.full_w`);
+    const fullH = getInt(`photo.full_h`);
+    const rotate = getFloat(`photo.rotate.f_${cameraNum}`);
+    const logoX = getInt('media.logo_x');
+    const logoY = getInt('media.logo_y');
+    const cropOffsetX = cropDeltaX;
+    const cropOffsetY = cropDeltaY;
+    const logoDir = settings.get('dir.logo');
+
+    //TODO: convert to pipeline
+    let passThrough = new stream.PassThrough();
+    // make backup copy
+    gm(dir).write(backupDestination, err => {
+      gm(backupDestination)
+      // xform: zoom -> rotate abt center -> crop
+      .command('convert')
+      .in('-resize', `${zoom}%`)
+      .in('-distort', 'SRT', `${rotate}`)
+      .in('-crop', `${cropW}x${cropH}+${cropOffsetX}+${cropOffsetY}`)
+      .stream()
+      .pipe(passThrough)
+      if (applyLogo) {
+        let str = gm(passThrough)
+        .composite(logoDir)
+        .geometry(`+${logoX}+${logoY}`)
+        .stream()
+        passThrough = new stream.PassThrough();
+        str.pipe(passThrough)
+      }
+      if (applyOverlay) {
+        let str = gm(passThrough)
+        .composite(overlayFrames[cameraNum])
+        .geometry(`${cropW}x${cropH}+0+0`)
+        .stream()
+        passThrough = new stream.PassThrough();
+        str.pipe(passThrough)
+      }
+      gm(passThrough)
+      .write(dir, err => {
+        if (err) { console.log(err); }
+        else {
+          fs.move(dir, destination, err => {
+            if (err) { console.log(err); }
+            console.log(filename + ' moved to ' + destination);
+          })
+        }
+      });      
+    });
   }
 
   // effects must be already applied at this point
   onSortedPhotoAdded = (index, dir) => {
     SortingEngine._sortDirMap.get(index).add(dir);
-    const maxNum = Number.parseInt(settings.get('media.frames'), 10);
-    console.log('Number of frames in ' + index + ': ' + SortingEngine._sortDirMap.get(index).size);
-    console.log('Max num: ' + maxNum);
+    const maxNum = getInt('media.frames');
+    console.log('frame ' + SortingEngine._sortDirMap.get(index).size + ' out of ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
+      SortingEngine._isCreatingMedia = true;
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
-      ipcRenderer.on('media-reply', (event, arg) => {  
-        console.log(arg);
-      });
-      ipcRenderer.on('media-error', (event, arg) => {  
-          console.log(arg);
+      ipcRenderer.once('media-reply', (event, arg) => {  
+        emitter.emit(EVENT_PHOTO_ADDED, arg);
       });
     }
   }
 
   onMediaAdded = dir => {
     console.log('SortingEngine: media added: ' + dir);
-    emitter.emit(EVENT_PHOTO_ADDED, dir);
+    if (!SortingEngine._isCreatingMedia) {
+      emitter.emit(EVENT_PHOTO_ADDED, dir);
+    }
   }
 
   onSortedPhotoRemoved = (index, dir) => {
     console.log(`Removed ${dir}, ${index}`);
     SortingEngine._sortDirMap.get(index).delete(dir);
-    //emitter.emit(EVENT_PHOTO_REMOVED, dir);
   }
 
   onMediaRemoved = dir => {
     emitter.emit(EVENT_PHOTO_REMOVED, dir);
+  }
+
+  unpackOverlays = dir => {
+    const overlays = []
+    fs.readdirSync(dir).forEach(file => {
+      overlays.push(dir + (os.platform() === 'darwin' ? '/' : '\\') + file);
+    });
+    return overlays;
   }
 }
