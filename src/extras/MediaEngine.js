@@ -76,9 +76,10 @@ function generateGif(frames) {
     const sortedDescending = sortedFrames(frames, false);
     // remove first element
     sortedDescending.shift();
+    sorted.splice(-1, 1);
     // if boomerang, append descending array
     const orderedFrames = boomerang ? 
-      sorted.splice(-1, 1).concat(sortedDescending) : sorted;
+      sorted.concat(sortedDescending) : sorted;
     let finalFrames = [];
     // append file URL prefix
     for (let i = 0; i < orderedFrames.length; i++) {
