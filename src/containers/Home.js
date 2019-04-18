@@ -26,7 +26,6 @@ const os = window.require('os');
 const graphicsmagick = remote.require('graphicsmagick-static');
 const imagemagick = remote.require('imagemagick-darwin-static');
 let imagemagickPath = remote.require('imagemagick-darwin-static').path;
-console.log(imagemagickPath);
 
 const { subClass } = remote.require('gm');
 let gm;
@@ -94,8 +93,6 @@ export const Home = observer(class Home extends Component {
         console.log(err);
       }
     });
-    
-
   }
 
   onPhotoRemoved = (...args) => {
