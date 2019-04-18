@@ -5,8 +5,6 @@ import IconButton from '@material-ui/core/IconButton';
 import SmsBox from 'material-ui-community-icons/icons/message-text';
 import HeartBox from 'material-ui-community-icons/icons/heart-box'
 import EmailBox from 'material-ui-community-icons/icons/email';
-import FacebookBox from 'material-ui-community-icons/icons/facebook-box';
-import TwitterBox from 'material-ui-community-icons/icons/twitter-box';
 
 export default class SelectDock extends React.Component {
   render() {
@@ -53,16 +51,6 @@ export default class SelectDock extends React.Component {
             <li style={sharingButtonStyles}>
               <IconButton onClick={this.props.toggleModal('email')}>
                 <EmailBox style={dockIconStyles} />
-              </IconButton>
-            </li>
-            <li style={sharingButtonStyles}>
-              <IconButton onClick={this.props.toggleModal('facebook')}>
-                <FacebookBox style={dockIconStyles} />
-              </IconButton>
-            </li>
-            <li style={sharingButtonStyles}>
-              <IconButton onClick={this.props.toggleModal('twitter')}>
-                <TwitterBox style={dockIconStyles} />
               </IconButton>
             </li>
           </ul>

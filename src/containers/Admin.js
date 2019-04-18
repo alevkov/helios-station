@@ -368,21 +368,6 @@ export const Admin = observer(class Admin extends Component {
             }
             label='Logo'/>
         </div>
-        {/*
-        <div className='Admin-media-filter-select'>
-          <Select 
-            options={ImageProcessor.imgixFilters}
-            value={this.state.selectedFilter}
-            placeholder='Filter...'
-            onChange={this.onSelectChanged('media.filter')}/>
-        </div>
-        <div className='Admin-media-form-preview'>
-          <div style={{width: '800', height: '450'}} key={0}>
-            <img 
-              style={{maxWidth: '100%', maxHeight: '100%'}} 
-              src={`${effectsTestImgSrc}${this.state.selectedFilter.value}`} />
-          </div>
-        </div>*/}
         <div className='Admin-media-form-extra-assets'>
           <Button
             color='primary'

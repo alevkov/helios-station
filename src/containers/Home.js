@@ -20,19 +20,35 @@ import {
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 
-// declare as observer to observe the state of data structs declared above
+const { ipcRenderer, remote } = window.require('electron');
+const path = require('path');
+const os = window.require('os');
+const graphicsmagick = remote.require('graphicsmagick-static');
+const imagemagick = remote.require('imagemagick-darwin-static');
+let imagemagickPath = remote.require('imagemagick-darwin-static').path;
+
+const { subClass } = remote.require('gm');
+let gm;
+
+if (os.platform() == "win32") {
+    gm = subClass({imageMagick: true})
+} else {
+    gm = subClass({
+        imageMagick: true,
+        appPath: path.join(`${imagemagickPath}`, '/')
+    });
+}
+
 export const Home = observer(class Home extends Component {
-  // sub sandwhiches
-  static _PhotoAddedSub = null;
-  static _PhotoRemovedSub = null;
-  // observables
-  static o_photosList = observable.array([], { deep: true });
-  static _shotList = new Set();
+  static OnPhotoAddedSubscriber = null;
+  static OnPhotoRemovedSubscriber = null;
+  static PhotosList = observable.array([], { deep: true });
+  static ShotList = new Set();
 
   constructor(props) {
     super(props)
     this.state = {
-      photos: Home.o_photosList,
+      photos: Home.PhotosList,
       showPhotoCarousel: false,
       carouselStartPos: 0,
       selectedEffect: '',
@@ -42,49 +58,56 @@ export const Home = observer(class Home extends Component {
   }
 
   componentDidMount() {
-    if (Home._PhotoAddedSub === null) {
-      Home._PhotoAddedSub = emitter.addListener(EVENT_PHOTO_ADDED,
+    if (Home.OnPhotoAddedSubscriber === null) {
+      Home.OnPhotoAddedSubscriber = emitter.addListener(EVENT_PHOTO_ADDED,
        this.onPhotoAdded);
     }
-    if (Home._PhotoRemovedSub === null) {
-      Home._PhotoRemovedSub = emitter.addListener(EVENT_PHOTO_REMOVED,
+    if (Home.OnPhotoRemovedSubscriber === null) {
+      Home.OnPhotoRemovedSubscriber = emitter.addListener(EVENT_PHOTO_REMOVED,
        this.onPhotoRemoved);
     }
     this.initSortingEngineIfDirsSelected();
   }
 
   onPhotoAdded = (...args) => {
-    console.log('media added')
+    console.log('media added');
     const path = args[0];
-    const filename = path.replace(/^.*[\\\/]/, '');
-    const shot = Number.parseInt(filename.split('.')[0], 10);
-    const image = {
-      src: 'file://' + path,
-      actual: path,
-      name: filename,
-      shot: shot, // shot number
-      eventcode: settings.get('event.name'),
-      width: 3,
-      height: 2
-    }
-    console.log(image);
-    Home._shotList.add(shot);
-    Home.o_photosList.push(image);
+    gm(path)
+    .size(function (err, size) {
+      if (!err) {
+        const filename = path.replace(/^.*[\\\/]/, '');
+        const shot = Number.parseInt(filename.split('.')[0], 10);
+        const image = {
+          src: 'file://' + path,
+          actual: path,
+          name: filename,
+          shot: shot, // shot number
+          eventcode: settings.get('event.name'),
+          width: size.width,
+          height: size.height
+        }
+        console.log(image);
+        Home.ShotList.add(shot);
+        Home.PhotosList.push(image);
+      } else {
+        console.log(err);
+      }
+    });
   }
 
   onPhotoRemoved = (...args) => {
     // remove path from observable array
     const removedPath = args[0];
-    const idx = Home.o_photosList.findIndex((item, index, array) => {
+    const idx = Home.PhotosList.findIndex((item, index, array) => {
       return item.src === 'file://' + removedPath;
     });
-    Home.o_photosList.remove(Home.o_photosList[idx]);
+    Home.PhotosList.remove(Home.PhotosList[idx]);
   }
 
   onSelectPhoto = (event, obj) => {
-    Home.o_photosList[obj.index].selected = 
-      !Home.o_photosList[obj.index].selected;
-    if (Home.o_photosList[obj.index].selected === true) {
+    Home.PhotosList[obj.index].selected = 
+      !Home.PhotosList[obj.index].selected;
+    if (Home.PhotosList[obj.index].selected === true) {
       this.state.selectedPhotosList.add(obj.index);
     } else {
       this.state.selectedPhotosList.delete(obj.index);
@@ -110,7 +133,7 @@ export const Home = observer(class Home extends Component {
   getSelectedPhotosList = () => {
     let selectedPhotosPaths = [];
     this.state.selectedPhotosList.forEach(i => {
-      const path = Home.o_photosList[i].actual;
+      const path = Home.PhotosList[i].actual;
       selectedPhotosPaths.push(path);
     });
     return selectedPhotosPaths;
@@ -156,13 +179,7 @@ export const Home = observer(class Home extends Component {
   }
 
   render() {
-    /*
-    const effectsList = [
-      {value: 'original', label: 'No Effect'},
-      {value: 'sepia', label: 'Sepia'},
-      {value: 'grayscale', label: 'Grayscale'},
-    ];*/
-    const carouselContent = Home.o_photosList
+    const carouselContent = Home.PhotosList
      .map((item, i) => <div key={i}><img src={item.src} /></div>);
     const ImageCarousel = () => (
       <Carousel 
