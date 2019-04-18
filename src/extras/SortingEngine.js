@@ -160,8 +160,8 @@ export default class SortingEngine {
 
   onSourcePhotoAdded = dir => {
     let overlayFrames = []
-    let applyOverlay = settings.get('media.applyOverlay') && settings.get('media.overlay') != undefined;
-    let applyLogo = settings.get('media.applyLogo') && settings.get('dir.logo') != undefined;
+    let applyOverlay = Boolean(settings.get('media.applyOverlay')) && settings.has('dir.overlay');
+    let applyLogo = settings.get('media.applyLogo') && settings.has('dir.logo');
     console.log('overlay: ' + applyOverlay);
     console.log('logo: ' + applyLogo);
 
@@ -207,7 +207,9 @@ export default class SortingEngine {
     const cropOffsetX = cropDeltaX;
     const cropOffsetY = cropDeltaY;
     const logoDir = settings.get('dir.logo');
-
+    console.log(cameraNum);
+    console.log(overlayFrames);
+    console.log(overlayFrames[cameraNum-1]);
     //TODO: convert to pipeline
     let passThrough = new stream.PassThrough();
     // make backup copy
@@ -230,12 +232,14 @@ export default class SortingEngine {
       }
       if (applyOverlay) {
         let str = gm(passThrough)
-        .composite(overlayFrames[cameraNum])
+        .composite(overlayFrames[cameraNum-1])
         .geometry(`${cropW}x${cropH}+0+0`)
         .stream()
         passThrough = new stream.PassThrough();
         str.pipe(passThrough)
       }
+      const boomerang = Boolean(settings.get('media.boomerang'));
+      console.log(boomerang);
       gm(passThrough)
       .write(dir, err => {
         if (err) { console.log(err); }
