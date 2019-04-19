@@ -265,6 +265,12 @@ export const Admin = observer(class Admin extends Component {
             onChange={this.onTextChanged('event.name')}
             value={settings.get('event.name')}
             margin='normal'/>
+          <TextField
+            id='password'
+            label='Event Password'
+            onChange={this.onTextChanged('event.pwd')}
+            value={settings.get('event.pwd')}
+            margin='normal'/>
         </div>
         <Select 
           className='Admin-general-station-select'

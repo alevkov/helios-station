@@ -135,9 +135,22 @@ export const Home = observer(class Home extends Component {
   }
 
   onLoveItClick = () => {
+    const axios = require('axios');
     const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
     cloud.upload(selected, 'loveit');
+    axios({
+      method: 'post',
+      url: `https://helios-api.herokuapp.com/password/${settings.get('event.name')}`,
+      data: {
+        pwd: settings.get('event.pwd')
+      }
+    }).then(response => {
+      console.log(response);
+    })
+    .catch(error => {
+      console.log(error);
+    });
   }
 
   onCarouselNav = pos => {
