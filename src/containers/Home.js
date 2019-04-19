@@ -6,6 +6,8 @@ import { Carousel } from 'react-responsive-carousel';
 import SelectedImage from '../components/neptunian/SelectedImage';
 import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
 import { Line } from 'rc-progress';
@@ -152,6 +154,19 @@ export const Home = observer(class Home extends Component {
     settings.set(name, event.target.value);
   }
 
+  onCheckboxChanged = name => event => {
+    if (name === 'play') {
+      for (let i = 0; i < Home.PhotosList.length; i++) {
+        if (event.target.checked) {
+          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].actual
+        } else {
+          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].staticframe
+        }
+      }
+      this.forceUpdate();
+    }
+  }
+
   initSortingEngineIfDirsSelected = () => {
     if (settings.get('dir.source') !== undefined &&
         settings.get('dir.sort') !== undefined &&
@@ -193,6 +208,17 @@ export const Home = observer(class Home extends Component {
           <Button
             style={{ fontSize: '25px', float: 'right'}}
             onClick={this.onCloseCarousel}>&#10539;</Button>
+        </div>) : null}
+      {/*** Play ***/}
+        { this.state.photos.length > 0 && this.state.showPhotoCarousel === false ? 
+        (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                onChange={this.onCheckboxChanged('play')}
+                value='checkedPlay'/>
+            }
+            label='Play Media'/>
         </div>) : null}
       {/*** Dock ***/} 
         <SharingDock 
