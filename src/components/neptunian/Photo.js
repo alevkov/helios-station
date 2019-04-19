@@ -23,6 +23,7 @@ export const photoPropType = PropTypes.shape({
   src: PropTypes.string.isRequired,
   eventcode: PropTypes.string.isRequired,
   actual: PropTypes.string.isRequired,
+  staticframe: PropTypes.string.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   alt: PropTypes.string,

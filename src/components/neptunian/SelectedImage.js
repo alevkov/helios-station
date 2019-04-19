@@ -50,7 +50,9 @@ const SelectedImage = ({ index, onClick, photo, margin, onExpand }) => {
 
       <Checkmark selected={photo.selected ? true : false} />
       <Preview selected={photo.selected ? true : false} onExpand={onExpand} index={index}/>
-      <img style={photo.selected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle }} {...photo} onClick={(e) => onClick(e, { index, photo })} />
+      <img 
+        style={photo.selected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle }} {...photo} 
+        onClick={(e) => onClick(e, { index, photo })} />
 
       <style>
         {`.not-selected:hover{outline:2px solid #06befa}`}

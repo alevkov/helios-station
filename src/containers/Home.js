@@ -53,7 +53,10 @@ export const Home = observer(class Home extends Component {
 
   onPhotoAdded = (...args) => {
     console.log('media added');
-    const path = args[0];
+    // will be shown when selected
+    const path = args[0].full;
+    // will be shown by default
+    const staticFrame = args[0].static;
     const processor = new ImageProcessor();
     processor.get()(path)
     .size(function (err, size) {
@@ -61,8 +64,9 @@ export const Home = observer(class Home extends Component {
         const filename = path.replace(/^.*[\\\/]/, '');
         const shot = Number.parseInt(filename.split('.')[0], 10);
         const image = {
-          src: 'file://' + path,
+          src: 'file://' + staticFrame,
           actual: path,
+          staticframe: staticFrame,
           name: filename,
           shot: shot, // shot number
           eventcode: settings.get('event.name'),
@@ -91,8 +95,10 @@ export const Home = observer(class Home extends Component {
     Home.PhotosList[obj.index].selected = 
       !Home.PhotosList[obj.index].selected;
     if (Home.PhotosList[obj.index].selected === true) {
+      Home.PhotosList[obj.index].src = 'file://' + Home.PhotosList[obj.index].actual; 
       this.state.selectedPhotosList.add(obj.index);
     } else {
+      Home.PhotosList[obj.index].src = 'file://' + Home.PhotosList[obj.index].staticframe;
       this.state.selectedPhotosList.delete(obj.index);
     }
     this.forceUpdate();
