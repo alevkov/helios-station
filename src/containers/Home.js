@@ -156,11 +156,12 @@ export const Home = observer(class Home extends Component {
 
   onCheckboxChanged = name => event => {
     if (name === 'play') {
+      settings.set(`media.play`, event.target.checked);
       for (let i = 0; i < Home.PhotosList.length; i++) {
         if (event.target.checked) {
-          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].actual
+          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].actual;
         } else {
-          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].staticframe
+          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].staticframe;
         }
       }
       this.forceUpdate();
@@ -215,6 +216,7 @@ export const Home = observer(class Home extends Component {
           <FormControlLabel
             control={
               <Checkbox
+                checked={settings.get(`media.play`)}
                 onChange={this.onCheckboxChanged('play')}
                 value='checkedPlay'/>
             }
