@@ -173,8 +173,8 @@ export const Home = observer(class Home extends Component {
         settings.get('dir.sort') !== undefined &&
         settings.get('dir.media') !== undefined) {
       // initialize sorting engine
-      if (Admin._sortingEngine == null) {
-              Admin._sortingEngine =
+      if (Admin.SortingEngine == null) {
+              Admin.SortingEngine =
         new SortingEngine(
           settings.get('dir.source'), 
           settings.get('dir.sort'),

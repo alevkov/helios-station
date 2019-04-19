@@ -18,22 +18,22 @@ const os = window.require('os');
 
 export default class SortingEngine {
   // dirs
-  static _sourceDir = null;
-  static _sortDir = null;
-  static _mediaDir = null;
-  static _sortDirMap = new Map(); // [string: Set<string>]
-  static _dirWatchMap = new Map(); // [string: Watcher]
-  static _isCreatingMedia = false;
+  static SourceDir = null;
+  static SortDir = null;
+  static MediaDir = null;
+  static SortDirMap = new Map(); // [string: Set<string>]
+  static DirWatchMap = new Map(); // [string: Watcher]
+  static IsCreatingMedia = false;
 
   constructor(source, sort, media) {
-    SortingEngine._sourceDir = source;
-    SortingEngine._sortDir = sort;
-    SortingEngine._mediaDir = media;
+    SortingEngine.SourceDir = source;
+    SortingEngine.SortDir = sort;
+    SortingEngine.MediaDir = media;
     // emit source folder event for subscribing components
-    emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, SortingEngine._sourceDir);
-    this.initWatchDir('source', SortingEngine._sourceDir);
-    console.log('media dir: ' + SortingEngine._mediaDir);
-    this.initWatchDir('media', SortingEngine._mediaDir);
+    emitter.emit(EVENT_SOURCE_FOLDER_SELECTED, SortingEngine.SourceDir);
+    this.initWatchDir('source', SortingEngine.SourceDir);
+    console.log('media dir: ' + SortingEngine.MediaDir);
+    this.initWatchDir('media', SortingEngine.MediaDir);
   }
 
   sortedFrames = (frames, ascending) => {
@@ -76,21 +76,21 @@ export default class SortingEngine {
         });
         break;
       }
-      // e.g. _sortDir/000/
+      // e.g. SortDir/000/
       // this is the "shot number"
       case 'index': {
         const filename = dir.replace(/^.*[\\\/]/, '');
         const index = filename.split('_')[0];
         if (!fs.existsSync(dir)) {
-          if (SortingEngine._dirWatchMap.get(dir)) {
-            SortingEngine._dirWatchMap.get(dir).close();
-            SortingEngine._dirWatchMap.delete(dir);
+          if (SortingEngine.DirWatchMap.get(dir)) {
+            SortingEngine.DirWatchMap.get(dir).close();
+            SortingEngine.DirWatchMap.delete(dir);
           }
           fs.mkdirSync(dir);
           fs.mkdirSync(`${dir}-backup`)
         }
-        if (!SortingEngine._dirWatchMap.get(dir)) {
-          SortingEngine._sortDirMap.set(index, new Set());
+        if (!SortingEngine.DirWatchMap.get(dir)) {
+          SortingEngine.SortDirMap.set(index, new Set());
           const indexPathWatcher = choker.watch(dir, {
             ignored: /(^|[\/\\])\../,
             persistent: true
@@ -109,7 +109,7 @@ export default class SortingEngine {
             }
             this.onSortedPhotoRemoved(index, removedFilePath);
           });  
-          SortingEngine._dirWatchMap.set(dir, indexPathWatcher);
+          SortingEngine.DirWatchMap.set(dir, indexPathWatcher);
         }
         break;
       }
@@ -166,7 +166,7 @@ export default class SortingEngine {
     const index = filename.split('_')[0]; // shot number
     const camera = filename.split('_')[1].split('.')[0];
     const cameraNum = Number.parseInt(camera, 10);
-    const indexPath = SortingEngine._sortDir +
+    const indexPath = SortingEngine.SortDir +
       (os.platform() === 'darwin' ? '/' : '\\') +
       index;
     // start watching index dir
@@ -241,13 +241,13 @@ export default class SortingEngine {
 
   // effects must be already applied at this point
   onSortedPhotoAdded = (index, dir) => {
-    SortingEngine._sortDirMap.get(index).add(dir);
+    SortingEngine.SortDirMap.get(index).add(dir);
     const maxNum = getInt('media.frames');
-    console.log('frame ' + SortingEngine._sortDirMap.get(index).size + ' out of ' + maxNum);
-    if (SortingEngine._sortDirMap.get(index).size === maxNum) {
-      let staticFrame = Array.from(SortingEngine._sortDirMap.get(index))[SortingEngine._sortDirMap.get(index).size / 2];
-      SortingEngine._isCreatingMedia = true;
-      let frames = Array.from(SortingEngine._sortDirMap.get(index));
+    console.log('frame ' + SortingEngine.SortDirMap.get(index).size + ' out of ' + maxNum);
+    if (SortingEngine.SortDirMap.get(index).size === maxNum) {
+      let staticFrame = Array.from(SortingEngine.SortDirMap.get(index))[SortingEngine.SortDirMap.get(index).size / 2];
+      SortingEngine.IsCreatingMedia = true;
+      let frames = Array.from(SortingEngine.SortDirMap.get(index));
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
       ipcRenderer.once('media-reply', (event, arg) => {
@@ -259,7 +259,7 @@ export default class SortingEngine {
 
   onMediaAdded = dir => {
     console.log('SortingEngine: media added: ' + dir);
-    if (!SortingEngine._isCreatingMedia) {
+    if (!SortingEngine.IsCreatingMedia) {
       if (settings.has(`static.${dir}`)) {
         emitter.emit(EVENT_PHOTO_ADDED, {full: dir, static: settings.get(`static.${dir}`)});
       }
@@ -268,7 +268,7 @@ export default class SortingEngine {
 
   onSortedPhotoRemoved = (index, dir) => {
     console.log(`Removed ${dir}, ${index}`);
-    SortingEngine._sortDirMap.get(index).delete(dir);
+    SortingEngine.SortDirMap.get(index).delete(dir);
   }
 
   onMediaRemoved = dir => {

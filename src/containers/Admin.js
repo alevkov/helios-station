@@ -15,7 +15,7 @@ const { dialog } = window.require('electron').remote;
 
 export const Admin = observer(class Admin extends Component {
   // sorting engine instance
-  static _sortingEngine = null;
+  static SortingEngine = null;
 
   constructor(props) {
     super(props);
@@ -39,7 +39,6 @@ export const Admin = observer(class Admin extends Component {
   }
 
   componentDidMount() {
-    console.log('Admin: did mount');
     this.initOverlayListIfSelected();
   }
 
@@ -203,12 +202,12 @@ export const Admin = observer(class Admin extends Component {
   }
 
   initSortingEngineIfDirsSelected = () => {
-    if (settings.get('dir.source') !== undefined &&
-        settings.get('dir.sort') !== undefined &&
-        settings.get('dir.media') !== undefined) {
+    if (settings.has('dir.source') && 
+      settings.has('dir.sort') && 
+      settings.has('dir.media')) {
       // initialize sorting engine
-      if (Admin._sortingEngine == null) {
-              Admin._sortingEngine =
+      if (Admin.SortingEngine == null) {
+              Admin.SortingEngine =
         new SortingEngine(
           settings.get('dir.source'), 
           settings.get('dir.sort'),
@@ -218,9 +217,9 @@ export const Admin = observer(class Admin extends Component {
   }
 
   initOverlayListIfSelected = () => {
-    if (settings.get('dir.overlay') !== undefined) {
+    if (settings.has('dir.overlay')) {
       // why is this an array?
-      const overlays = Admin._sortingEngine
+      const overlays = Admin.SortingEngine
         .unpackOverlays(settings.get('dir.overlay')[0]);
       this.setState({
         overlayList: overlays
