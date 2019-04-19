@@ -19,25 +19,7 @@ import {
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-
-const { ipcRenderer, remote } = window.require('electron');
-const path = require('path');
-const os = window.require('os');
-const graphicsmagick = remote.require('graphicsmagick-static');
-const imagemagick = remote.require('imagemagick-darwin-static');
-let imagemagickPath = remote.require('imagemagick-darwin-static').path;
-
-const { subClass } = remote.require('gm');
-let gm;
-
-if (os.platform() == "win32") {
-    gm = subClass({imageMagick: true})
-} else {
-    gm = subClass({
-        imageMagick: true,
-        appPath: path.join(`${imagemagickPath}`, '/')
-    });
-}
+import ImageProcessor from "../extras/ImageProcessor";
 
 export const Home = observer(class Home extends Component {
   static OnPhotoAddedSubscriber = null;
@@ -72,7 +54,8 @@ export const Home = observer(class Home extends Component {
   onPhotoAdded = (...args) => {
     console.log('media added');
     const path = args[0];
-    gm(path)
+    const processor = new ImageProcessor();
+    processor.get()(path)
     .size(function (err, size) {
       if (!err) {
         const filename = path.replace(/^.*[\\\/]/, '');

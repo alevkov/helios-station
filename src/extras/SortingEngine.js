@@ -7,6 +7,7 @@ import {
   getInt,
   getFloat
 } from '../common';
+import ImageProcessor from './ImageProcessor';
 
 const { ipcRenderer, remote } = window.require('electron');
 const choker = remote.require('chokidar');
@@ -14,22 +15,6 @@ const path = require('path');
 const fs = remote.require('fs-extra');
 const stream = remote.require('stream');
 const os = window.require('os');
-const graphicsmagick = remote.require('graphicsmagick-static');
-const imagemagick = remote.require('imagemagick-darwin-static');
-let imagemagickPath = remote.require('imagemagick-darwin-static').path;
-console.log(imagemagickPath);
-
-const { subClass } = remote.require('gm');
-let gm;
-
-if (os.platform() == "win32") {
-    gm = subClass({imageMagick: true})
-} else {
-    gm = subClass({
-        imageMagick: true,
-        appPath: path.join(`${imagemagickPath}`, '/')
-    });
-}
 
 export default class SortingEngine {
   // dirs
@@ -213,8 +198,9 @@ export default class SortingEngine {
     //TODO: convert to pipeline
     let passThrough = new stream.PassThrough();
     // make backup copy
-    gm(dir).write(backupDestination, err => {
-      gm(backupDestination)
+    const processor = new ImageProcessor();
+    processor.get()(dir).write(backupDestination, err => {
+      processor.get()(backupDestination)
       // xform: zoom -> rotate abt center -> crop
       .command('convert')
       .in('-resize', `${zoom}%`)
@@ -223,7 +209,7 @@ export default class SortingEngine {
       .stream()
       .pipe(passThrough)
       if (applyLogo) {
-        let str = gm(passThrough)
+        let str = processor.get()(passThrough)
         .composite(logoDir)
         .geometry(`+${logoX}+${logoY}`)
         .stream()
@@ -231,7 +217,7 @@ export default class SortingEngine {
         str.pipe(passThrough)
       }
       if (applyOverlay) {
-        let str = gm(passThrough)
+        let str = processor.get()(passThrough)
         .composite(overlayFrames[cameraNum-1])
         .geometry(`${cropW}x${cropH}+0+0`)
         .stream()
@@ -240,7 +226,7 @@ export default class SortingEngine {
       }
       const boomerang = Boolean(settings.get('media.boomerang'));
       console.log(boomerang);
-      gm(passThrough)
+      processor.get()(passThrough)
       .write(dir, err => {
         if (err) { console.log(err); }
         else {

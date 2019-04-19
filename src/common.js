@@ -1,5 +1,3 @@
-import ImageProcessor from './extras/ImageProcessor';
-
 const { EventEmitter } = require('fbemitter');
 const electron = window.require('electron'); 
 const os = require('os');
@@ -49,5 +47,4 @@ setIfNot('media.frames', 10);
 setIfNot('media.fps', 10);
 setIfNot('media.boomerang', true);
 setIfNot('media.format', 'gif');
-setIfNot('media.filter', ImageProcessor.imgixFilters[0]);
 setIfNot('photo.frame', 1);
