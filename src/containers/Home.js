@@ -169,9 +169,9 @@ export const Home = observer(class Home extends Component {
   }
 
   initSortingEngineIfDirsSelected = () => {
-    if (settings.get('dir.source') !== undefined &&
-        settings.get('dir.sort') !== undefined &&
-        settings.get('dir.media') !== undefined) {
+    if (settings.has('dir.source') && 
+      settings.has('dir.sort') && 
+      settings.has('dir.media')) {
       // initialize sorting engine
       if (Admin.SortingEngine == null) {
               Admin.SortingEngine =
