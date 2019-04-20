@@ -135,9 +135,22 @@ export const Home = observer(class Home extends Component {
   }
 
   onLoveItClick = () => {
+    const axios = require('axios');
     const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
     cloud.upload(selected, 'loveit');
+    axios({
+      method: 'post',
+      url: `https://helios-api.herokuapp.com/password/${settings.get('event.name')}`,
+      data: {
+        pwd: settings.get('event.pwd')
+      }
+    }).then(response => {
+      console.log(response);
+    })
+    .catch(error => {
+      console.log(error);
+    });
   }
 
   onCarouselNav = pos => {
@@ -169,12 +182,12 @@ export const Home = observer(class Home extends Component {
   }
 
   initSortingEngineIfDirsSelected = () => {
-    if (settings.get('dir.source') !== undefined &&
-        settings.get('dir.sort') !== undefined &&
-        settings.get('dir.media') !== undefined) {
+    if (settings.has('dir.source') && 
+      settings.has('dir.sort') && 
+      settings.has('dir.media')) {
       // initialize sorting engine
-      if (Admin._sortingEngine == null) {
-              Admin._sortingEngine =
+      if (Admin.SortingEngine == null) {
+              Admin.SortingEngine =
         new SortingEngine(
           settings.get('dir.source'), 
           settings.get('dir.sort'),
