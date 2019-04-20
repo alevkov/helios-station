@@ -6,6 +6,8 @@ import { Carousel } from 'react-responsive-carousel';
 import SelectedImage from '../components/neptunian/SelectedImage';
 import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
 import { Line } from 'rc-progress';
@@ -19,25 +21,7 @@ import {
 } from '../common';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-
-const { ipcRenderer, remote } = window.require('electron');
-const path = require('path');
-const os = window.require('os');
-const graphicsmagick = remote.require('graphicsmagick-static');
-const imagemagick = remote.require('imagemagick-darwin-static');
-let imagemagickPath = remote.require('imagemagick-darwin-static').path;
-
-const { subClass } = remote.require('gm');
-let gm;
-
-if (os.platform() == "win32") {
-    gm = subClass({imageMagick: true})
-} else {
-    gm = subClass({
-        imageMagick: true,
-        appPath: path.join(`${imagemagickPath}`, '/')
-    });
-}
+import ImageProcessor from "../extras/ImageProcessor";
 
 export const Home = observer(class Home extends Component {
   static OnPhotoAddedSubscriber = null;
@@ -71,15 +55,20 @@ export const Home = observer(class Home extends Component {
 
   onPhotoAdded = (...args) => {
     console.log('media added');
-    const path = args[0];
-    gm(path)
+    // will be shown when selected
+    const path = args[0].full;
+    // will be shown by default
+    const staticFrame = args[0].static;
+    const processor = new ImageProcessor();
+    processor.get()(path)
     .size(function (err, size) {
       if (!err) {
         const filename = path.replace(/^.*[\\\/]/, '');
         const shot = Number.parseInt(filename.split('.')[0], 10);
         const image = {
-          src: 'file://' + path,
+          src: 'file://' + staticFrame,
           actual: path,
+          staticframe: staticFrame,
           name: filename,
           shot: shot, // shot number
           eventcode: settings.get('event.name'),
@@ -108,8 +97,10 @@ export const Home = observer(class Home extends Component {
     Home.PhotosList[obj.index].selected = 
       !Home.PhotosList[obj.index].selected;
     if (Home.PhotosList[obj.index].selected === true) {
+      Home.PhotosList[obj.index].src = 'file://' + Home.PhotosList[obj.index].actual; 
       this.state.selectedPhotosList.add(obj.index);
     } else {
+      Home.PhotosList[obj.index].src = 'file://' + Home.PhotosList[obj.index].staticframe;
       this.state.selectedPhotosList.delete(obj.index);
     }
     this.forceUpdate();
@@ -144,9 +135,22 @@ export const Home = observer(class Home extends Component {
   }
 
   onLoveItClick = () => {
+    const axios = require('axios');
     const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
     cloud.upload(selected, 'loveit');
+    axios({
+      method: 'post',
+      url: `https://helios-api.herokuapp.com/password/${settings.get('event.name')}`,
+      data: {
+        pwd: settings.get('event.pwd')
+      }
+    }).then(response => {
+      console.log(response);
+    })
+    .catch(error => {
+      console.log(error);
+    });
   }
 
   onCarouselNav = pos => {
@@ -163,13 +167,27 @@ export const Home = observer(class Home extends Component {
     settings.set(name, event.target.value);
   }
 
+  onCheckboxChanged = name => event => {
+    if (name === 'play') {
+      settings.set(`media.play`, event.target.checked);
+      for (let i = 0; i < Home.PhotosList.length; i++) {
+        if (event.target.checked) {
+          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].actual;
+        } else {
+          Home.PhotosList[i].src = 'file://' + Home.PhotosList[i].staticframe;
+        }
+      }
+      this.forceUpdate();
+    }
+  }
+
   initSortingEngineIfDirsSelected = () => {
-    if (settings.get('dir.source') !== undefined &&
-        settings.get('dir.sort') !== undefined &&
-        settings.get('dir.media') !== undefined) {
+    if (settings.has('dir.source') && 
+      settings.has('dir.sort') && 
+      settings.has('dir.media')) {
       // initialize sorting engine
-      if (Admin._sortingEngine == null) {
-              Admin._sortingEngine =
+      if (Admin.SortingEngine == null) {
+              Admin.SortingEngine =
         new SortingEngine(
           settings.get('dir.source'), 
           settings.get('dir.sort'),
@@ -204,6 +222,18 @@ export const Home = observer(class Home extends Component {
           <Button
             style={{ fontSize: '25px', float: 'right'}}
             onClick={this.onCloseCarousel}>&#10539;</Button>
+        </div>) : null}
+      {/*** Play ***/}
+        { this.state.photos.length > 0 && this.state.showPhotoCarousel === false ? 
+        (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={settings.get(`media.play`)}
+                onChange={this.onCheckboxChanged('play')}
+                value='checkedPlay'/>
+            }
+            label='Play Media'/>
         </div>) : null}
       {/*** Dock ***/} 
         <SharingDock 
