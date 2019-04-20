@@ -43,6 +43,7 @@
     "rc-progress": "^2.3.0",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.1",
+    "react-bootstrap-dialog": "^0.11.0",
     "react-dock": "^0.2.4",
     "react-dom": "^16.4.2",
     "react-hover": "^1.3.2",
@@ -53,6 +54,7 @@
     "react-select": "^2.0.0",
     "react-tap-event-plugin": "^3.0.3",
     "resize-observer-polyfill": "^1.5.0",
+    "rodal": "^1.6.3",
     "segmented-control": "^0.1.10",
     "videoshow": "^0.1.11",
     "xfs": "^0.2.4"

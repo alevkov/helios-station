@@ -12,6 +12,8 @@ import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
 import { Line } from 'rc-progress';
 import '../styles/Home.css';
+import SmsModal from '../components/home/SmsModal';
+import EmailModal from '../components/home/EmailModal';
 import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
   emitter,
@@ -22,6 +24,7 @@ import {
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import ImageProcessor from "../extras/ImageProcessor";
+import axios from 'axios';
 
 export const Home = observer(class Home extends Component {
   static OnPhotoAddedSubscriber = null;
@@ -35,6 +38,8 @@ export const Home = observer(class Home extends Component {
       photos: Home.PhotosList,
       showPhotoCarousel: false,
       carouselStartPos: 0,
+      showSmsModal: false,
+      showEmailModal: false,
       selectedEffect: '',
       selectedPhotosList: new Set(),
       uploadProgress: 0
@@ -134,8 +139,32 @@ export const Home = observer(class Home extends Component {
     console.log(name);
   }
 
+  toggleSmsModal = () => {
+    this.setState({
+      showSmsModal: !this.state.showSmsModal
+    });
+  }
+
+  toggleEmailModal = () => {
+    this.setState({
+      showEmailModal: !this.state.showEmailModal
+    })
+  }
+
+  generateShareContentFromSelected = () => {
+    let content = '';
+    let photos = Home.PhotosList;
+    this.state.selectedPhotosList.forEach(i => {
+      content += photos[i].actual.replace(/ /g, "%20");
+      content += '\n';
+      content += '-------------------';
+      content += '\n';
+    });
+    return content;
+  }
+
+
   onLoveItClick = () => {
-    const axios = require('axios');
     const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
     cloud.upload(selected, 'loveit');
@@ -238,7 +267,8 @@ export const Home = observer(class Home extends Component {
       {/*** Dock ***/} 
         <SharingDock 
           showDock={this.state.selectedPhotosList.size !==0 && !this.state.showPhotoCarousel } 
-          toggleModal={this.onToggleModal}
+          toggleSmsModal={this.toggleSmsModal}
+          toggleEmailModal={this.toggleEmailModal}
           onLoveItClick={this.onLoveItClick} />
       {/*** Carousel ***/} 
         { this.state.showPhotoCarousel === true ? <ImageCarousel /> :  null }
@@ -251,6 +281,18 @@ export const Home = observer(class Home extends Component {
           onClick={this.onSelectPhoto}
           onExpand={this.onExpandPhoto}
           ImageComponent={SelectedImage} /> : null }
+        <SmsModal 
+          isShown={this.state.showSmsModal} 
+          handleClose={this.toggleSmsModal}
+          smsRecepient="+19548042297"
+          smsBody={this.generateShareContentFromSelected()}>
+        </SmsModal>
+        <EmailModal
+          isShown={this.state.showEmailModal}
+          handleClose={this.toggleEmailModal}
+          emailRecepient="example@mail.com"
+          emailBody={this.generateShareContentFromSelected()}>
+        </EmailModal>
       </div>
     );
   }
