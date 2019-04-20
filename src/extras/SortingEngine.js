@@ -245,7 +245,8 @@ export default class SortingEngine {
     const maxNum = getInt('media.frames');
     console.log('frame ' + SortingEngine._sortDirMap.get(index).size + ' out of ' + maxNum);
     if (SortingEngine._sortDirMap.get(index).size === maxNum) {
-      let staticFrame = Array.from(SortingEngine._sortDirMap.get(index))[SortingEngine._sortDirMap.get(index).size / 2];
+      let staticFrame = Array.from(SortingEngine._sortDirMap.get(index))[Math.floor(SortingEngine._sortDirMap.get(index).size / 2)];
+      console.log(staticFrame)
       SortingEngine._isCreatingMedia = true;
       let frames = Array.from(SortingEngine._sortDirMap.get(index));
       console.log('About to generate gif...');
