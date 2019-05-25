@@ -2,19 +2,18 @@ import React, { Component } from 'react';
 import Admin from './Admin';
 import SortingEngine from '../extras/SortingEngine';
 import Gallery from '../components/neptunian/Gallery';
-import { Carousel } from 'react-responsive-carousel';
 import SelectedImage from '../components/neptunian/SelectedImage';
 import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Lightbox from 'react-images';
 import Select from 'react-select';
 import CloudInterface from '../extras/CloudInterface';
 import { Line } from 'rc-progress';
 import '../styles/Home.css';
 import SmsModal from '../components/home/SmsModal';
 import EmailModal from '../components/home/EmailModal';
-import styles from 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { 
   emitter,
   settings,
@@ -30,6 +29,7 @@ export const Home = observer(class Home extends Component {
   static OnPhotoAddedSubscriber = null;
   static OnPhotoRemovedSubscriber = null;
   static PhotosList = observable.array([], { deep: true });
+  static LightboxList = observable.array([], { deep: true });
   static ShotList = new Set();
 
   constructor(props) {
@@ -80,9 +80,16 @@ export const Home = observer(class Home extends Component {
           width: size.width,
           height: size.height
         }
-        console.log(image);
+        const lightboxImage = {
+          src: 'file://' + path,
+          actual: 'file://' + path,
+          width: size.width,
+          height: size.height
+
+        }
         Home.ShotList.add(shot);
         Home.PhotosList.push(image);
+        Home.LightboxList.push(lightboxImage);
       } else {
         console.log(err);
       }
@@ -119,11 +126,30 @@ export const Home = observer(class Home extends Component {
     console.log(index);
   }
 
-  onCloseCarousel = () => {
-    this.setState({
-      showPhotoCarousel: false,
-      carouselStartPos: 0
-    });
+  openLightbox = index => () => {
+      this.setState({
+          carouselStartPos: index,
+          showPhotoCarousel: true,
+      });
+  };
+
+  closeLightbox = () => {
+      this.setState({
+          carouselStartPos: 0,
+          showPhotoCarousel: false,
+      });
+  }
+
+  gotoPrevious = () => {
+      this.setState({
+          carouselStartPos: this.state.carouselStartPos - 1,
+      });
+  }
+
+  gotoNext = () => {
+      this.setState({
+          carouselStartPos: this.state.carouselStartPos + 1,
+      });
   }
 
   getSelectedPhotosList = () => {
@@ -164,7 +190,6 @@ export const Home = observer(class Home extends Component {
     return content;
   }
 
-
   onLoveItClick = () => {
     const cloud = new CloudInterface(this.onUploadProgressReceived);
     const selected = this.getSelectedPhotosList();
@@ -181,10 +206,6 @@ export const Home = observer(class Home extends Component {
     .catch(error => {
       console.log(error);
     });
-  }
-
-  onCarouselNav = pos => {
-    console.log(pos);
   }
 
   onUploadProgressReceived = progress => {
@@ -227,32 +248,19 @@ export const Home = observer(class Home extends Component {
   }
 
   render() {
-    const carouselContent = Home.PhotosList
-     .map((item, i) => <div key={i}><img src={item.src} /></div>);
     const ImageCarousel = () => (
-      <Carousel 
-        showArrows={false} 
-        showThumbs={false} 
-        showIndicators={false}
-        emulateTouch={true}
-        dynamicHeight={true}
-        onChange={this.onCarouselNav}
-        selectedItem={this.state.carouselStartPos}>
-        {carouselContent}
-      </Carousel>
+      <Lightbox images={Home.LightboxList}
+                onClose={this.closeLightbox}
+                onClickPrev={this.gotoPrevious}
+                onClickNext={this.gotoNext}
+                currentImage={this.state.carouselStartPos}
+                isOpen={this.state.showPhotoCarousel}/>
     );
     return (
       <div className='Home'> 
       { this.state.uploadProgress > 0 && this.state.uploadProgress < 100 ? 
         <Line percent={this.state.uploadProgress} strokeWidth="2" strokeColor="#4b0082" />
         : null }
-      {/*** Close Button ***/}
-        { this.state.showPhotoCarousel === true ? 
-        (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>
-          <Button
-            style={{ fontSize: '25px', float: 'right'}}
-            onClick={this.onCloseCarousel}>&#10539;</Button>
-        </div>) : null}
       {/*** Play ***/}
         { this.state.photos.length > 0 && this.state.showPhotoCarousel === false ? 
         (<div className='Home-top-buttons' style={{width:'100%', height:'50px'}}>
