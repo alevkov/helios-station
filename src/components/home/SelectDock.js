@@ -16,7 +16,8 @@ export default class SelectDock extends React.Component {
 
     const sharingButtonStyles = {
       listStyleType: 'none',
-      paddingRight: 40
+      paddingRight: 40,
+      paddingTop: 10
     }
 
     const dockStyles = {
@@ -44,12 +45,12 @@ export default class SelectDock extends React.Component {
               </IconButton>
             </li>
             <li style={sharingButtonStyles}>
-              <IconButton onClick={this.props.toggleModal('sms')}>
+              <IconButton onClick={this.props.toggleSmsModal}>
                 <SmsBox style={dockIconStyles} />
               </IconButton>
             </li>
             <li style={sharingButtonStyles}>
-              <IconButton onClick={this.props.toggleModal('email')}>
+              <IconButton onClick={this.props.toggleEmailModal}>
                 <EmailBox style={dockIconStyles} />
               </IconButton>
             </li>

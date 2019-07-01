@@ -7303,6 +7303,11 @@ react-autowhatever@^10.1.2:
     react-themeable "^1.1.0"
     section-iterator "^2.0.0"
 
+react-bootstrap-dialog@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/react-bootstrap-dialog/-/react-bootstrap-dialog-0.11.0.tgz#449e777d7c3cf11f2a71ec607207600fac0575e5"
+  integrity sha512-Ku2/dh9WNCNauprxtfvnTF0zx23vEBDoxcmqoNEZcm/XU8iA21/gNXz5Z2Ovt6FQ2fatMrpC9VPMt66wbnlZ9w==
+
 react-bootstrap@^0.32.1:
   version "0.32.4"
   resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-0.32.4.tgz#8efc4cbfc4807215d75b7639bee0d324c8d740d1"
@@ -7408,6 +7413,7 @@ react-image-lightbox@5.0.0:
 react-images@^0.5.19:
   version "0.5.19"
   resolved "https://registry.yarnpkg.com/react-images/-/react-images-0.5.19.tgz#9339570029e065f9f28a19f03fdb5d9d5aa109d3"
+  integrity sha512-B3d4W1uFJj+m17K8S65iAyEJShKGBjPk7n7N1YsPiAydEm8mIq9a6CoeQFMY1d7N2QMs6FBCjT9vELyc5jP5JA==
   dependencies:
     aphrodite "^0.5.0"
     prop-types "^15.6.0"
@@ -8052,6 +8058,11 @@ rimraf@2, rimraf@^2.2.8, rimraf@^2.5.1, rimraf@^2.6.1, rimraf@~2.6.2:
 ripemd160@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-0.2.0.tgz#2bf198bde167cacfa51c0a928e84b68bbe171fce"
+
+rodal@^1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/rodal/-/rodal-1.6.3.tgz#27c4810ca2d34fd6aedcbdbf7721a06c78a5b9a8"
+  integrity sha512-OWry49Kga2lRUqPiSimPaowdNjZlX/kwfVQZNpkwf5NayROFioPmhawA9lQ8MDILFiIh777WspqsmrV2jSUn0Q==
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"
