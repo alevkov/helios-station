@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Admin from './Admin';
 import SortingEngine from '../extras/SortingEngine';
 import Gallery from '../components/neptunian/Gallery';
-import SelectedImage from '../components/neptunian/SelectedImage';
+import SelectedImage2 from '../components/neptunian/SelectedImage2';
 import SharingDock from '../components/home/SelectDock';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -284,12 +284,13 @@ export const Home = observer(class Home extends Component {
       {/*** Nothing ***/}
         { this.state.photos.length === 0 ? <NothingToShow /> : null }
       {/*** Gallery ***/}
-        { this.state.showPhotoCarousel === false ?
+        { this.state.showPhotoCarousel === false && Home.PhotosList.length > 0 ?
         <Gallery 
-          photos={this.state.photos}
+          photos={Home.PhotosList}
           onClick={this.onSelectPhoto}
           onExpand={this.onExpandPhoto}
-          ImageComponent={SelectedImage} /> : null }
+          direction={"column"}
+          renderImage={SelectedImage2} /> : null }
         <SmsModal 
           isShown={this.state.showSmsModal} 
           handleClose={this.toggleSmsModal}

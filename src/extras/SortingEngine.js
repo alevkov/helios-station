@@ -248,9 +248,11 @@ export default class SortingEngine {
       let staticFrame = Array.from(SortingEngine.SortDirMap.get(index))[Math.floor(SortingEngine.SortDirMap.get(index).size / 2)];
       SortingEngine.IsCreatingMedia = true;
       let frames = Array.from(SortingEngine.SortDirMap.get(index));
+      const filename = dir.replace(/^.*[\\\/]/, '');
+      const shot = filename.split('_')[0]; // shot number
       console.log('About to generate gif...');
       ipcRenderer.send('generate-media', frames);
-      ipcRenderer.once('media-reply', (event, arg) => {
+      ipcRenderer.once(`media-reply-${shot}`, (event, arg) => {
         settings.set(`static.${arg}`, staticFrame);
         emitter.emit(EVENT_PHOTO_ADDED, {full: arg, static: staticFrame});
       });

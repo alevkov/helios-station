@@ -71,7 +71,9 @@ ipcMain.on('generate-media', (event, arg) => {
     const frames = arg;
     generate(frames)
     .then(result => {
-        event.sender.send('media-reply', result);
+        const filename = result.replace(/^.*[\\\/]/, '');
+        const index = filename.split('.')[0]; // shot number
+        event.sender.send(`media-reply-${index}`, result);
     });
 });
 

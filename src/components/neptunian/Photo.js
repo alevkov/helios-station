@@ -3,8 +3,13 @@ import PropTypes from 'prop-types';
 
 const imgWithClick = { cursor: 'pointer' };
 
-const Photo = ({ index, onClick, photo, margin }) => {
-  const imgStyle = { display: 'block', float: 'left', margin: margin };
+const Photo = ({ index, onClick, photo, margin, direction, top, left }) => {
+  const imgStyle = { margin: margin, display: 'block' };
+  if (direction === 'column') {
+    imgStyle.position = 'absolute';
+    imgStyle.left = left;
+    imgStyle.top = top;
+  }
 
   const handleClick = event => {
     onClick(event, { photo, index });
@@ -20,6 +25,7 @@ const Photo = ({ index, onClick, photo, margin }) => {
 };
 
 export const photoPropType = PropTypes.shape({
+  key: PropTypes.string,
   src: PropTypes.string.isRequired,
   eventcode: PropTypes.string.isRequired,
   actual: PropTypes.string.isRequired,
@@ -33,9 +39,21 @@ export const photoPropType = PropTypes.shape({
 });
 
 Photo.propTypes = {
-  index: PropTypes.number,
+  index: PropTypes.number.isRequired,
   onClick: PropTypes.func,
-  photo: photoPropType,
+  photo: photoPropType.isRequired,
+  margin: PropTypes.number,
+  top: props => {
+    if (props.direction === 'column' && typeof props.top !== 'number') {
+      return new Error('top is a required number when direction is set to `column`');
+    }
+  },
+  left: props => {
+    if (props.direction === 'column' && typeof props.left !== 'number') {
+      return new Error('left is a required number when direction is set to `column`');
+    }
+  },
+  direction: PropTypes.string,
 };
 
 export default Photo;
