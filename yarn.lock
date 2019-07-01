@@ -9166,6 +9166,7 @@ verror@1.10.0:
 videoshow@^0.1.11:
   version "0.1.11"
   resolved "https://registry.yarnpkg.com/videoshow/-/videoshow-0.1.11.tgz#0ef7b00b8a7f474bf8550262387b658e02bbc32b"
+  integrity sha1-DvewC4p/R0v4VQJiOHtljgK7wys=
   dependencies:
     ass-stringify "^0.1.1"
     fluent-ffmpeg "^2.0.0"

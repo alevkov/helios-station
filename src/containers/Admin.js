@@ -19,6 +19,7 @@ export const Admin = observer(class Admin extends Component {
 
   constructor(props) {
     super(props);
+    setIfNot(`media.option`, {value: 'gif', label: '.gif'});
     this.state = {
       sourceDir: settings.get('dir.source'),
       sortDir: settings.get('dir.sort'),
@@ -33,7 +34,8 @@ export const Admin = observer(class Admin extends Component {
         label: `Frame ${settings.get('photo.frame')}`
       },
       selectedFilter: settings.get('media.filter'),
-      selectedOverlay: settings.get('media.overlay')
+      selectedOverlay: settings.get('media.overlay'),
+      selectedOption: settings.get('media.option')
     };
     this.initSortingEngineIfDirsSelected();
   }
@@ -169,7 +171,11 @@ export const Admin = observer(class Admin extends Component {
         console.log(option);
         break;
       }
-      case 'media.format': {
+      case 'media.option': {
+        settings.set('media.option', option);
+        this.setState({
+          selectedOption: option
+        });
         console.log(option);
         break;
       }
@@ -389,8 +395,8 @@ export const Admin = observer(class Admin extends Component {
           <Select 
             className='Admin-media-format-select'
             placeholder='Format...'
-            value={{value: 'gif', label: '.gif'}}
-            onChange={this.onSelectChanged('media.format')}
+            value={this.state.selectedOption}
+            onChange={this.onSelectChanged('media.option')}
             options={mediaSelectOptions} />
           <Select 
             className='Admin-media-overlay-select'
