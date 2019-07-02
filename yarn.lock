@@ -3689,7 +3689,7 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-fluent-ffmpeg@^2.0.0:
+fluent-ffmpeg@^2.0.0, fluent-ffmpeg@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/fluent-ffmpeg/-/fluent-ffmpeg-2.1.2.tgz#c952de2240f812ebda0aa8006d7776ee2acf7d74"
   dependencies:
@@ -4385,6 +4385,11 @@ ignore-walk@^3.0.1:
 ignore@^3.1.5:
   version "3.3.10"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.3.10.tgz#0a97fb876986e8081c631160f8f9f389157f0043"
+
+image-size@^0.5.3:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/image-size/-/image-size-0.5.5.tgz#09dfd4ab9d20e29eb1c3e80b8990378df9e3cb9c"
+  integrity sha1-Cd/Uq50g4p6xw+gLiZA3jfnjy5w=
 
 imagemagick-darwin-static@^1.0.11:
   version "1.0.11"
@@ -6007,6 +6012,13 @@ moo@^0.4.3:
 mout@^0.11.0:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/mout/-/mout-0.11.1.tgz#ba3611df5f0e5b1ffbfd01166b8f02d1f5fa2b99"
+
+mp4-mjpeg@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/mp4-mjpeg/-/mp4-mjpeg-0.0.2.tgz#db436a16b774562c271eca7331960dd5b89f0c17"
+  integrity sha1-20NqFrd0ViwnHspzMZYN1bifDBc=
+  dependencies:
+    image-size "^0.5.3"
 
 ms@0.7.1:
   version "0.7.1"

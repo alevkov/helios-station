@@ -6,11 +6,14 @@
 const gifshot = require('gifshot');
 const electron = require('electron');
 const settings = require('electron-settings');
+const mjpeg = require('mp4-mjpeg');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const graphicsmagick = require('graphicsmagick-static');
 const imagemagick = require('imagemagick-darwin-static');
+const FfmpegCommand = require('fluent-ffmpeg');
+const command = new FfmpegCommand();
 
 function getDelim () {
  return os.platform() === 'darwin' ? '/' : '\\';
@@ -48,6 +51,15 @@ function generate(frames, type) {
       case 'gif': {
         try {
           let result = await generateGif(frames);
+          resolve(result);         
+        } catch (err) {
+          reject(new Error(JSON.stringify(err)));
+        }
+        break;
+      }
+      case 'mpeg': {
+        try {
+          let result = await generateMpeg(frames);
           resolve(result);         
         } catch (err) {
           reject(new Error(JSON.stringify(err)));
@@ -106,8 +118,43 @@ function generateGif(frames) {
 }
 
 function generateMpeg(frames) {
-  return null;
+  const boomerang = Boolean(settings.get('media.boomerang'));
+  const loop = Number.parseInt(!Boolean(settings.get('media.loop')), 10);
+  const numLoops = Number.parseInt(settings.get('media.mp4loops'), 10);
+  const numFrames = Number.parseInt(settings.get('media.frames'), 10);
+  const fps = Number.parseInt(settings.get('media.fps'), 10);
+  // sort frames
+  const sorted = sortedFrames(frames, true);
+  const sortedDescending = sortedFrames(frames, false);
+  // remove first element
+  sortedDescending.shift();
+  sorted.splice(-1, 1);
+  // if boomerang, append descending array
+  const orderedFrames = boomerang ? 
+  sorted.concat(sortedDescending) : sorted;
+  // add specified number of loops
+  let finalFrames = [];
+  // append file URL prefix
+  for (let j = 0; j < numLoops; j++) {
+    for (let i = 0; i < orderedFrames.length; i++) {
+      finalFrames.push(orderedFrames[i]);
+    }
+  }
+  const frameName = orderedFrames[0].replace(/^.*[\\\/]/, '');
+  const index = frameName.split('_')[0];
+  const dest = settings.get('dir.media') + 
+        (os.platform() === 'darwin' ? '/' : '\\') + 
+        index + '.mp4';
+  for (var i = 0; i < finalFrames.length; i++) {
+      command.input(finalFrames[i])
+  }
+  command
+    .inputFPS(1/fps)
+    .output(dest)
+    .outputFPS(30)
+    .noAudio()
+    .run();
 }
 
-module.exports = generateGif;
+module.exports = generate;
 /* IPC ONLY */

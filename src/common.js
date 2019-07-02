@@ -46,5 +46,6 @@ setIfNot('media.height', 100);
 setIfNot('media.frames', 10);
 setIfNot('media.fps', 10);
 setIfNot('media.boomerang', true);
-setIfNot('media.format', 'gif');
+setIfNot('media.mp4loops', 1);
 setIfNot('photo.frame', 1);
+setIfNot(`media.option`, {value: 'gif', label: '.gif'});

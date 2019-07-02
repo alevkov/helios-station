@@ -243,6 +243,7 @@ export default class SortingEngine {
   onSortedPhotoAdded = (index, dir) => {
     SortingEngine.SortDirMap.get(index).add(dir);
     const maxNum = getInt('media.frames');
+    const mediaType = settings.get(`media.option`).value;
     console.log('frame ' + SortingEngine.SortDirMap.get(index).size + ' out of ' + maxNum);
     if (SortingEngine.SortDirMap.get(index).size === maxNum) {
       let staticFrame = Array.from(SortingEngine.SortDirMap.get(index))[Math.floor(SortingEngine.SortDirMap.get(index).size / 2)];
@@ -250,11 +251,15 @@ export default class SortingEngine {
       let frames = Array.from(SortingEngine.SortDirMap.get(index));
       const filename = dir.replace(/^.*[\\\/]/, '');
       const shot = filename.split('_')[0]; // shot number
-      console.log('About to generate gif...');
-      ipcRenderer.send('generate-media', frames);
-      ipcRenderer.once(`media-reply-${shot}`, (event, arg) => {
+      console.log(`About to generate ${mediaType}...`);
+      ipcRenderer.send(`generate-media-${mediaType}`, frames);
+      ipcRenderer.once(`media-reply-${shot}-${mediaType}`, (event, arg) => {
         settings.set(`static.${arg}`, staticFrame);
-        emitter.emit(EVENT_PHOTO_ADDED, {full: arg, static: staticFrame});
+        console.log(arg);
+        // TODO: don't make format-dependent
+        if (mediaType == 'gif') {
+          emitter.emit(EVENT_PHOTO_ADDED, {full: arg, static: staticFrame});
+        }
       });
     }
   }

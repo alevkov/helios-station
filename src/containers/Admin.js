@@ -19,7 +19,6 @@ export const Admin = observer(class Admin extends Component {
 
   constructor(props) {
     super(props);
-    setIfNot(`media.option`, {value: 'gif', label: '.gif'});
     this.state = {
       sourceDir: settings.get('dir.source'),
       sortDir: settings.get('dir.sort'),
@@ -345,6 +344,13 @@ export const Admin = observer(class Admin extends Component {
             label='FPS'
             onChange={this.onTextChanged('media.fps')}
             value={settings.get('media.fps')}
+            type='number'
+            margin='normal'/>
+          <TextField
+            id='mp4loops'
+            label='# of Loops (MP4)'
+            onChange={this.onTextChanged('media.mp4loops')}
+            value={settings.get('media.mp4loops')}
             type='number'
             margin='normal'/>
           <FormControlLabel

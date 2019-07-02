@@ -66,14 +66,25 @@ app.on('activate', function () {
     }
 });
 
-ipcMain.on('generate-media', (event, arg) => {
+ipcMain.on('generate-media-gif', (event, arg) => {
     console.log('generate-media');
     const frames = arg;
-    generate(frames)
+    generate(frames, 'gif')
     .then(result => {
         const filename = result.replace(/^.*[\\\/]/, '');
         const index = filename.split('.')[0]; // shot number
-        event.sender.send(`media-reply-${index}`, result);
+        event.sender.send(`media-reply-${index}-gif`, result);
+    });
+});
+
+ipcMain.on('generate-media-mpeg', (event, arg) => {
+    console.log('generate-media');
+    const frames = arg;
+    generate(frames, 'mpeg')
+    .then(result => {
+        const filename = result.replace(/^.*[\\\/]/, '');
+        const index = filename.split('.')[0]; // shot number
+        event.sender.send(`media-reply-${index}-mpeg`, result);
     });
 });
 
